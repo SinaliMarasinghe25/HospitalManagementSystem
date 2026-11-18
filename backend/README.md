@@ -1,0 +1,1 @@
+# Backend followed by a line saying ASP.NET Core Web API for the HMS.
