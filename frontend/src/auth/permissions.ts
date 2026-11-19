@@ -16,4 +16,10 @@ export const Permissions = {
   updateAppointmentStatus: [Administrator, Doctor, Receptionist],
   editMedicalRecords: [Doctor],
   viewPrescriptions: [Administrator, Doctor, Nurse, Pharmacist],
+  viewAdmissions: [Administrator, Doctor, Nurse, Receptionist],
+  admitPatients: [Administrator, Doctor, Receptionist],
+  transferPatients: [Administrator, Doctor, Nurse],
+  recordVitals: [Administrator, Doctor, Nurse],
+  dischargePatients: [Administrator, Doctor],
+  manageWards: [Administrator],
 } satisfies Record<string, Role[]>

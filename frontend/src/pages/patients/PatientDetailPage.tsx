@@ -55,6 +55,11 @@ export default function PatientDetailPage() {
           <p className="font-mono text-sm text-slate-600">{patient.patientNumber}</p>
         </div>
         <div className="flex gap-2">
+          {can(Permissions.admitPatients) && (
+            <Link to={`/admissions/new?patientId=${patient.id}`} className={secondaryButtonClass}>
+              Admit
+            </Link>
+          )}
           {can(Permissions.bookAppointments) && (
             <Link to={`/appointments/new?patientId=${patient.id}`} className={primaryButtonClass}>
               Book appointment
@@ -147,7 +152,10 @@ function HistorySection({ patientId }: { patientId: number }) {
           <ul className="mt-2 space-y-1 text-sm text-slate-700">
             {history.admissions.map((a) => (
               <li key={a.id}>
-                {a.admissionNumber}: {a.ward}, bed {a.bed}, {formatDateTime(a.admittedAt)}
+                <Link to={`/admissions/${a.id}`} className="text-blue-700 hover:underline">
+                  {a.admissionNumber}
+                </Link>
+                : {a.ward}, bed {a.bed}, {formatDateTime(a.admittedAt)}
                 {a.dischargedAt ? ` to ${formatDateTime(a.dischargedAt)}` : ' (currently admitted)'}
               </li>
             ))}

@@ -18,6 +18,11 @@ import { Permissions } from './auth/permissions'
 import AppointmentDetailPage from './pages/appointments/AppointmentDetailPage'
 import AppointmentFormPage from './pages/appointments/AppointmentFormPage'
 import AppointmentsPage from './pages/appointments/AppointmentsPage'
+import AdmissionDetailPage from './pages/admissions/AdmissionDetailPage'
+import AdmissionsPage from './pages/admissions/AdmissionsPage'
+import AdmitPage from './pages/admissions/AdmitPage'
+import DischargeSummaryPage from './pages/admissions/DischargeSummaryPage'
+import WardsPage from './pages/admissions/WardsPage'
 import ConsultationFormPage from './pages/medical-records/ConsultationFormPage'
 import MedicalRecordPage from './pages/medical-records/MedicalRecordPage'
 import MedicalRecordsPage from './pages/medical-records/MedicalRecordsPage'
@@ -30,6 +35,7 @@ const builtPages: Record<string, ReactNode> = {
   '/doctors': <DoctorListPage />,
   '/appointments': <AppointmentsPage />,
   '/medical-records': <MedicalRecordsPage />,
+  '/admissions': <AdmissionsPage />,
 }
 
 export default function App() {
@@ -116,9 +122,33 @@ export default function App() {
           path="/medical-records/:id/edit"
           element={<RequireRole roles={Permissions.editMedicalRecords}><ConsultationFormPage /></RequireRole>}
         />
+
+        {/* Inpatient pages that are not in the menu */}
+        <Route
+          path="/admissions/new"
+          element={<RequireRole roles={Permissions.admitPatients}><AdmitPage /></RequireRole>}
+        />
+        <Route
+          path="/admissions/wards"
+          element={<RequireRole roles={Permissions.manageWards}><WardsPage /></RequireRole>}
+        />
+        <Route
+          path="/admissions/:id"
+          element={<RequireRole roles={Permissions.viewAdmissions}><AdmissionDetailPage /></RequireRole>}
+        />
       </Route>
 
-      {/* The printable report has no menu or header, so it is outside AppLayout. */}
+      {/* The printable pages have no menu or header, so they are outside AppLayout. */}
+      <Route
+        path="/admissions/:id/summary"
+        element={
+          <ProtectedRoute>
+            <RequireRole roles={Permissions.viewMedicalHistory}>
+              <DischargeSummaryPage />
+            </RequireRole>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/medical-records/:id/report"
         element={
