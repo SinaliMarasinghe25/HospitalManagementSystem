@@ -7,6 +7,10 @@ import { navItems } from './navigation'
 import ComingSoonPage from './pages/ComingSoonPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
+import DepartmentsPage from './pages/doctors/DepartmentsPage'
+import DoctorDetailPage from './pages/doctors/DoctorDetailPage'
+import DoctorFormPage from './pages/doctors/DoctorFormPage'
+import DoctorListPage from './pages/doctors/DoctorListPage'
 import PatientDetailPage from './pages/patients/PatientDetailPage'
 import PatientFormPage from './pages/patients/PatientFormPage'
 import PatientListPage from './pages/patients/PatientListPage'
@@ -16,6 +20,7 @@ import { Permissions } from './auth/permissions'
 const builtPages: Record<string, ReactNode> = {
   '/': <DashboardPage />,
   '/patients': <PatientListPage />,
+  '/doctors': <DoctorListPage />,
 }
 
 export default function App() {
@@ -55,6 +60,24 @@ export default function App() {
         <Route
           path="/patients/:id/edit"
           element={<RequireRole roles={Permissions.editPatients}><PatientFormPage /></RequireRole>}
+        />
+
+        {/* Doctor pages that are not in the menu */}
+        <Route
+          path="/doctors/new"
+          element={<RequireRole roles={Permissions.manageDoctors}><DoctorFormPage /></RequireRole>}
+        />
+        <Route
+          path="/doctors/departments"
+          element={<RequireRole roles={Permissions.manageDoctors}><DepartmentsPage /></RequireRole>}
+        />
+        <Route
+          path="/doctors/:id"
+          element={<RequireRole roles={Permissions.viewDoctors}><DoctorDetailPage /></RequireRole>}
+        />
+        <Route
+          path="/doctors/:id/edit"
+          element={<RequireRole roles={Permissions.manageDoctors}><DoctorFormPage /></RequireRole>}
         />
       </Route>
 

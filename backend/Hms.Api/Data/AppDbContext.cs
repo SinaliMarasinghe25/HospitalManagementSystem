@@ -94,6 +94,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     private static void ConfigureStaff(ModelBuilder builder)
     {
+        // Gives EMP-0001, EMP-0002... for every employee, including doctors.
+        builder.HasSequence<long>("EmployeeNumbers");
+
         builder.Entity<Department>().HasIndex(d => d.Name).IsUnique();
 
         builder.Entity<Employee>(e =>
@@ -117,8 +120,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             });
         });
 
-        builder.Entity<DoctorSchedule>().ToTable(t =>
-            t.HasCheckConstraint("CK_DoctorSchedules_Times", "\"EndTime\" > \"StartTime\""));
+        builder.Entity<DoctorSchedule>(e =>
+        {
+            e.ToTable(t => t.HasCheckConstraint("CK_DoctorSchedules_Times", "\"EndTime\" > \"StartTime\""));
+            e.HasIndex(x => new { x.DoctorId, x.DayOfWeek, x.StartTime }).IsUnique();
+        });
 
         builder.Entity<AttendanceRecord>(e =>
         {
