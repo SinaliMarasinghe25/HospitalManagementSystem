@@ -36,3 +36,45 @@ export function formatMoney(amount: number) {
 export function formatTime(time: string) {
   return time.slice(0, 5)
 }
+
+// ---------- Hospital-time calendar helpers (appointments) ----------
+
+// The hospital's calendar date of a moment, as "YYYY-MM-DD" ("en-CA" formats dates that way).
+export function hospitalDateOf(moment: string | Date) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+    new Date(moment),
+  )
+}
+
+export function todayInHospital() {
+  return hospitalDateOf(new Date())
+}
+
+// Date-only arithmetic in UTC, so the result never shifts because of the browser's time zone.
+export function addDays(isoDate: string, days: number) {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10)
+}
+
+// The Monday of the week that contains the date.
+export function startOfWeek(isoDate: string) {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay() // 0 = Sunday
+  return addDays(isoDate, -((weekday + 6) % 7))
+}
+
+// "Mon 23 Nov"
+export function formatDayHeading(isoDate: string) {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString('en-GB', {
+    timeZone: 'UTC',
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
+}
+
+// "10:15" in hospital time
+export function formatClock(iso: string) {
+  return new Date(iso).toLocaleTimeString('en-GB', { timeZone, hour: '2-digit', minute: '2-digit' })
+}

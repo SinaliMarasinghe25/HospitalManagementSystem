@@ -15,12 +15,16 @@ import PatientDetailPage from './pages/patients/PatientDetailPage'
 import PatientFormPage from './pages/patients/PatientFormPage'
 import PatientListPage from './pages/patients/PatientListPage'
 import { Permissions } from './auth/permissions'
+import AppointmentDetailPage from './pages/appointments/AppointmentDetailPage'
+import AppointmentFormPage from './pages/appointments/AppointmentFormPage'
+import AppointmentsPage from './pages/appointments/AppointmentsPage'
 
 // Pages that are built so far. Every other menu item shows a "coming soon" page.
 const builtPages: Record<string, ReactNode> = {
   '/': <DashboardPage />,
   '/patients': <PatientListPage />,
   '/doctors': <DoctorListPage />,
+  '/appointments': <AppointmentsPage />,
 }
 
 export default function App() {
@@ -78,6 +82,20 @@ export default function App() {
         <Route
           path="/doctors/:id/edit"
           element={<RequireRole roles={Permissions.manageDoctors}><DoctorFormPage /></RequireRole>}
+        />
+
+        {/* Appointment pages that are not in the menu */}
+        <Route
+          path="/appointments/new"
+          element={<RequireRole roles={Permissions.bookAppointments}><AppointmentFormPage /></RequireRole>}
+        />
+        <Route
+          path="/appointments/:id"
+          element={<RequireRole roles={Permissions.viewAppointments}><AppointmentDetailPage /></RequireRole>}
+        />
+        <Route
+          path="/appointments/:id/reschedule"
+          element={<RequireRole roles={Permissions.bookAppointments}><AppointmentFormPage /></RequireRole>}
         />
       </Route>
 
