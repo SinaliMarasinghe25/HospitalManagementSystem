@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { ApiError } from '../../api/client'
 import { documentDownloadUrl, getMedicalHistory, getPatient, listDocuments, uploadDocument } from '../../api/patients'
 import { Permissions } from '../../auth/permissions'
+import { PatientAppointments } from '../../components/appointments/PatientAppointments'
 import { hasAnyRole, type Role } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
@@ -53,11 +54,18 @@ export default function PatientDetailPage() {
           </h1>
           <p className="font-mono text-sm text-slate-600">{patient.patientNumber}</p>
         </div>
-        {can(Permissions.editPatients) && (
-          <Link to={`/patients/${patient.id}/edit`} className={secondaryButtonClass}>
-            Edit patient
-          </Link>
-        )}
+        <div className="flex gap-2">
+          {can(Permissions.bookAppointments) && (
+            <Link to={`/appointments/new?patientId=${patient.id}`} className={primaryButtonClass}>
+              Book appointment
+            </Link>
+          )}
+          {can(Permissions.editPatients) && (
+            <Link to={`/patients/${patient.id}/edit`} className={secondaryButtonClass}>
+              Edit patient
+            </Link>
+          )}
+        </div>
       </div>
 
       <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="details-heading">
@@ -72,6 +80,7 @@ export default function PatientDetailPage() {
         </dl>
       </section>
 
+      {can(Permissions.viewAppointments) && <PatientAppointments patientId={patient.id} />}
       {can(Permissions.viewMedicalHistory) && <HistorySection patientId={patient.id} />}
       {can(Permissions.viewPatientDocuments) && (
         <DocumentsSection patientId={patient.id} canUpload={can(Permissions.uploadPatientDocuments)} />

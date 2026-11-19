@@ -11,4 +11,7 @@ export const Permissions = {
   uploadPatientDocuments: [Administrator, Doctor, Receptionist],
   viewDoctors: [Administrator, Doctor, Nurse, Receptionist],
   manageDoctors: [Administrator],
+  viewAppointments: [Administrator, Doctor, Nurse, Receptionist],
+  bookAppointments: [Administrator, Receptionist],
+  updateAppointmentStatus: [Administrator, Doctor, Receptionist],
 } satisfies Record<string, Role[]>
