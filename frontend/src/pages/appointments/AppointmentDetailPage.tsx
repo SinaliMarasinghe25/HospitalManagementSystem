@@ -17,6 +17,8 @@ export default function AppointmentDetailPage() {
   const appointmentId = Number(id)
   const { user } = useAuth()
   const canSeePatient = hasAnyRole(user?.roles, Permissions.viewPatients)
+  const canSeeRecords = hasAnyRole(user?.roles, Permissions.viewMedicalHistory)
+  const canWriteRecords = hasAnyRole(user?.roles, Permissions.editMedicalRecords)
 
   const [appointment, setAppointment] = useState<Appointment | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -134,6 +136,20 @@ export default function AppointmentDetailPage() {
           )}
         </dl>
       </section>
+
+      {/* Step 16: from a visit to its medical record. Only clinical roles see these. */}
+      {appointment.medicalRecordId && canSeeRecords ? (
+        <Link to={`/medical-records/${appointment.medicalRecordId}`} className={`${primaryButtonClass} inline-block`}>
+          Open medical record
+        </Link>
+      ) : (
+        canWriteRecords &&
+        (appointment.status === 'CheckedIn' || appointment.status === 'Completed') && (
+          <Link to={`/appointments/${appointment.id}/consultation`} className={`${primaryButtonClass} inline-block`}>
+            Start consultation
+          </Link>
+        )
+      )}
 
       {(actions.length > 0 || canChange) && (
         <section className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">

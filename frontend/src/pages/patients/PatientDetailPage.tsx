@@ -111,7 +111,10 @@ function HistorySection({ patientId }: { patientId: number }) {
           {history.visits.map((v) => (
             <li key={v.id} className="rounded-lg border border-slate-200 p-3">
               <p className="font-medium text-slate-900">
-                {formatDateTime(v.visitDate)} &middot; {v.doctorName}
+                <Link to={`/medical-records/${v.id}`} className="text-blue-700 hover:underline">
+                  {formatDateTime(v.visitDate)}
+                </Link>{' '}
+                &middot; Dr {v.doctorName}
               </p>
               {v.chiefComplaint && <p className="text-sm text-slate-700">Complaint: {v.chiefComplaint}</p>}
               {v.diagnoses.length > 0 && <p className="text-sm text-slate-700">Diagnosis: {v.diagnoses.join('; ')}</p>}

@@ -18,6 +18,10 @@ import { Permissions } from './auth/permissions'
 import AppointmentDetailPage from './pages/appointments/AppointmentDetailPage'
 import AppointmentFormPage from './pages/appointments/AppointmentFormPage'
 import AppointmentsPage from './pages/appointments/AppointmentsPage'
+import ConsultationFormPage from './pages/medical-records/ConsultationFormPage'
+import MedicalRecordPage from './pages/medical-records/MedicalRecordPage'
+import MedicalRecordsPage from './pages/medical-records/MedicalRecordsPage'
+import MedicalReportPage from './pages/medical-records/MedicalReportPage'
 
 // Pages that are built so far. Every other menu item shows a "coming soon" page.
 const builtPages: Record<string, ReactNode> = {
@@ -25,6 +29,7 @@ const builtPages: Record<string, ReactNode> = {
   '/patients': <PatientListPage />,
   '/doctors': <DoctorListPage />,
   '/appointments': <AppointmentsPage />,
+  '/medical-records': <MedicalRecordsPage />,
 }
 
 export default function App() {
@@ -97,7 +102,33 @@ export default function App() {
           path="/appointments/:id/reschedule"
           element={<RequireRole roles={Permissions.bookAppointments}><AppointmentFormPage /></RequireRole>}
         />
+
+        {/* Medical record pages that are not in the menu */}
+        <Route
+          path="/appointments/:appointmentId/consultation"
+          element={<RequireRole roles={Permissions.editMedicalRecords}><ConsultationFormPage /></RequireRole>}
+        />
+        <Route
+          path="/medical-records/:id"
+          element={<RequireRole roles={Permissions.viewMedicalHistory}><MedicalRecordPage /></RequireRole>}
+        />
+        <Route
+          path="/medical-records/:id/edit"
+          element={<RequireRole roles={Permissions.editMedicalRecords}><ConsultationFormPage /></RequireRole>}
+        />
       </Route>
+
+      {/* The printable report has no menu or header, so it is outside AppLayout. */}
+      <Route
+        path="/medical-records/:id/report"
+        element={
+          <ProtectedRoute>
+            <RequireRole roles={Permissions.viewMedicalHistory}>
+              <MedicalReportPage />
+            </RequireRole>
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

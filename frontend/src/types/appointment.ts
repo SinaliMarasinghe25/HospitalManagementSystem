@@ -27,6 +27,7 @@ export type Appointment = {
   rescheduledFromId: number | null
   rescheduledToId: number | null
   createdAt: string
+  medicalRecordId: number | null // set once the doctor has written the visit's medical record
 }
 
 export type Slot = {
