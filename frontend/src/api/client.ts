@@ -29,7 +29,8 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     credentials: 'same-origin',
     headers: {
       Accept: 'application/json',
-      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      // JSON bodies are sent as strings. File uploads (FormData) set their own Content-Type.
+      ...(typeof options.body === 'string' ? { 'Content-Type': 'application/json' } : {}),
       ...options.headers,
     },
   })

@@ -22,6 +22,8 @@ namespace Hms.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence("PatientNumbers");
+
             modelBuilder.Entity("Hms.Api.Entities.Admission", b =>
                 {
                     b.Property<int>("Id")

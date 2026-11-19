@@ -136,6 +136,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     private static void ConfigurePatients(ModelBuilder builder)
     {
+        // Gives P-000001, P-000002... without duplicates, even with many users at once.
+        builder.HasSequence<long>("PatientNumbers");
+
         builder.Entity<Patient>(e =>
         {
             e.HasIndex(x => x.PatientNumber).IsUnique();
