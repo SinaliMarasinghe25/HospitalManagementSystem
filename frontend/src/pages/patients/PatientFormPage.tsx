@@ -4,6 +4,7 @@ import { ApiError } from '../../api/client'
 import { createPatient, getPatient, updatePatient } from '../../api/patients'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { PatientDetail, PatientRequest } from '../../types/patient'
+import { errorsByField } from '../../utils/formErrors'
 
 const emptyForm: PatientRequest = {
   firstName: '',
@@ -35,16 +36,6 @@ function toForm(p: PatientDetail): PatientRequest {
     emergencyContactName: p.emergencyContactName ?? '',
     emergencyContactPhone: p.emergencyContactPhone ?? '',
   }
-}
-
-// The API sends field names like "FirstName"; our form uses "firstName".
-function errorsByField(fieldErrors: Record<string, string[]>) {
-  const result: Record<string, string> = {}
-  for (const [key, messages] of Object.entries(fieldErrors)) {
-    const field = key.replace(/^\$\./, '')
-    result[field.charAt(0).toLowerCase() + field.slice(1)] = messages[0]
-  }
-  return result
 }
 
 // PDF 3.2 "Register Patient" and "Update Patient Information" (section 7: Add Patient, Edit Patient).

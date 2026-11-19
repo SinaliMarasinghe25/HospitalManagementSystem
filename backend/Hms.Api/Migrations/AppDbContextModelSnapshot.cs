@@ -22,6 +22,8 @@ namespace Hms.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence("EmployeeNumbers");
+
             modelBuilder.HasSequence("PatientNumbers");
 
             modelBuilder.Entity("Hms.Api.Entities.Admission", b =>
@@ -524,7 +526,8 @@ namespace Hms.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DoctorId");
+                    b.HasIndex("DoctorId", "DayOfWeek", "StartTime")
+                        .IsUnique();
 
                     b.ToTable("DoctorSchedules", t =>
                         {

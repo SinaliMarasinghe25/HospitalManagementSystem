@@ -27,3 +27,12 @@ export function ageFrom(isoDate: string) {
 export function formatFileSize(bytes: number) {
   return bytes < 1024 * 1024 ? `${Math.ceil(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
+
+export function formatMoney(amount: number) {
+  return `LKR ${amount.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+// "08:00:00" -> "08:00"
+export function formatTime(time: string) {
+  return time.slice(0, 5)
+}

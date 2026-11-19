@@ -9,4 +9,6 @@ export const Permissions = {
   viewMedicalHistory: [Administrator, Doctor, Nurse],
   viewPatientDocuments: [Administrator, Doctor, Nurse, Receptionist],
   uploadPatientDocuments: [Administrator, Doctor, Receptionist],
+  viewDoctors: [Administrator, Doctor, Nurse, Receptionist],
+  manageDoctors: [Administrator],
 } satisfies Record<string, Role[]>

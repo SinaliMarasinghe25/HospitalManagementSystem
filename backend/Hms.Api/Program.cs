@@ -79,6 +79,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<PatientService>();
 builder.Services.AddScoped<PatientDocumentService>();
+builder.Services.AddScoped<DepartmentService>();
+builder.Services.AddScoped<DoctorService>();
 
 // Errors are returned as safe JSON (ProblemDetails) without stack traces.
 builder.Services.AddProblemDetails();
