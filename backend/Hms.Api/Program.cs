@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+using Hms.Api.Authorization;
 using Hms.Api.Data;
 using Hms.Api.Entities;
 using Hms.Api.Services;
@@ -69,16 +71,21 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 // ---------- Authorization ----------
 // Secure by default: every endpoint needs a logged-in user unless it says [AllowAnonymous].
 builder.Services.AddAuthorizationBuilder()
-    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
+    .AddHmsPolicies();   // named permissions, see Authorization/Policies.cs
 
 // ---------- Our services ----------
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuditService>();
+builder.Services.AddScoped<PatientService>();
+builder.Services.AddScoped<PatientDocumentService>();
 
 // Errors are returned as safe JSON (ProblemDetails) without stack traces.
 builder.Services.AddProblemDetails();
 
-builder.Services.AddControllers();
+// Enums travel as text in JSON ("Female"), matching how they are stored in the database.
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

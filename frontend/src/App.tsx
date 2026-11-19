@@ -7,10 +7,15 @@ import { navItems } from './navigation'
 import ComingSoonPage from './pages/ComingSoonPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
+import PatientDetailPage from './pages/patients/PatientDetailPage'
+import PatientFormPage from './pages/patients/PatientFormPage'
+import PatientListPage from './pages/patients/PatientListPage'
+import { Permissions } from './auth/permissions'
 
 // Pages that are built so far. Every other menu item shows a "coming soon" page.
 const builtPages: Record<string, ReactNode> = {
   '/': <DashboardPage />,
+  '/patients': <PatientListPage />,
 }
 
 export default function App() {
@@ -37,6 +42,20 @@ export default function App() {
             }
           />
         ))}
+
+        {/* Patient pages that are not in the menu */}
+        <Route
+          path="/patients/new"
+          element={<RequireRole roles={Permissions.editPatients}><PatientFormPage /></RequireRole>}
+        />
+        <Route
+          path="/patients/:id"
+          element={<RequireRole roles={Permissions.viewPatients}><PatientDetailPage /></RequireRole>}
+        />
+        <Route
+          path="/patients/:id/edit"
+          element={<RequireRole roles={Permissions.editPatients}><PatientFormPage /></RequireRole>}
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
