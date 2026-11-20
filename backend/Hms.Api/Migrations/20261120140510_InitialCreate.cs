@@ -12,6 +12,18 @@ namespace Hms.Api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateSequence(
+                name: "AdmissionNumbers");
+
+            migrationBuilder.CreateSequence(
+                name: "EmployeeNumbers");
+
+            migrationBuilder.CreateSequence(
+                name: "LabRequestNumbers");
+
+            migrationBuilder.CreateSequence(
+                name: "PatientNumbers");
+
             migrationBuilder.CreateTable(
                 name: "AuditLogs",
                 columns: table => new
@@ -653,6 +665,49 @@ namespace Hms.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BedTransfers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    AdmissionId = table.Column<int>(type: "integer", nullable: false),
+                    FromBedId = table.Column<int>(type: "integer", nullable: false),
+                    ToBedId = table.Column<int>(type: "integer", nullable: false),
+                    TransferredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Reason = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
+                    TransferredByUserId = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BedTransfers", x => x.Id);
+                    table.CheckConstraint("CK_BedTransfers_DifferentBeds", "\"FromBedId\" <> \"ToBedId\"");
+                    table.ForeignKey(
+                        name: "FK_BedTransfers_Admissions_AdmissionId",
+                        column: x => x.AdmissionId,
+                        principalTable: "Admissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BedTransfers_Beds_FromBedId",
+                        column: x => x.FromBedId,
+                        principalTable: "Beds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BedTransfers_Beds_ToBedId",
+                        column: x => x.ToBedId,
+                        principalTable: "Beds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BedTransfers_Users_TransferredByUserId",
+                        column: x => x.TransferredByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "VitalSigns",
                 columns: table => new
                 {
@@ -1073,6 +1128,26 @@ namespace Hms.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_BedTransfers_AdmissionId",
+                table: "BedTransfers",
+                column: "AdmissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BedTransfers_FromBedId",
+                table: "BedTransfers",
+                column: "FromBedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BedTransfers_ToBedId",
+                table: "BedTransfers",
+                column: "ToBedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BedTransfers_TransferredByUserId",
+                table: "BedTransfers",
+                column: "TransferredByUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Charges_AdmissionId",
                 table: "Charges",
                 column: "AdmissionId");
@@ -1126,9 +1201,10 @@ namespace Hms.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_DoctorSchedules_DoctorId",
+                name: "IX_DoctorSchedules_DoctorId_DayOfWeek_StartTime",
                 table: "DoctorSchedules",
-                column: "DoctorId");
+                columns: new[] { "DoctorId", "DayOfWeek", "StartTime" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_DepartmentId",
@@ -1417,6 +1493,9 @@ namespace Hms.Api.Migrations
                 name: "AuditLogs");
 
             migrationBuilder.DropTable(
+                name: "BedTransfers");
+
+            migrationBuilder.DropTable(
                 name: "Charges");
 
             migrationBuilder.DropTable(
@@ -1511,6 +1590,18 @@ namespace Hms.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropSequence(
+                name: "AdmissionNumbers");
+
+            migrationBuilder.DropSequence(
+                name: "EmployeeNumbers");
+
+            migrationBuilder.DropSequence(
+                name: "LabRequestNumbers");
+
+            migrationBuilder.DropSequence(
+                name: "PatientNumbers");
         }
     }
 }

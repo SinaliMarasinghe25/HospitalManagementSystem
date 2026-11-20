@@ -22,7 +22,11 @@ namespace Hms.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence("AdmissionNumbers");
+
             modelBuilder.HasSequence("EmployeeNumbers");
+
+            modelBuilder.HasSequence("LabRequestNumbers");
 
             modelBuilder.HasSequence("PatientNumbers");
 
@@ -324,6 +328,49 @@ namespace Hms.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Beds");
+                });
+
+            modelBuilder.Entity("Hms.Api.Entities.BedTransfer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdmissionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FromBedId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<int>("ToBedId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("TransferredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TransferredByUserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdmissionId");
+
+                    b.HasIndex("FromBedId");
+
+                    b.HasIndex("ToBedId");
+
+                    b.HasIndex("TransferredByUserId");
+
+                    b.ToTable("BedTransfers", t =>
+                        {
+                            t.HasCheckConstraint("CK_BedTransfers_DifferentBeds", "\"FromBedId\" <> \"ToBedId\"");
+                        });
                 });
 
             modelBuilder.Entity("Hms.Api.Entities.Charge", b =>
@@ -1608,6 +1655,38 @@ namespace Hms.Api.Migrations
                     b.Navigation("Ward");
                 });
 
+            modelBuilder.Entity("Hms.Api.Entities.BedTransfer", b =>
+                {
+                    b.HasOne("Hms.Api.Entities.Admission", "Admission")
+                        .WithMany("BedTransfers")
+                        .HasForeignKey("AdmissionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hms.Api.Entities.Bed", "FromBed")
+                        .WithMany()
+                        .HasForeignKey("FromBedId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hms.Api.Entities.Bed", "ToBed")
+                        .WithMany()
+                        .HasForeignKey("ToBedId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hms.Api.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("TransferredByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Admission");
+
+                    b.Navigation("FromBed");
+
+                    b.Navigation("ToBed");
+                });
+
             modelBuilder.Entity("Hms.Api.Entities.Charge", b =>
                 {
                     b.HasOne("Hms.Api.Entities.Admission", "Admission")
@@ -1990,6 +2069,8 @@ namespace Hms.Api.Migrations
 
             modelBuilder.Entity("Hms.Api.Entities.Admission", b =>
                 {
+                    b.Navigation("BedTransfers");
+
                     b.Navigation("VitalSigns");
                 });
 
