@@ -35,6 +35,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Bed> Beds => Set<Bed>();
     public DbSet<Admission> Admissions => Set<Admission>();
     public DbSet<VitalSign> VitalSigns => Set<VitalSign>();
+    public DbSet<BedTransfer> BedTransfers => Set<BedTransfer>();
 
     // Laboratory and pharmacy
     public DbSet<LabTest> LabTests => Set<LabTest>();
@@ -198,12 +199,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
         builder.Entity<Bed>().HasIndex(x => new { x.WardId, x.BedNumber }).IsUnique();
 
+        // Gives ADM-000001, ADM-000002, ... without two admissions ever getting the same number.
+        builder.HasSequence<long>("AdmissionNumbers");
+
         builder.Entity<Admission>(e =>
         {
             e.HasIndex(x => x.AdmissionNumber).IsUnique();
             // A bed holds one patient at a time, and a patient has one active admission.
             e.HasIndex(x => x.BedId).IsUnique().HasFilter("\"DischargedAt\" IS NULL");
             e.HasIndex(x => x.PatientId).IsUnique().HasFilter("\"DischargedAt\" IS NULL");
+        });
+
+        builder.Entity<BedTransfer>(e =>
+        {
+            e.HasOne(x => x.FromBed).WithMany().HasForeignKey(x => x.FromBedId);
+            e.HasOne(x => x.ToBed).WithMany().HasForeignKey(x => x.ToBedId);
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.TransferredByUserId);
+            e.ToTable(t => t.HasCheckConstraint("CK_BedTransfers_DifferentBeds", "\"FromBedId\" <> \"ToBedId\""));
         });
 
         builder.Entity<VitalSign>(e =>
@@ -220,6 +232,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             e.HasIndex(x => x.Code).IsUnique();
             e.ToTable(t => t.HasCheckConstraint("CK_LabTests_Price", "\"Price\" >= 0"));
         });
+
+        // Gives LAB-000001, LAB-000002, ... for lab requests.
+        builder.HasSequence<long>("LabRequestNumbers");
 
         builder.Entity<LabRequest>(e =>
         {
