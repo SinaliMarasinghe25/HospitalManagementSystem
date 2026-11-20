@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router'
 import { ApiError } from '../../api/client'
 import { addPrescription, cancelPrescription, getMedicalRecord, searchMedicines } from '../../api/medicalRecords'
+import { LabTestsSection } from '../../components/lab/LabTestsSection'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { Medicine, MedicalRecord, Prescription, PrescriptionLine } from '../../types/medicalRecord'
 import { ageFrom, formatDate, formatDateTime } from '../../utils/format'
@@ -101,6 +102,7 @@ export default function MedicalRecordPage() {
       </section>
 
       <PrescriptionsSection record={record} onChanged={() => setReloadKey((k) => k + 1)} />
+      <LabTestsSection patientId={record.patientId} medicalRecordId={record.id} canRequest={record.canEdit} />
     </div>
   )
 }

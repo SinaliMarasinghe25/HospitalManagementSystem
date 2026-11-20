@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { listAppointments } from '../api/appointments'
+import { openLabRequestCount } from '../api/lab'
 import { Permissions } from '../auth/permissions'
 import { hasAnyRole } from '../auth/roles'
 import { useAuth } from '../auth/useAuth'
@@ -9,12 +10,22 @@ import type { Appointment } from '../types/appointment'
 import { formatClock, todayInHospital } from '../utils/format'
 
 // PDF section 7, Dashboard. The five tiles get real numbers as each module is built.
-const placeholderTiles = ['Total Patients', 'Revenue Summary', 'Laboratory Requests', 'Pharmacy Alerts']
+const placeholderTiles = ['Total Patients', 'Revenue Summary', 'Pharmacy Alerts']
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const canSeeAppointments = hasAnyRole(user?.roles, Permissions.viewAppointments)
   const [today, setToday] = useState<Appointment[] | null>(null)
+  const canSeeLab = hasAnyRole(user?.roles, Permissions.viewLabRequests)
+  const [openLab, setOpenLab] = useState<number | null>(null)
+
+  // UI-DSH-04 Laboratory Requests: tests waiting for a sample or a result.
+  useEffect(() => {
+    if (!canSeeLab) return
+    openLabRequestCount()
+      .then((r) => setOpenLab(r.count))
+      .catch(() => setOpenLab(null))
+  }, [canSeeLab])
 
   useEffect(() => {
     if (!canSeeAppointments) return
@@ -38,6 +49,16 @@ export default function DashboardPage() {
           <p className={`mt-2 text-2xl font-semibold ${today ? 'text-slate-900' : 'text-slate-400'}`}>
             {today ? today.length : '--'}
           </p>
+        </Link>
+        <Link
+          to={canSeeLab ? '/laboratory' : '/'}
+          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-blue-300"
+        >
+          <p className="text-sm text-slate-600">Laboratory Requests</p>
+          <p className={`mt-2 text-2xl font-semibold ${openLab !== null ? 'text-slate-900' : 'text-slate-400'}`}>
+            {openLab ?? '--'}
+          </p>
+          {openLab !== null && <p className="text-xs text-slate-500">waiting for sample or result</p>}
         </Link>
         {placeholderTiles.map((tile) => (
           <div key={tile} className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">

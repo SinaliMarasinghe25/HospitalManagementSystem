@@ -136,7 +136,10 @@ function HistorySection({ patientId }: { patientId: number }) {
           <ul className="mt-2 space-y-1 text-sm text-slate-700">
             {history.labResults.map((l) => (
               <li key={l.id}>
-                {formatDateTime(l.requestedAt)}: {l.testName} - {l.resultValue ?? l.status}
+                <Link to={`/laboratory/requests/${l.id}`} className="text-blue-700 hover:underline">
+                  {formatDateTime(l.requestedAt)}
+                </Link>
+                : {l.testName} - {l.resultValue ?? l.status}
                 {l.unit && ` ${l.unit}`}
                 {l.referenceRange && ` (normal ${l.referenceRange})`}
                 {l.isAbnormal && <span className="ml-1 font-medium text-red-700">abnormal</span>}
