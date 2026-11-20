@@ -31,6 +31,11 @@ import ConsultationFormPage from './pages/medical-records/ConsultationFormPage'
 import MedicalRecordPage from './pages/medical-records/MedicalRecordPage'
 import MedicalRecordsPage from './pages/medical-records/MedicalRecordsPage'
 import MedicalReportPage from './pages/medical-records/MedicalReportPage'
+import DispensePage from './pages/pharmacy/DispensePage'
+import MedicineFormPage from './pages/pharmacy/MedicineFormPage'
+import MedicinePage from './pages/pharmacy/MedicinePage'
+import PharmacyPage from './pages/pharmacy/PharmacyPage'
+import UsersPage from './pages/users/UsersPage'
 
 // Pages that are built so far. Every other menu item shows a "coming soon" page.
 const builtPages: Record<string, ReactNode> = {
@@ -41,6 +46,8 @@ const builtPages: Record<string, ReactNode> = {
   '/medical-records': <MedicalRecordsPage />,
   '/admissions': <AdmissionsPage />,
   '/laboratory': <LabPage />,
+  '/pharmacy': <PharmacyPage />,
+  '/users': <UsersPage />,
 }
 
 export default function App() {
@@ -150,6 +157,24 @@ export default function App() {
         <Route
           path="/laboratory/requests/:id"
           element={<RequireRole roles={Permissions.viewLabRequests}><LabRequestPage /></RequireRole>}
+        />
+
+        {/* Pharmacy pages that are not in the menu */}
+        <Route
+          path="/pharmacy/medicines/new"
+          element={<RequireRole roles={Permissions.managePharmacyStock}><MedicineFormPage /></RequireRole>}
+        />
+        <Route
+          path="/pharmacy/medicines/:id"
+          element={<RequireRole roles={Permissions.viewPharmacyStock}><MedicinePage /></RequireRole>}
+        />
+        <Route
+          path="/pharmacy/medicines/:id/edit"
+          element={<RequireRole roles={Permissions.managePharmacyStock}><MedicineFormPage /></RequireRole>}
+        />
+        <Route
+          path="/pharmacy/prescriptions/:id"
+          element={<RequireRole roles={Permissions.pharmacyQueue}><DispensePage /></RequireRole>}
         />
       </Route>
 
