@@ -8,7 +8,7 @@ import { useAuth } from '../../auth/useAuth'
 import { InvoiceStatusBadge } from '../../components/billing/InvoiceStatusBadge'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import { chargeTypeLabels, paymentMethodLabels, type InvoiceDetail, type PaymentMethod } from '../../types/billing'
-import { errorsByField } from '../../utils/formErrors'
+import { errorsByField, firstError } from '../../utils/formErrors'
 import { formatDateTime, formatMoney } from '../../utils/format'
 
 // One invoice: its lines and totals (FR-BL-05), payments (FR-BL-06, UI-BIL-02) and receipts (UI-BIL-03).
@@ -36,7 +36,7 @@ export default function InvoicePage() {
     try {
       setInvoice(await cancelInvoice(invoiceId))
     } catch (err) {
-      setError(err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : 'Could not cancel.')
+      setError(firstError(err, 'Could not cancel.'))
     }
   }
 

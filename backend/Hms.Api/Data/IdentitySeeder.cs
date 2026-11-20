@@ -23,8 +23,10 @@ public static class IdentitySeeder
         }
 
         var adminUserName = configuration["Seed:AdminUserName"] ?? "admin";
-        if (await userManager.FindByNameAsync(adminUserName) is not null)
+        var existing = await userManager.FindByNameAsync(adminUserName);
+        if (existing is not null)
         {
+            await RecoverAdminAsync(userManager, existing, logger);
             return;
         }
 
@@ -47,5 +49,25 @@ public static class IdentitySeeder
 
         await userManager.AddToRoleAsync(admin, Roles.Administrator);
         logger.LogInformation("Created admin account {UserName}", adminUserName);
+    }
+
+    // A safety net: if no active Administrator is left (for example, the role was removed by mistake
+    // before the guards existed), the seed account gets the role back and is made active again on startup.
+    // Its other roles and its password are left as they are.
+    private static async Task RecoverAdminAsync(UserManager<AppUser> userManager, AppUser seedAdmin, ILogger logger)
+    {
+        var activeAdmins = (await userManager.GetUsersInRoleAsync(Roles.Administrator)).Count(u => u.IsActive);
+        if (activeAdmins > 0) return;
+
+        if (!await userManager.IsInRoleAsync(seedAdmin, Roles.Administrator))
+        {
+            await userManager.AddToRoleAsync(seedAdmin, Roles.Administrator);
+        }
+        seedAdmin.IsActive = true;
+        await userManager.UpdateAsync(seedAdmin);
+        await userManager.SetLockoutEndDateAsync(seedAdmin, null);
+        await userManager.UpdateSecurityStampAsync(seedAdmin);
+        logger.LogWarning("No active administrator was found, so {UserName} was given the Administrator role again.",
+            seedAdmin.UserName);
     }
 }

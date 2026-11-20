@@ -6,6 +6,8 @@ export type Department = {
   description: string | null
   isActive: boolean
   doctorCount: number
+  // Active employees in the department, doctors included.
+  staffCount: number
 }
 
 export type DayOfWeek = 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday'
@@ -47,21 +49,4 @@ export type DoctorDetail = {
   isActive: boolean
   userName: string | null
   schedule: ScheduleItem[]
-}
-
-// Form values are strings, as typed in the inputs.
-export type DoctorForm = {
-  firstName: string
-  lastName: string
-  phone: string
-  email: string
-  hireDate: string
-  departmentId: string
-  specialization: string
-  licenseNumber: string
-  consultationFee: string
-  slotMinutes: string
-  isActive: boolean
-  userName: string
-  password: string
 }

@@ -8,6 +8,13 @@ export type UserAccount = {
   isActive: boolean
   isLockedOut: boolean
   roles: Role[]
+  // Still has the temporary password an administrator set.
+  mustChangePassword: boolean
+  // The staff record this login is linked to, if any.
+  employeeId: number | null
+  employeeName: string | null
+  // Linked to an employee with a doctor profile: the Doctor role is kept automatically.
+  isDoctor: boolean
 }
 
 export const roleLabels: Record<Role, string> = {

@@ -8,10 +8,7 @@ import { useAuth } from '../../auth/useAuth'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { AdmissionDetail, VitalSign, VitalSignForm, Ward } from '../../types/admission'
 import { ageFrom, formatDateTime, formatMoney } from '../../utils/format'
-
-function firstMessage(err: unknown, fallback: string) {
-  return err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : fallback
-}
+import { firstError } from '../../utils/formErrors'
 
 // One admission: where the patient is, transfers, vital signs and nursing notes, and discharge.
 export default function AdmissionDetailPage() {
@@ -162,7 +159,7 @@ function TransferSection({ admission, onDone }: { admission: AdmissionDetail; on
       onDone(await transferPatient(admission.id, Number(toBedId), reason))
       setOpen(false)
     } catch (err) {
-      setError(firstMessage(err, 'Could not transfer.'))
+      setError(firstError(err, 'Could not transfer.'))
     }
   }
 
@@ -268,7 +265,7 @@ function VitalsSection({ admissionId, canRecord }: { admissionId: number; canRec
       setForm(emptyVitals)
       setReloadKey((k) => k + 1)
     } catch (err) {
-      setError(firstMessage(err, 'Could not save.'))
+      setError(firstError(err, 'Could not save.'))
     }
   }
 
@@ -378,7 +375,7 @@ function DischargeSection({ admissionId, onDone }: { admissionId: number; onDone
     try {
       onDone(await dischargePatient(admissionId, summary))
     } catch (err) {
-      setError(firstMessage(err, 'Could not discharge.'))
+      setError(firstError(err, 'Could not discharge.'))
     }
   }
 

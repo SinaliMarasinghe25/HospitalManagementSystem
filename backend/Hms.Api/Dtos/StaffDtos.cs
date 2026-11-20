@@ -5,9 +5,9 @@ namespace Hms.Api.Dtos;
 
 // PDF 3.9 Staff Management.
 
-// ---------- FR-ST-01 Employee registration, FR-ST-03 Department assignment ----------
-// Doctors are employees too, but they are added and edited on the Doctors page,
-// because they also need a licence number, fee and schedule.
+// ---------- FR-ST-01 Employee registration, FR-ST-03 Department assignment, FR-DM-01/02 doctors ----------
+// One form for every member of staff. A doctor is an employee with a doctor profile (Doctor below);
+// their weekly schedule is set on the Doctors page.
 public record EmployeeRequest
 {
     [Required, MaxLength(100)] public string FirstName { get; init; } = string.Empty;
@@ -19,10 +19,37 @@ public record EmployeeRequest
     [Required] public DateOnly? HireDate { get; init; }
     [Required] public int? DepartmentId { get; init; }
     public bool IsActive { get; init; } = true;
+
+    // Set for doctors. A doctor profile can be added to an existing employee, but never removed,
+    // because appointments and medical records point to it (make the employee inactive instead).
+    public DoctorProfileRequest? Doctor { get; init; }
+
+    // Only used when adding an employee: optionally create their login account at the same time.
+    // Leave UserName empty for staff who do not use the system.
+    [MinLength(3), MaxLength(50), RegularExpression("^[a-zA-Z0-9._-]+$",
+        ErrorMessage = "Use only letters, numbers, dot, dash or underscore.")]
+    public string? UserName { get; init; }
+    [MinLength(8), MaxLength(128)] public string? Password { get; init; }
+    public List<string>? Roles { get; init; }
 }
 
-// Link a login account (created through Hms.Api.http) to an employee, or unlink it with null.
-// The link is what lets a member of staff see and request their own leave.
+public record DoctorProfileRequest(
+    [Required, MaxLength(100)] string Specialization,             // "Cardiologist"
+    [Required, MaxLength(50)] string LicenseNumber,               // SLMC registration number
+    [Range(0, 1_000_000)] decimal ConsultationFee,                // charged when an appointment is completed
+    [Range(5, 120)] int SlotMinutes = 15);                        // appointment length
+
+public record DoctorProfile(int Id, string Specialization, string LicenseNumber, decimal ConsultationFee, int SlotMinutes);
+
+// Create a new login account for an existing employee and link it in one step.
+public record NewEmployeeLoginRequest(
+    [Required, MinLength(3), MaxLength(50), RegularExpression("^[a-zA-Z0-9._-]+$",
+        ErrorMessage = "Use only letters, numbers, dot, dash or underscore.")] string UserName,
+    [Required, MinLength(8), MaxLength(128)] string Password,
+    [Required, MinLength(1)] List<string> Roles);
+
+// Link an existing login account (one made before logins were created from the staff record) to an employee,
+// or unlink it with null. The link is what lets a member of staff see and request their own leave.
 public record EmployeeLoginRequest(string? UserId);
 
 public record EmployeeSummary(
@@ -34,7 +61,7 @@ public record EmployeeSummary(
     string DepartmentName,
     string? Phone,
     bool IsActive,
-    int? DoctorId,          // set when this employee is a doctor (edit on the Doctors page)
+    int? DoctorId,          // set when this employee has a doctor profile
     string? UserName);      // the linked login, if any
 
 public record EmployeeDetail(
@@ -49,7 +76,7 @@ public record EmployeeDetail(
     int DepartmentId,
     string DepartmentName,
     bool IsActive,
-    int? DoctorId,
+    DoctorProfile? Doctor,
     string? UserId,
     string? UserName,
     IReadOnlyList<LeaveResponse> Leave);

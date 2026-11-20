@@ -10,6 +10,7 @@ import { StatusBadge } from '../../components/appointments/StatusBadge'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { Appointment, AppointmentStatus } from '../../types/appointment'
 import { formatClock, formatDateTime } from '../../utils/format'
+import { firstError } from '../../utils/formErrors'
 
 // One appointment: details, status tracking (FR-AP-04), cancel (FR-AP-02) and reschedule (FR-AP-03).
 export default function AppointmentDetailPage() {
@@ -35,7 +36,7 @@ export default function AppointmentDetailPage() {
   }, [appointmentId])
 
   function showError(err: unknown) {
-    setError(err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : 'Could not save.')
+    setError(firstError(err, 'Could not save.'))
   }
 
   async function changeStatus(next: AppointmentStatus) {

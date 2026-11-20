@@ -79,9 +79,6 @@ public class MedicalRecordService(AppDbContext db)
             CanEdit: myDoctorId is not null && myDoctorId == m.DoctorId);
     }
 
-    public Task<int?> DoctorIdForUserAsync(string? userId) =>
-        db.Doctors.Where(d => d.Employee.UserId == userId).Select(d => (int?)d.Id).FirstOrDefaultAsync();
-
     // ---------- Writing the visit (FR-EMR-01, FR-EMR-03) ----------
 
     public async Task<ServiceResult<int>> CreateAsync(MedicalRecordRequest request, int? myDoctorId)
@@ -264,7 +261,7 @@ public class MedicalRecordService(AppDbContext db)
         var query = db.Medicines.AsNoTracking().Where(m => m.IsActive);
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var pattern = $"%{search.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_")}%";
+            var pattern = SearchText.Contains(search);
             query = query.Where(m => EF.Functions.ILike(m.Name, pattern, "\\") ||
                                      (m.GenericName != null && EF.Functions.ILike(m.GenericName, pattern, "\\")));
         }

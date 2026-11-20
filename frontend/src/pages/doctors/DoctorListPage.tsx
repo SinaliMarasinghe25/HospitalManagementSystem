@@ -48,10 +48,8 @@ export default function DoctorListPage() {
         <h1 className="text-xl font-semibold text-slate-900">Doctors</h1>
         {canManage && (
           <div className="flex gap-2">
-            <Link to="/doctors/departments" className={secondaryButtonClass}>
-              Departments
-            </Link>
-            <Link to="/doctors/new" className={primaryButtonClass}>
+            {/* The same form as every other member of staff, with "This person is a doctor" ticked. */}
+            <Link to="/staff/employees/new?doctor=1" className={primaryButtonClass}>
               Add doctor
             </Link>
           </div>

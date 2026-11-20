@@ -36,7 +36,9 @@ builder.Services
         options.User.RequireUniqueEmail = false;
     })
     .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    // Adds the "must change password" claim to the sign-in cookie (see Authorization/MustChangePassword.cs).
+    .AddClaimsPrincipalFactory<HmsClaimsPrincipalFactory>();
 
 // ---------- The sign-in cookie ----------
 builder.Services.ConfigureApplicationCookie(options =>
@@ -89,6 +91,8 @@ builder.Services.AddScoped<LabService>();
 builder.Services.AddScoped<PharmacyService>();
 builder.Services.AddScoped<BillingService>();
 builder.Services.AddScoped<StaffService>();
+builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddScoped<UserAccountService>();
 
 // Errors are returned as safe JSON (ProblemDetails) without stack traces.
 builder.Services.AddProblemDetails();
@@ -124,6 +128,7 @@ else
 app.UseHttpsRedirection();
 
 app.UseAuthentication();   // 1. Who are you? (reads the cookie)
+app.UseMustChangePassword(); // 1b. A temporary password must be replaced before anything else.
 app.UseAuthorization();    // 2. Are you allowed? (checks roles and policies)
 
 app.MapControllers();

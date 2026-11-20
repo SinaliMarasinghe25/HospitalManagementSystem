@@ -4,6 +4,8 @@ export type CurrentUser = {
   userName: string
   email: string | null
   roles: string[]
+  // True after an administrator set the password: the user must choose a new one first.
+  mustChangePassword: boolean
 }
 
 export type LoginRequest = {

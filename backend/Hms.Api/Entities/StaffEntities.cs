@@ -10,6 +10,10 @@ public class AppUser : IdentityUser
 {
     public bool IsActive { get; set; } = true;
 
+    // True after an administrator sets the password (new account or reset). The user must then choose
+    // their own password before using anything else, so only they know it.
+    public bool MustChangePassword { get; set; }
+
     public Employee? Employee { get; set; }
 }
 

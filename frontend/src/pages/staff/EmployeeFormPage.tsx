@@ -1,13 +1,15 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { ApiError } from '../../api/client'
 import { listDepartments } from '../../api/doctors'
 import { createEmployee, getEmployee, updateEmployee } from '../../api/staff'
+import { NewLoginFields } from '../../components/staff/NewLoginFields'
+import { emptyLogin, loginProblems } from '../../components/staff/newLogin'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { Department } from '../../types/doctor'
-import type { EmployeeForm } from '../../types/staff'
+import type { EmployeeForm, NewLogin } from '../../types/staff'
 import { todayInHospital } from '../../utils/format'
-import { errorsByField } from '../../utils/formErrors'
+import { errorsByField, firstError } from '../../utils/formErrors'
 
 const emptyForm: EmployeeForm = {
   firstName: '',
@@ -18,16 +20,32 @@ const emptyForm: EmployeeForm = {
   hireDate: '',
   departmentId: '',
   isActive: true,
+  isDoctor: false,
+  specialization: '',
+  licenseNumber: '',
+  consultationFee: '',
+  slotMinutes: '15',
 }
 
-// FR-ST-01 "Employee registration" and FR-ST-03 "Department assignment".
-// Doctors are added on the Doctors page instead, because they also need a licence, fee and schedule.
+// The doctor fields come back from the API as "Doctor.LicenseNumber", which errorsByField turns into this.
+const doctorFields = ['specialization', 'licenseNumber', 'consultationFee', 'slotMinutes'] as const
+type TextField = Exclude<keyof EmployeeForm, 'isActive' | 'isDoctor'>
+const errorKey = (name: TextField) =>
+  (doctorFields as readonly string[]).includes(name) ? `doctor.${name}` : name
+
+// The ONE form for adding or editing a member of staff (FR-ST-01, FR-ST-03), doctors included (FR-DM-01, FR-DM-02).
+// Everyone gets an employee record. Doctors also get a doctor profile. Anyone who uses the system gets a login.
+// "/staff/employees/new?doctor=1" opens it with "This person is a doctor" already ticked (from the Doctors page).
 export default function EmployeeFormPage() {
   const { id } = useParams()
   const isEdit = id !== undefined
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState<EmployeeForm>(emptyForm)
+  const [form, setForm] = useState<EmployeeForm>(() =>
+    !isEdit && searchParams.get('doctor') === '1' ? { ...emptyForm, isDoctor: true, jobTitle: 'Doctor' } : emptyForm,
+  )
+  const [wasDoctor, setWasDoctor] = useState(false)
   const [currentDepartmentId, setCurrentDepartmentId] = useState<number | null>(null)
   const [departments, setDepartments] = useState<Department[]>([])
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
@@ -35,18 +53,16 @@ export default function EmployeeFormPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(isEdit)
   const [today] = useState(() => todayInHospital())
+  const [withLogin, setWithLogin] = useState(false)
+  const [login, setLogin] = useState<NewLogin>(emptyLogin)
 
   useEffect(() => {
     listDepartments(true).then(setDepartments).catch(() => setError('Could not load departments.'))
     if (!isEdit) return
     getEmployee(Number(id))
       .then((e) => {
-        if (e.doctorId !== null) {
-          // Doctors are edited in one place only.
-          navigate(`/doctors/${e.doctorId}/edit`, { replace: true })
-          return
-        }
         setCurrentDepartmentId(e.departmentId)
+        setWasDoctor(e.doctor !== null)
         setForm({
           firstName: e.firstName,
           lastName: e.lastName,
@@ -56,11 +72,16 @@ export default function EmployeeFormPage() {
           hireDate: e.hireDate,
           departmentId: String(e.departmentId),
           isActive: e.isActive,
+          isDoctor: e.doctor !== null,
+          specialization: e.doctor?.specialization ?? '',
+          licenseNumber: e.doctor?.licenseNumber ?? '',
+          consultationFee: e.doctor ? String(e.doctor.consultationFee) : '',
+          slotMinutes: e.doctor ? String(e.doctor.slotMinutes) : '15',
         })
       })
       .catch(() => setError('Could not load this employee.'))
       .finally(() => setIsLoading(false))
-  }, [id, isEdit, navigate])
+  }, [id, isEdit])
 
   function handleChange(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value, type } = event.target
@@ -70,47 +91,56 @@ export default function EmployeeFormPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setIsSaving(true)
     setError(null)
     setFieldErrors({})
+    const wantsLogin = !isEdit && withLogin
+    if (wantsLogin) {
+      const problems = loginProblems(login, form.isDoctor)
+      if (Object.keys(problems).length > 0) {
+        setFieldErrors(problems)
+        setError('Please correct the highlighted fields.')
+        return
+      }
+    }
+    setIsSaving(true)
     try {
-      const saved = isEdit ? await updateEmployee(Number(id), form) : await createEmployee(form)
+      const saved = isEdit ? await updateEmployee(Number(id), form) : await createEmployee(form, wantsLogin ? login : null)
       navigate(`/staff/employees/${saved.id}`)
     } catch (err) {
-      if (err instanceof ApiError && Object.keys(err.fieldErrors).length > 0) {
-        const byField = errorsByField(err.fieldErrors)
-        setFieldErrors(byField)
-        setError(byField.employee ?? 'Please correct the highlighted fields.')
-      } else {
-        setError(err instanceof ApiError ? err.message : 'Could not save. Please try again.')
-      }
+      const byField = err instanceof ApiError ? errorsByField(err.fieldErrors) : {}
+      setFieldErrors(byField)
+      setError(
+        Object.keys(byField).length > 0
+          ? (byField.doctor ?? 'Please correct the highlighted fields.')
+          : firstError(err, 'Could not save. Please try again.'),
+      )
     } finally {
       setIsSaving(false)
     }
   }
 
-  const field = (name: Exclude<keyof EmployeeForm, 'isActive'>) => ({
+  const field = (name: TextField) => ({
     id: name,
     name,
     value: form[name],
     onChange: handleChange,
     className: inputClass,
-    'aria-invalid': fieldErrors[name] ? true : undefined,
-    'aria-describedby': fieldErrors[name] ? `${name}-error` : undefined,
+    'aria-invalid': fieldErrors[errorKey(name)] ? true : undefined,
+    'aria-describedby': fieldErrors[errorKey(name)] ? `${name}-error` : undefined,
   })
 
   if (isLoading) return <p role="status">Loading...</p>
 
   // Inactive departments are hidden, except the one the employee is already in.
   const departmentOptions = departments.filter((d) => d.isActive || d.id === currentDepartmentId)
+  const title = isEdit ? (wasDoctor ? 'Edit doctor' : 'Edit employee') : form.isDoctor ? 'Add doctor' : 'Add employee'
 
   return (
     <div className="max-w-3xl space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">{isEdit ? 'Edit employee' : 'Add employee'}</h1>
+      <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
       {!isEdit && (
         <p className="text-sm text-slate-600">
-          Adding a doctor? Use <Link to="/doctors/new" className="text-blue-700 hover:underline">Add doctor</Link>{' '}
-          instead, so the licence, fee and schedule are recorded too.
+          Use this form for everyone who works at the hospital: doctors, nurses, receptionists, accountants and others.
         </p>
       )}
 
@@ -140,7 +170,7 @@ export default function EmployeeFormPage() {
         <fieldset className="grid gap-4 sm:grid-cols-2">
           <legend className="mb-2 font-medium text-slate-900">Job</legend>
           <FormField id="jobTitle" label="Job title" required error={fieldErrors.jobTitle}>
-            <input {...field('jobTitle')} required maxLength={100} placeholder="e.g. Staff Nurse" />
+            <input {...field('jobTitle')} required maxLength={100} placeholder="e.g. Staff Nurse, Accountant" />
           </FormField>
           <FormField id="departmentId" label="Department" required error={fieldErrors.departmentId}>
             <select {...field('departmentId')} required>
@@ -153,6 +183,14 @@ export default function EmployeeFormPage() {
               ))}
             </select>
           </FormField>
+          <p className="text-xs text-slate-500 sm:col-span-2">
+            Everyone belongs to one department. Office staff go in a non-clinical department, for example an accountant in
+            &ldquo;Finance&rdquo; or a receptionist in &ldquo;Front Office&rdquo;. Missing one?{' '}
+            <Link to="/staff?tab=departments" className="text-blue-700 hover:underline">
+              Add it on Staff &rarr; Departments
+            </Link>
+            .
+          </p>
           <FormField id="hireDate" label="Hire date" required error={fieldErrors.hireDate}>
             <input {...field('hireDate')} type="date" max={today} required />
           </FormField>
@@ -162,9 +200,82 @@ export default function EmployeeFormPage() {
           </label>
         </fieldset>
 
+        <fieldset className="space-y-3">
+          <legend className="mb-1 font-medium text-slate-900">Doctor</legend>
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              name="isDoctor"
+              checked={form.isDoctor}
+              onChange={handleChange}
+              disabled={wasDoctor}
+              aria-describedby="isDoctor-hint"
+            />
+            This person is a doctor
+          </label>
+          <p id="isDoctor-hint" className="text-xs text-slate-500">
+            {wasDoctor
+              ? 'A doctor profile cannot be removed, because appointments and medical records use it. Untick Active instead.'
+              : 'Doctors can be booked for appointments. Their login gets the Doctor role automatically.'}
+          </p>
+          {fieldErrors.doctor && <p className="text-sm text-red-700">{fieldErrors.doctor}</p>}
+          {form.isDoctor && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField id="specialization" label="Specialisation" required error={fieldErrors['doctor.specialization']}>
+                <input {...field('specialization')} required maxLength={100} placeholder="e.g. Cardiologist" />
+              </FormField>
+              <FormField
+                id="licenseNumber"
+                label="SLMC registration number"
+                required
+                error={fieldErrors['doctor.licenseNumber']}
+              >
+                <input {...field('licenseNumber')} required maxLength={50} />
+              </FormField>
+              <FormField
+                id="consultationFee"
+                label="Consultation fee (LKR)"
+                required
+                error={fieldErrors['doctor.consultationFee']}
+              >
+                <input {...field('consultationFee')} type="number" min={0} step="0.01" required />
+              </FormField>
+              <FormField
+                id="slotMinutes"
+                label="Appointment length (minutes)"
+                required
+                error={fieldErrors['doctor.slotMinutes']}
+              >
+                <input {...field('slotMinutes')} type="number" min={5} max={120} step={5} required />
+              </FormField>
+              <p className="text-xs text-slate-500 sm:col-span-2">
+                Set the weekly working hours afterwards, from the employee&apos;s page (Weekly schedule).
+              </p>
+            </div>
+          )}
+        </fieldset>
+
+        {!isEdit && (
+          <fieldset className="space-y-3">
+            <legend className="mb-1 font-medium text-slate-900">Login account (optional)</legend>
+            <label className="flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" checked={withLogin} onChange={(e) => setWithLogin(e.target.checked)} />
+              Create a login for this person now
+            </label>
+            {withLogin && (
+              <NewLoginFields value={login} onChange={setLogin} errors={fieldErrors} isDoctor={form.isDoctor} />
+            )}
+            {!withLogin && (
+              <p className="text-sm text-slate-600">
+                Leave this off for staff who do not use the system. You can add a login later from the employee&apos;s page.
+              </p>
+            )}
+          </fieldset>
+        )}
+
         <div className="flex gap-3">
           <button type="submit" className={primaryButtonClass} disabled={isSaving}>
-            {isSaving ? 'Saving...' : isEdit ? 'Save changes' : 'Add employee'}
+            {isSaving ? 'Saving...' : isEdit ? 'Save changes' : title}
           </button>
           <Link to={isEdit ? `/staff/employees/${id}` : '/staff'} className={secondaryButtonClass}>
             Cancel

@@ -8,12 +8,8 @@ import { useAuth } from '../../auth/useAuth'
 import { ExpiryBadge, LowStockBadge } from '../../components/pharmacy/PharmacyBadges'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import { movementLabels, type Batch, type MedicineDetail } from '../../types/pharmacy'
-import { errorsByField } from '../../utils/formErrors'
+import { errorsByField, firstError } from '../../utils/formErrors'
 import { addDays, formatDate, formatDateTime, formatMoney, todayInHospital } from '../../utils/format'
-
-function firstMessage(err: unknown, fallback: string) {
-  return err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : fallback
-}
 
 // One medicine: stock by batch (FR-PH-01), stock in and corrections (FR-PH-03), expiry (FR-PH-04), price.
 export default function MedicinePage() {
@@ -42,7 +38,7 @@ export default function MedicinePage() {
       setDetail(await action())
       return true
     } catch (err) {
-      setError(firstMessage(err, 'Could not save.'))
+      setError(firstError(err, 'Could not save.'))
       return false
     }
   }
@@ -363,7 +359,7 @@ function PriceForm({ price, onSave }: { price: number; onSave: (price: number) =
     try {
       await onSave(Number(value || 0))
     } catch (err) {
-      setError(firstMessage(err, 'Could not save the price.'))
+      setError(firstError(err, 'Could not save the price.'))
     }
   }
 

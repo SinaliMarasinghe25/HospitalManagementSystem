@@ -9,6 +9,7 @@ import type {
   LeaveResponse,
   LeaveStatus,
   MyLeave,
+  NewLogin,
   UnlinkedUser,
 } from '../types/staff'
 import { apiFetch } from './client'
@@ -29,17 +30,32 @@ export function getEmployee(id: number) {
   return apiFetch<EmployeeDetail>(`/staff/employees/${id}`)
 }
 
-function employeeBody(form: EmployeeForm) {
+// Converts the text in the form into what the API expects (numbers, null for empty, the doctor part only for doctors).
+function employeeBody(form: EmployeeForm, login: NewLogin | null = null) {
   return JSON.stringify({
-    ...form,
+    firstName: form.firstName.trim(),
+    lastName: form.lastName.trim(),
+    jobTitle: form.jobTitle.trim(),
+    phone: form.phone.trim(),
     email: form.email.trim() || null,
     hireDate: form.hireDate || null,
     departmentId: form.departmentId ? Number(form.departmentId) : null,
+    isActive: form.isActive,
+    doctor: form.isDoctor
+      ? {
+          specialization: form.specialization.trim(),
+          licenseNumber: form.licenseNumber.trim(),
+          consultationFee: Number(form.consultationFee || 0),
+          slotMinutes: Number(form.slotMinutes || 15),
+        }
+      : null,
+    ...(login ? { userName: login.userName.trim(), password: login.password, roles: login.roles } : {}),
   })
 }
 
-export function createEmployee(form: EmployeeForm) {
-  return apiFetch<EmployeeDetail>('/staff/employees', { method: 'POST', body: employeeBody(form) })
+// With "login", the employee's login account is created and linked at the same time.
+export function createEmployee(form: EmployeeForm, login: NewLogin | null) {
+  return apiFetch<EmployeeDetail>('/staff/employees', { method: 'POST', body: employeeBody(form, login) })
 }
 
 export function updateEmployee(id: number, form: EmployeeForm) {
@@ -48,6 +64,13 @@ export function updateEmployee(id: number, form: EmployeeForm) {
 
 export function setEmployeeLogin(id: number, userId: string | null) {
   return apiFetch<EmployeeDetail>(`/staff/employees/${id}/login`, { method: 'PUT', body: JSON.stringify({ userId }) })
+}
+
+export function createEmployeeLogin(id: number, login: NewLogin) {
+  return apiFetch<EmployeeDetail>(`/staff/employees/${id}/login`, {
+    method: 'POST',
+    body: JSON.stringify({ ...login, userName: login.userName.trim() }),
+  })
 }
 
 export function listUnlinkedUsers() {

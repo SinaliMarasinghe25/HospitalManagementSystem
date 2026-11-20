@@ -9,6 +9,7 @@ import { useAuth } from '../../auth/useAuth'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { MedicalHistory, PatientDetail, PatientDocument } from '../../types/patient'
 import { ageFrom, formatDate, formatDateTime, formatFileSize } from '../../utils/format'
+import { firstError } from '../../utils/formErrors'
 
 // Section 7 Patient Screen: details, "View History" and documents for one patient.
 export default function PatientDetailPage() {
@@ -196,7 +197,7 @@ function DocumentsSection({ patientId, canUpload }: { patientId: number; canUplo
       load()
     } catch (err) {
       const message =
-        err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : 'Upload failed.'
+        firstError(err, 'Upload failed.')
       setError(message)
     } finally {
       setIsUploading(false)

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Hms.Api.Authorization;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -95,8 +94,7 @@ public class AdmissionsController(AdmissionService admissions, AuditService audi
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
 
-        await audit.LogAsync(AuditAction.Create, userManager.GetUserId(User), User.Identity?.Name, "VitalSign",
-            result.Value.ToString(), JsonSerializer.Serialize(new { AdmissionId = id }));
+        await audit.LogChangeAsync(AuditAction.Create, "VitalSign", result.Value, new { AdmissionId = id });
         return StatusCode(StatusCodes.Status201Created, new { id = result.Value });
     }
 
@@ -104,6 +102,5 @@ public class AdmissionsController(AdmissionService admissions, AuditService audi
         User.IsInRole(Roles.Administrator) || User.IsInRole(Roles.Doctor) || User.IsInRole(Roles.Nurse);
 
     private Task Audit(AuditAction action, int id, object? changes) =>
-        audit.LogAsync(action, userManager.GetUserId(User), User.Identity?.Name, "Admission", id.ToString(),
-            changes is null ? null : JsonSerializer.Serialize(changes));
+        audit.LogChangeAsync(action, "Admission", id, changes);
 }

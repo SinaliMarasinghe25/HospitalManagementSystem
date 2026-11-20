@@ -8,6 +8,7 @@ import { useAuth } from '../../auth/useAuth'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { AdmissionSummary, Ward } from '../../types/admission'
 import { addDays, formatDateTime, formatMoney, todayInHospital } from '../../utils/format'
+import { Tabs } from '../../components/ui/Tabs'
 
 type Tab = 'beds' | 'current' | 'discharged'
 
@@ -63,25 +64,16 @@ export default function AdmissionsPage() {
         </div>
       </div>
 
-      <div role="tablist" aria-label="Admissions views" className="flex gap-1 border-b border-slate-200">
-        {(Object.keys(tabLabels) as Tab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            role="tab"
-            aria-selected={tab === t}
-            onClick={() => {
-              setAdmissions(null)
-              setParams({ tab: t })
-            }}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
-              tab === t ? 'border-blue-700 text-blue-700' : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            {tabLabels[t]}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        label="Admissions views"
+        tabs={Object.keys(tabLabels) as Tab[]}
+        labels={tabLabels}
+        value={tab}
+        onChange={(t) => {
+          setAdmissions(null)
+          setParams({ tab: t })
+        }}
+      />
 
       {error && (
         <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">

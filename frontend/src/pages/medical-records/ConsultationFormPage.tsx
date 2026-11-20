@@ -5,7 +5,7 @@ import { ApiError } from '../../api/client'
 import { createMedicalRecord, getMedicalRecord, updateMedicalRecord } from '../../api/medicalRecords'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { DiagnosisItem, TreatmentItem } from '../../types/medicalRecord'
-import { errorsByField } from '../../utils/formErrors'
+import { errorsByField, firstError } from '../../utils/formErrors'
 import { formatDateTime } from '../../utils/format'
 
 type Header = { patientName: string; patientNumber: string; visit: string; allergies?: string | null }
@@ -85,7 +85,7 @@ export default function ConsultationFormPage() {
     } catch (err) {
       if (err instanceof ApiError) {
         setErrors(errorsByField(err.fieldErrors))
-        setFormError(Object.values(err.fieldErrors)[0]?.[0] ?? err.message)
+        setFormError(firstError(err, err.message))
       } else {
         setFormError('Could not save the medical record.')
       }

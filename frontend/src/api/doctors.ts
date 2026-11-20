@@ -1,4 +1,4 @@
-import type { Department, DoctorDetail, DoctorForm, DoctorSummary, ScheduleItem } from '../types/doctor'
+import type { Department, DoctorDetail, DoctorSummary, ScheduleItem } from '../types/doctor'
 import { apiFetch } from './client'
 
 // ---------- Departments (DepartmentsController.cs) ----------
@@ -27,33 +27,7 @@ export function getDoctor(id: number) {
   return apiFetch<DoctorDetail>(`/doctors/${id}`)
 }
 
-// Converts the text in the form into the types the API expects (numbers, null for empty).
-function toBody(form: DoctorForm) {
-  const text = (value: string) => (value.trim() === '' ? null : value.trim())
-  return JSON.stringify({
-    firstName: form.firstName.trim(),
-    lastName: form.lastName.trim(),
-    phone: form.phone.trim(),
-    email: text(form.email),
-    hireDate: text(form.hireDate),
-    departmentId: form.departmentId ? Number(form.departmentId) : null,
-    specialization: form.specialization.trim(),
-    licenseNumber: form.licenseNumber.trim(),
-    consultationFee: Number(form.consultationFee || 0),
-    slotMinutes: Number(form.slotMinutes || 15),
-    isActive: form.isActive,
-    userName: text(form.userName),
-    password: form.password === '' ? null : form.password,
-  })
-}
-
-export function createDoctor(form: DoctorForm) {
-  return apiFetch<DoctorDetail>('/doctors', { method: 'POST', body: toBody(form) })
-}
-
-export function updateDoctor(id: number, form: DoctorForm) {
-  return apiFetch<DoctorDetail>(`/doctors/${id}`, { method: 'PUT', body: toBody(form) })
-}
+// Doctors are added and edited on the Staff page (createEmployee / updateEmployee in api/staff.ts).
 
 export function saveSchedule(id: number, items: ScheduleItem[]) {
   return apiFetch<DoctorDetail>(`/doctors/${id}/schedule`, { method: 'PUT', body: JSON.stringify({ items }) })

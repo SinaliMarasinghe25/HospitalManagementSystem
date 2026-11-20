@@ -55,10 +55,6 @@ public class AppointmentService(AppDbContext db)
     public Task<AppointmentResponse?> GetAsync(AppointmentAccess access, int id) =>
         Project(Visible(access).Where(a => a.Id == id)).FirstOrDefaultAsync();
 
-    // The doctor profile linked to a login account, or null if the user is not a doctor.
-    public Task<int?> DoctorIdForUserAsync(string? userId) =>
-        db.Doctors.Where(d => d.Employee.UserId == userId).Select(d => (int?)d.Id).FirstOrDefaultAsync();
-
     // UI-APT-01: every slot of the doctor's working hours on one day, marked free or not.
     public async Task<ServiceResult<List<SlotResponse>>> GetSlotsAsync(int doctorId, DateOnly date, int? ignoreAppointmentId)
     {

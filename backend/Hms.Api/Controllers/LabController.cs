@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Hms.Api.Authorization;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -16,10 +14,8 @@ namespace Hms.Api.Controllers;
 [ApiController]
 [Route("api/lab")]
 [Authorize(Policy = Policies.ViewLabRequests)]
-public class LabController(LabService lab, AuditService audit, UserManager<AppUser> userManager) : ControllerBase
+public class LabController(LabService lab, DoctorService doctors, AuditService audit, UserManager<AppUser> userManager) : ControllerBase
 {
-    private static readonly JsonSerializerOptions AuditJson = new() { Converters = { new JsonStringEnumConverter() } };
-
     // ---------- Test catalogue ----------
 
     // GET /api/lab/tests
@@ -40,7 +36,7 @@ public class LabController(LabService lab, AuditService audit, UserManager<AppUs
         var result = await lab.SaveTestAsync(id, request);
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
-        await Audit(id is null ? AuditAction.Create : AuditAction.Update, "LabTest", result.Value, request);
+        await audit.LogChangeAsync(id is null ? AuditAction.Create : AuditAction.Update, "LabTest", result.Value, request);
         return id is null ? StatusCode(StatusCodes.Status201Created, new { id = result.Value }) : NoContent();
     }
 
@@ -66,7 +62,7 @@ public class LabController(LabService lab, AuditService audit, UserManager<AppUs
     {
         var request = await lab.GetAsync(id);
         if (request is null) return NotFound();
-        await Audit(AuditAction.View, "LabRequest", id, null);
+        await audit.LogChangeAsync(AuditAction.View, "LabRequest", id, null);
         return request;
     }
 
@@ -79,7 +75,7 @@ public class LabController(LabService lab, AuditService audit, UserManager<AppUs
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
         foreach (var id in result.Value!)
         {
-            await Audit(AuditAction.Create, "LabRequest", id, new { request.PatientId, request.MedicalRecordId });
+            await audit.LogChangeAsync(AuditAction.Create, "LabRequest", id, new { request.PatientId, request.MedicalRecordId });
         }
         return StatusCode(StatusCodes.Status201Created, result.Value);
     }
@@ -112,7 +108,7 @@ public class LabController(LabService lab, AuditService audit, UserManager<AppUs
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
 
         // Result values are clinical data: the audit log records that a result was entered or corrected, not the value.
-        await Audit(AuditAction.Update, "LabRequest", id,
+        await audit.LogChangeAsync(AuditAction.Update, "LabRequest", id,
             new { Status = LabRequestStatus.Completed, Correction = result.Value });
         return (await lab.GetAsync(id))!;
     }
@@ -121,14 +117,10 @@ public class LabController(LabService lab, AuditService audit, UserManager<AppUs
     {
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
-        await Audit(AuditAction.Update, "LabRequest", id, changes);
+        await audit.LogChangeAsync(AuditAction.Update, "LabRequest", id, changes);
         return (await lab.GetAsync(id))!;
     }
 
     private async Task<int?> MyDoctorIdAsync() =>
-        User.IsInRole(Roles.Doctor) ? await lab.DoctorIdForUserAsync(userManager.GetUserId(User)) : null;
-
-    private Task Audit(AuditAction action, string entity, int id, object? changes) =>
-        audit.LogAsync(action, userManager.GetUserId(User), User.Identity?.Name, entity, id.ToString(),
-            changes is null ? null : JsonSerializer.Serialize(changes, AuditJson));
+        User.IsInRole(Roles.Doctor) ? await doctors.DoctorIdForUserAsync(userManager.GetUserId(User)) : null;
 }

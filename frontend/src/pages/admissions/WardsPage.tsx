@@ -4,7 +4,7 @@ import { addBeds, listWards, saveWard, setBedActive } from '../../api/admissions
 import { ApiError } from '../../api/client'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { Ward } from '../../types/admission'
-import { errorsByField } from '../../utils/formErrors'
+import { errorsByField, firstError } from '../../utils/formErrors'
 import { formatMoney } from '../../utils/format'
 
 type WardForm = { name: string; wardType: string; dailyCharge: string }
@@ -46,7 +46,7 @@ export default function WardsPage() {
       await action()
       reload()
     } catch (err) {
-      setMessage(err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : 'Could not save.')
+      setMessage(firstError(err, 'Could not save.'))
     }
   }
 

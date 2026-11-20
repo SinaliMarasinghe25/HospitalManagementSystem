@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router'
 import { ApiError } from '../../api/client'
-import { getEmployee, getEmployeeAttendance, listUnlinkedUsers, setEmployeeLogin } from '../../api/staff'
+import { createEmployeeLogin, getEmployee, getEmployeeAttendance, listUnlinkedUsers, setEmployeeLogin } from '../../api/staff'
 import { LeaveTable } from '../../components/staff/LeaveTable'
+import { NewLoginFields } from '../../components/staff/NewLoginFields'
+import { emptyLogin, loginProblems } from '../../components/staff/newLogin'
 import { AttendanceBadge } from '../../components/staff/StaffBadges'
 import { compactInputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import {
@@ -10,9 +12,11 @@ import {
   attendanceStatuses,
   type EmployeeAttendance,
   type EmployeeDetail,
+  type NewLogin,
   type UnlinkedUser,
 } from '../../types/staff'
-import { addDays, formatDate, formatTime, todayInHospital } from '../../utils/format'
+import { addDays, formatDate, formatMoney, formatTime, todayInHospital } from '../../utils/format'
+import { errorsByField, firstError } from '../../utils/formErrors'
 
 // One employee: details, linked login, attendance (FR-ST-02, viewable per employee)
 // and leave (FR-ST-04, listed per employee).
@@ -41,6 +45,14 @@ export default function EmployeePage() {
     ['Hire date', formatDate(employee.hireDate)],
     ['Status', employee.isActive ? 'Active' : 'Inactive'],
   ]
+  if (employee.doctor) {
+    details.push(
+      ['Specialisation', employee.doctor.specialization],
+      ['SLMC registration number', employee.doctor.licenseNumber],
+      ['Consultation fee', formatMoney(employee.doctor.consultationFee)],
+      ['Appointment length', `${employee.doctor.slotMinutes} minutes`],
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -53,15 +65,16 @@ export default function EmployeePage() {
             {employee.firstName} {employee.lastName}
           </h1>
         </div>
-        {employee.doctorId === null ? (
+        <div className="flex flex-wrap gap-2">
+          {employee.doctor && (
+            <Link to={`/doctors/${employee.doctor.id}`} className={secondaryButtonClass}>
+              Weekly schedule
+            </Link>
+          )}
           <Link to={`/staff/employees/${employee.id}/edit`} className={secondaryButtonClass}>
             Edit employee
           </Link>
-        ) : (
-          <Link to={`/doctors/${employee.doctorId}`} className={secondaryButtonClass}>
-            Open doctor profile
-          </Link>
-        )}
+        </div>
       </div>
 
       <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="details-heading">
@@ -92,10 +105,16 @@ export default function EmployeePage() {
 }
 
 // The link between this employee and a login account. With it, the person can request their own leave.
+// An administrator can link an existing login or create a new one here in one step.
 function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved: (e: EmployeeDetail) => void }) {
+  const isDoctor = employee.doctor !== null
+  const [mode, setMode] = useState<'new' | 'existing'>('new')
   const [users, setUsers] = useState<UnlinkedUser[] | null>(null)
   const [userId, setUserId] = useState('')
+  const [login, setLogin] = useState<NewLogin>(emptyLogin)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
@@ -105,19 +124,44 @@ function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved
       .catch(() => setError('Could not load login accounts.'))
   }, [employee.userId])
 
-  async function save(newUserId: string | null) {
+  async function run(action: () => Promise<EmployeeDetail>, done: string) {
     setIsSaving(true)
     setError(null)
+    setNotice(null)
     try {
-      onSaved(await setEmployeeLogin(employee.id, newUserId))
+      onSaved(await action())
       setUserId('')
+      setLogin(emptyLogin)
+      setFieldErrors({})
+      setNotice(done)
     } catch (err) {
-      const fieldMessage = err instanceof ApiError ? Object.values(err.fieldErrors).flat()[0] : undefined
-      setError(fieldMessage ?? (err instanceof ApiError ? err.message : 'Could not save. Please try again.'))
+      if (err instanceof ApiError) setFieldErrors(errorsByField(err.fieldErrors))
+      setError(firstError(err, 'Could not save. Please try again.'))
     } finally {
       setIsSaving(false)
     }
   }
+
+  function createLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const problems = loginProblems(login, isDoctor)
+    setFieldErrors(problems)
+    if (Object.keys(problems).length > 0) {
+      setError('Please correct the highlighted fields.')
+      return
+    }
+    void run(
+      () => createEmployeeLogin(employee.id, login),
+      `Login ${login.userName.trim()} was created. Give the temporary password to the person privately.`,
+    )
+  }
+
+  const tab = (value: 'new' | 'existing', label: string) => (
+    <label className="flex items-center gap-2">
+      <input type="radio" name="login-mode" checked={mode === value} onChange={() => setMode(value)} />
+      {label}
+    </label>
+  )
 
   return (
     <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="login-heading">
@@ -127,42 +171,77 @@ function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved
           {error}
         </p>
       )}
+      {notice && (
+        <p className="mt-2 rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">
+          {notice}
+        </p>
+      )}
       {employee.userName ? (
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
           <p>
-            Linked to <strong>{employee.userName}</strong>. They can request their own leave.
+            Linked to <strong>{employee.userName}</strong>. They can request their own leave. Reset the password or change
+            roles on the <Link to="/users" className="text-blue-700 hover:underline">Users</Link> page.
           </p>
-          <button type="button" className={secondaryButtonClass} disabled={isSaving} onClick={() => save(null)}>
+          <button
+            type="button"
+            className={secondaryButtonClass}
+            disabled={isSaving}
+            onClick={() =>
+              void run(
+                () => setEmployeeLogin(employee.id, null),
+                isDoctor
+                  ? 'The login was unlinked. It lost the Doctor role, and it was deactivated if it had no other role.'
+                  : 'The login was unlinked. It still exists.',
+              )
+            }
+          >
             Unlink
           </button>
         </div>
       ) : (
-        <div className="mt-2 space-y-2 text-sm">
-          <p className="text-slate-600">
-            Not linked. Link a login account so this person can request leave. New accounts are created in
-            Hms.Api.http.
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <label htmlFor="link-user" className="sr-only">
-              Login account
-            </label>
-            <select
-              id="link-user"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              className={`${compactInputClass} w-auto`}
-            >
-              <option value="">{users && users.length === 0 ? 'No free login accounts' : 'Choose a login...'}</option>
-              {users?.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.userName} ({u.roles.join(', ') || 'no role'})
-                </option>
-              ))}
-            </select>
-            <button type="button" className={primaryButtonClass} disabled={!userId || isSaving} onClick={() => save(userId)}>
-              Link
-            </button>
-          </div>
+        <div className="mt-2 space-y-3 text-sm">
+          <p className="text-slate-600">Not linked yet. With a login, this person can sign in and request leave.</p>
+          <fieldset className="flex flex-wrap gap-x-6 gap-y-1">
+            <legend className="sr-only">How to add a login</legend>
+            {tab('new', 'Create a new login')}
+            {tab('existing', 'Link an existing login')}
+          </fieldset>
+
+          {mode === 'new' ? (
+            <form onSubmit={createLogin} noValidate className="space-y-3">
+              <NewLoginFields value={login} onChange={setLogin} errors={fieldErrors} isDoctor={isDoctor} />
+              <button type="submit" className={primaryButtonClass} disabled={isSaving}>
+                {isSaving ? 'Creating...' : 'Create and link login'}
+              </button>
+            </form>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <label htmlFor="link-user" className="sr-only">
+                Login account
+              </label>
+              <select
+                id="link-user"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                className={`${compactInputClass} w-auto`}
+              >
+                <option value="">{users && users.length === 0 ? 'No free login accounts' : 'Choose a login...'}</option>
+                {users?.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.userName} ({u.roles.join(', ') || 'no role'})
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className={primaryButtonClass}
+                disabled={!userId || isSaving}
+                onClick={() => void run(() => setEmployeeLogin(employee.id, userId), 'The login was linked.')}
+              >
+                Link
+              </button>
+            </div>
+          )}
         </div>
       )}
     </section>

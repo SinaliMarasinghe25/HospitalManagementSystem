@@ -2,20 +2,19 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Hms.Api.Dtos;
 
+// Login accounts (Users page). New logins are created from a person's staff record (see StaffDtos.cs).
+
 public record UserResponse(
     string Id,
     string UserName,
     string? Email,
     bool IsActive,
     bool IsLockedOut,
-    IReadOnlyList<string> Roles);
-
-public record CreateUserRequest(
-    [Required, MinLength(3), MaxLength(50), RegularExpression("^[a-zA-Z0-9._-]+$",
-        ErrorMessage = "Use only letters, numbers, dot, dash or underscore.")] string UserName,
-    [EmailAddress, MaxLength(256)] string? Email,
-    [Required, MinLength(8), MaxLength(128)] string Password,
-    [Required, MinLength(1)] List<string> Roles);
+    IReadOnlyList<string> Roles,
+    bool MustChangePassword,      // still has the temporary password an administrator set
+    int? EmployeeId,              // the staff record this login belongs to, if any
+    string? EmployeeName,
+    bool IsDoctor);               // linked to a doctor: the Doctor role is kept automatically
 
 public record UpdateUserRolesRequest([Required, MinLength(1)] List<string> Roles);
 

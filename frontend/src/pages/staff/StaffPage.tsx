@@ -6,17 +6,20 @@ import { listEmployees } from '../../api/staff'
 import { Permissions } from '../../auth/permissions'
 import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
-import { compactInputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
+import { compactInputClass, primaryButtonClass } from '../../components/ui/FormField'
 import type { Department } from '../../types/doctor'
 import type { EmployeeSummary } from '../../types/staff'
 import AttendanceTab from './AttendanceTab'
+import DepartmentsTab from './DepartmentsTab'
 import LeaveRequestsTab from './LeaveRequestsTab'
 import MyLeavePanel from './MyLeavePanel'
+import { Tabs } from '../../components/ui/Tabs'
 
-type Tab = 'employees' | 'attendance' | 'leave' | 'mine'
+type Tab = 'employees' | 'departments' | 'attendance' | 'leave' | 'mine'
 
 const tabLabels: Record<Tab, string> = {
   employees: 'Employees',
+  departments: 'Departments',
   attendance: 'Attendance',
   leave: 'Leave requests',
   mine: 'My leave',
@@ -38,30 +41,16 @@ export default function StaffPage() {
     )
   }
 
-  const tabs: Tab[] = ['employees', 'attendance', 'leave', 'mine']
+  const tabs: Tab[] = ['employees', 'departments', 'attendance', 'leave', 'mine']
   const requested = params.get('tab') as Tab | null
   const tab = requested && tabs.includes(requested) ? requested : 'employees'
 
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold text-slate-900">Staff</h1>
-      <div role="tablist" aria-label="Staff views" className="flex flex-wrap gap-1 border-b border-slate-200">
-        {tabs.map((t) => (
-          <button
-            key={t}
-            type="button"
-            role="tab"
-            aria-selected={tab === t}
-            onClick={() => setParams({ tab: t })}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
-              tab === t ? 'border-blue-700 text-blue-700' : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            {tabLabels[t]}
-          </button>
-        ))}
-      </div>
+      <Tabs label="Staff views" tabs={tabs} labels={tabLabels} value={tab} onChange={(t) => setParams({ tab: t })} />
       {tab === 'employees' && <EmployeesTab />}
+      {tab === 'departments' && <DepartmentsTab />}
       {tab === 'attendance' && <AttendanceTab />}
       {tab === 'leave' && <LeaveRequestsTab />}
       {tab === 'mine' && <MyLeavePanel />}
@@ -134,9 +123,6 @@ function EmployeesTab() {
           Show inactive
         </label>
         <div className="ml-auto flex flex-wrap gap-2">
-          <Link to="/doctors/departments" className={secondaryButtonClass}>
-            Departments
-          </Link>
           <Link to="/staff/employees/new" className={primaryButtonClass}>
             Add employee
           </Link>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router'
+import { Link, Outlet } from 'react-router'
 import { useAuth } from '../../auth/useAuth'
 import { Sidebar } from './Sidebar'
 
@@ -37,6 +37,9 @@ export function AppLayout() {
           <span className="hidden text-sm text-slate-600 sm:inline">
             {user?.userName} ({user?.roles.join(', ')})
           </span>
+          <Link to="/change-password" className="text-sm text-blue-700 hover:underline">
+            Change password
+          </Link>
           <button
             type="button"
             onClick={() => void logout()}

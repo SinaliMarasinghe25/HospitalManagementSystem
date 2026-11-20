@@ -17,4 +17,5 @@ public record CurrentUserResponse(
     string Id,
     string UserName,
     string? Email,
-    IReadOnlyList<string> Roles);
+    IReadOnlyList<string> Roles,
+    bool MustChangePassword);

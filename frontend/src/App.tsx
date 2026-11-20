@@ -7,9 +7,9 @@ import { navItems } from './navigation'
 import ComingSoonPage from './pages/ComingSoonPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
-import DepartmentsPage from './pages/doctors/DepartmentsPage'
+import ChangePasswordPage from './pages/ChangePasswordPage'
+import UsersPage from './pages/users/UsersPage'
 import DoctorDetailPage from './pages/doctors/DoctorDetailPage'
-import DoctorFormPage from './pages/doctors/DoctorFormPage'
 import DoctorListPage from './pages/doctors/DoctorListPage'
 import PatientDetailPage from './pages/patients/PatientDetailPage'
 import PatientFormPage from './pages/patients/PatientFormPage'
@@ -55,12 +55,21 @@ const builtPages: Record<string, ReactNode> = {
   '/pharmacy': <PharmacyPage />,
   '/billing': <BillingPage />,
   '/staff': <StaffPage />,
+  '/users': <UsersPage />,
 }
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/change-password"
+        element={
+          <ProtectedRoute>
+            <ChangePasswordPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Every page inside here needs a login and shares the same layout. */}
       <Route
@@ -98,20 +107,8 @@ export default function App() {
 
         {/* Doctor pages that are not in the menu */}
         <Route
-          path="/doctors/new"
-          element={<RequireRole roles={Permissions.manageDoctors}><DoctorFormPage /></RequireRole>}
-        />
-        <Route
-          path="/doctors/departments"
-          element={<RequireRole roles={Permissions.manageDoctors}><DepartmentsPage /></RequireRole>}
-        />
-        <Route
           path="/doctors/:id"
           element={<RequireRole roles={Permissions.viewDoctors}><DoctorDetailPage /></RequireRole>}
-        />
-        <Route
-          path="/doctors/:id/edit"
-          element={<RequireRole roles={Permissions.manageDoctors}><DoctorFormPage /></RequireRole>}
         />
 
         {/* Appointment pages that are not in the menu */}

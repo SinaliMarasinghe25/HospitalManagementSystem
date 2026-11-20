@@ -12,7 +12,8 @@ public class DepartmentService(AppDbContext db)
             .Where(d => includeInactive || d.IsActive)
             .OrderBy(d => d.Name)
             .Select(d => new DepartmentResponse(d.Id, d.Name, d.Description, d.IsActive,
-                d.Employees.Count(e => e.Doctor != null)))
+                d.Employees.Count(e => e.IsActive && e.Doctor != null),
+                d.Employees.Count(e => e.IsActive)))
             .ToListAsync();
 
     public async Task<ServiceResult<DepartmentResponse>> SaveAsync(int? id, DepartmentRequest request)
@@ -43,8 +44,9 @@ public class DepartmentService(AppDbContext db)
         department.IsActive = request.IsActive;
         await db.SaveChangesAsync();
 
-        var doctorCount = await db.Doctors.CountAsync(d => d.Employee.DepartmentId == department.Id);
+        var doctorCount = await db.Doctors.CountAsync(d => d.Employee.DepartmentId == department.Id && d.Employee.IsActive);
+        var staffCount = await db.Employees.CountAsync(e => e.DepartmentId == department.Id && e.IsActive);
         return ServiceResult<DepartmentResponse>.Ok(new DepartmentResponse(
-            department.Id, department.Name, department.Description, department.IsActive, doctorCount));
+            department.Id, department.Name, department.Description, department.IsActive, doctorCount, staffCount));
     }
 }

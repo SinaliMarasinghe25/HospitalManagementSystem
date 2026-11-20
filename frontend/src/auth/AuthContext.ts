@@ -7,6 +7,8 @@ export type AuthState = {
   sessionExpired: boolean
   login: (request: LoginRequest) => Promise<void>
   logout: () => Promise<void>
+  // Asks the API again who is logged in (for example after a password change).
+  refreshUser: () => Promise<void>
 }
 
 // Shared login state that any component can read with useAuth().

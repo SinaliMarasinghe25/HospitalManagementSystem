@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router'
-import { ApiError } from '../../api/client'
 import { listDepartments, saveDepartment } from '../../api/doctors'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { Department } from '../../types/doctor'
+import { firstError } from '../../utils/formErrors'
 
 type Draft = { id: number | null; name: string; description: string; isActive: boolean }
 const newDraft: Draft = { id: null, name: '', description: '', isActive: true }
 
-// PDF section 6: Departments. Admin adds, renames and deactivates departments.
-// Departments are deactivated, never deleted, because doctors and history point to them.
-export default function DepartmentsPage() {
+// PDF section 6: Departments, on the Staff page because every employee belongs to one
+// (Finance, Front Office, Nursing... as well as the medical departments).
+// Admin adds, renames and deactivates departments. They are deactivated, never deleted,
+// because employees and history point to them.
+export default function DepartmentsTab() {
   const [departments, setDepartments] = useState<Department[]>([])
   const [draft, setDraft] = useState<Draft>(newDraft)
   const [error, setError] = useState<string | null>(null)
@@ -30,7 +31,7 @@ export default function DepartmentsPage() {
       setDraft(newDraft)
       load()
     } catch (err) {
-      setError(err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : 'Could not save.')
+      setError(firstError(err, 'Could not save.'))
     } finally {
       setIsSaving(false)
     }
@@ -38,10 +39,6 @@ export default function DepartmentsPage() {
 
   return (
     <div className="max-w-3xl space-y-4">
-      <Link to="/doctors" className="text-sm text-blue-700 hover:underline">
-        &larr; Doctors
-      </Link>
-      <h1 className="text-xl font-semibold text-slate-900">Departments</h1>
 
       <form onSubmit={handleSubmit} className="grid gap-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:grid-cols-2">
         <h2 className="font-medium text-slate-900 sm:col-span-2">{draft.id === null ? 'Add department' : 'Edit department'}</h2>
@@ -73,6 +70,7 @@ export default function DepartmentsPage() {
           <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Name</th>
+              <th scope="col" className="px-4 py-3 font-medium">Staff</th>
               <th scope="col" className="px-4 py-3 font-medium">Doctors</th>
               <th scope="col" className="px-4 py-3 font-medium">Status</th>
               <th scope="col" className="px-4 py-3 font-medium"><span className="sr-only">Actions</span></th>
@@ -85,16 +83,24 @@ export default function DepartmentsPage() {
                   <p className="font-medium text-slate-900">{d.name}</p>
                   {d.description && <p className="text-slate-500">{d.description}</p>}
                 </td>
+                <td className="px-4 py-3 text-slate-700">{d.staffCount}</td>
                 <td className="px-4 py-3 text-slate-700">{d.doctorCount}</td>
                 <td className="px-4 py-3 text-slate-700">{d.isActive ? 'Active' : 'Inactive'}</td>
                 <td className="px-4 py-3 text-right">
                   <button type="button" className="text-blue-700 hover:underline"
                     onClick={() => setDraft({ id: d.id, name: d.name, description: d.description ?? '', isActive: d.isActive })}>
-                    Edit
+                    Edit<span className="sr-only"> {d.name}</span>
                   </button>
                 </td>
               </tr>
             ))}
+            {departments.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-6 text-center text-slate-500">
+                  No departments yet. Add the first one above, for example Nursing, Front Office or Finance.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

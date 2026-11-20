@@ -19,6 +19,7 @@ import {
   startOfWeek,
   todayInHospital,
 } from '../../utils/format'
+import { firstError } from '../../utils/formErrors'
 
 type View = 'day' | 'week'
 
@@ -68,7 +69,7 @@ export default function AppointmentsPage() {
       await updateAppointmentStatus(appointment.id, next)
       setReloadKey((k) => k + 1)
     } catch (err) {
-      const message = err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : 'Could not update.'
+      const message = firstError(err, 'Could not update.')
       setError(message)
     }
   }

@@ -14,6 +14,13 @@ export function logout(): Promise<void> {
   return apiFetch<void>('/auth/logout', { method: 'POST' })
 }
 
+export function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  return apiFetch<void>('/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  })
+}
+
 export function getCurrentUser(): Promise<CurrentUser> {
   return apiFetch<CurrentUser>('/auth/me')
 }

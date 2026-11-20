@@ -1,8 +1,8 @@
 # Manual API tests. Open this file in VS Code with the "REST Client" extension
 # and click "Send Request" above each request. Cookies are kept between requests.
 # Change the port to the https port shown when you run the API.
-# reception1 and its passwords below are fictitious demo values for local testing only.
-@baseUrl = https://localhost:7019
+# Nadee Example, frontdesk1 and the passwords below are fictitious demo values for local testing only.
+@baseUrl = https://localhost:7183
 
 ### 1. Not logged in yet: expect 401 Unauthorized
 GET {{baseUrl}}/api/auth/me
@@ -24,48 +24,53 @@ Content-Type: application/json
 ### 4. Who am I? expect 200
 GET {{baseUrl}}/api/auth/me
 
-### 5. Create a receptionist (fictitious test user): expect 201
-POST {{baseUrl}}/api/users
+### 5. Create a department for office staff: expect 201 (or 400 "already exists" the second time)
+# @name dept
+POST {{baseUrl}}/api/departments
+Content-Type: application/json
+
+{ "name": "Front Office", "description": "Reception and registration", "isActive": true }
+
+### 6. Add a receptionist with a login, in one step (fictitious person): expect 201
+# Logins are always created from the staff record. If request 5 said "already exists",
+# put the Front Office id from GET /api/departments in place of {{dept.response.body.$.id}}.
+POST {{baseUrl}}/api/staff/employees
 Content-Type: application/json
 
 {
-  "userName": "reception1",
-  "email": "reception1@example.test",
-  "password": "Recept#2027",
+  "firstName": "Nadee",
+  "lastName": "Example",
+  "jobTitle": "Receptionist",
+  "phone": "0771234567",
+  "email": "frontdesk1@example.test",
+  "hireDate": "2026-01-05",
+  "departmentId": {{dept.response.body.$.id}},
+  "isActive": true,
+  "userName": "frontdesk1",
+  "password": "Front#2026",
   "roles": ["Receptionist"]
 }
-### Create a pharmacist user
-POST {{baseUrl}}/api/users
-Content-Type: application/json
 
-{ "userName": "pharm1", "password": "Pharm#20261", "roles": ["Pharmacist"] }
-
-### Create an accountant
-POST {{baseUrl}}/api/users
-Content-Type: application/json
-
-{ "userName": "acc1", "password": "Acc#20261", "roles": ["Accountant"] }
-
-### 6. List users: expect 200
+### 7. List users: expect 200, frontdesk1 is linked to Nadee Example
 GET {{baseUrl}}/api/users
 
-### 7. Log out: expect 204
+### 8. Log out: expect 204
 POST {{baseUrl}}/api/auth/logout
 
-### 8. Log in as the receptionist: expect 200 with roles ["Receptionist"]
+### 9. Log in as the receptionist: expect 200 with mustChangePassword true
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
-{ "userName": "reception1", "password": "Recept#2027" }
+{ "userName": "frontdesk1", "password": "Front#2026" }
 
-### 9. Receptionist tries to list users: expect 403 Forbidden
-GET {{baseUrl}}/api/users
-
-### 10. Change own password: expect 204
+### 10. Change the temporary password: expect 204
 POST {{baseUrl}}/api/auth/change-password
 Content-Type: application/json
 
-{ "currentPassword": "Recept#2027", "newPassword": "Recept#2028" }
+{ "currentPassword": "Front#2026", "newPassword": "Front#2027" }
 
-### 11. Log out: expect 204, then request 4 returns 401 again
+### 11. Receptionist tries to list users: expect 403 Forbidden
+GET {{baseUrl}}/api/users
+
+### 12. Log out: expect 204, then request 4 returns 401 again
 POST {{baseUrl}}/api/auth/logout

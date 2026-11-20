@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Hms.Api.Authorization;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -16,7 +14,7 @@ namespace Hms.Api.Controllers;
 [ApiController]
 [Route("api/medical-records")]
 [Authorize(Policy = Policies.ViewMedicalHistory)]
-public class MedicalRecordsController(MedicalRecordService records, AuditService audit, UserManager<AppUser> userManager)
+public class MedicalRecordsController(MedicalRecordService records, DoctorService doctors, AuditService audit, UserManager<AppUser> userManager)
     : ControllerBase
 {
     // GET /api/medical-records?fromDate=2026-11-13&toDate=2026-11-19&patientId=1&doctorId=1
@@ -83,17 +81,13 @@ public class MedicalRecordsController(MedicalRecordService records, AuditService
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
 
-        await audit.LogAsync(AuditAction.Create, userManager.GetUserId(User), User.Identity?.Name, "Prescription",
-            result.Value!.Id.ToString(), JsonSerializer.Serialize(request, AuditJson));
+        await audit.LogChangeAsync(AuditAction.Create, "Prescription", result.Value!.Id, request);
         return result.Value;
     }
 
     private async Task<int?> MyDoctorIdAsync() =>
-        User.IsInRole(Roles.Doctor) ? await records.DoctorIdForUserAsync(userManager.GetUserId(User)) : null;
-
-    internal static readonly JsonSerializerOptions AuditJson = new() { Converters = { new JsonStringEnumConverter() } };
+        User.IsInRole(Roles.Doctor) ? await doctors.DoctorIdForUserAsync(userManager.GetUserId(User)) : null;
 
     private Task Audit(AuditAction action, int recordId, object? changes) =>
-        audit.LogAsync(action, userManager.GetUserId(User), User.Identity?.Name, "MedicalRecord", recordId.ToString(),
-            changes is null ? null : JsonSerializer.Serialize(changes, AuditJson));
+        audit.LogChangeAsync(action, "MedicalRecord", recordId, changes);
 }
