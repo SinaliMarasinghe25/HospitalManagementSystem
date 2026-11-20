@@ -37,6 +37,7 @@ public static class Policies
     public const string ViewInvoiceDetails = nameof(ViewInvoiceDetails);
     public const string ManageBilling = nameof(ManageBilling);
     public const string ViewRevenue = nameof(ViewRevenue);
+    public const string ManageStaff = nameof(ManageStaff);
 
     public static AuthorizationBuilder AddHmsPolicies(this AuthorizationBuilder builder) => builder
         .AddPolicy(ViewPatients, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.Nurse, Roles.Receptionist))
@@ -78,5 +79,7 @@ public static class Policies
         .AddPolicy(ViewInvoiceDetails, p => p.RequireRole(Roles.Administrator, Roles.Accountant))
         .AddPolicy(ManageBilling, p => p.RequireRole(Roles.Accountant))
         // Dashboard tile "Revenue Summary": Admin and Accountant only (UI-DSH-03).
-        .AddPolicy(ViewRevenue, p => p.RequireRole(Roles.Administrator, Roles.Accountant));
+        .AddPolicy(ViewRevenue, p => p.RequireRole(Roles.Administrator, Roles.Accountant))
+        // Staff, attendance, leave: Admin full. Every role manages its own leave, which needs only a login.
+        .AddPolicy(ManageStaff, p => p.RequireRole(Roles.Administrator));
 }

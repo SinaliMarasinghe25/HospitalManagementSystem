@@ -25,6 +25,7 @@ public enum AttendanceStatus { Present, Absent, Late, OnLeave }
 
 public enum LeaveType { Annual, Sick, Casual, Other }
 
-public enum LeaveStatus { Pending, Approved, Rejected }
+// Cancelled: the employee withdrew the request before it was reviewed (kept, never deleted).
+public enum LeaveStatus { Pending, Approved, Rejected, Cancelled }
 
 public enum AuditAction { Login, LoginFailed, Logout, Create, Update, Delete, View }

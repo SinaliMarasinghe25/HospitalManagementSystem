@@ -849,6 +849,9 @@ namespace Hms.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("integer");
 
@@ -864,6 +867,16 @@ namespace Hms.Api.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<string>("RequestedByUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReviewNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("ReviewedByUserId")
                         .HasColumnType("text");
 
@@ -877,9 +890,13 @@ namespace Hms.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("RequestedByUserId");
 
                     b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("EmployeeId", "StartDate");
 
                     b.ToTable("LeaveRequests", t =>
                         {
@@ -1863,6 +1880,11 @@ namespace Hms.Api.Migrations
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Hms.Api.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("RequestedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Hms.Api.Entities.AppUser", null)
                         .WithMany()
