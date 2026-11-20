@@ -134,5 +134,14 @@ public class LeaveRequest
 
     public LeaveStatus Status { get; set; } = LeaveStatus.Pending;
 
+    // Who typed the request: the employee themselves, or an administrator on their behalf.
+    public string? RequestedByUserId { get; set; }
+    public DateTime CreatedAt { get; set; }
+
     public string? ReviewedByUserId { get; set; }
+    public DateTime? ReviewedAt { get; set; }
+
+    // The administrator's note on approval or rejection (required when rejecting).
+    [MaxLength(500)]
+    public string? ReviewNote { get; set; }
 }

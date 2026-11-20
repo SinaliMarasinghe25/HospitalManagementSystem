@@ -34,6 +34,7 @@ export const Permissions = {
   viewInvoiceDetails: [Administrator, Accountant],
   manageBilling: [Accountant],
   viewRevenue: [Administrator, Accountant],
+  manageStaff: [Administrator],
   // Not an API policy: who works from the dispensing queue screens (the API also lets doctors read prescriptions).
   pharmacyQueue: [Administrator, Pharmacist],
 } satisfies Record<string, Role[]>

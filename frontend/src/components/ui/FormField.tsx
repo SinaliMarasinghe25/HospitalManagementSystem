@@ -35,6 +35,11 @@ export function FormField({
 export const inputClass =
   'block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/30 focus:outline-none aria-[invalid=true]:border-red-500'
 
+// The same look without "w-full", for inputs that set their own width (w-32, w-auto) in toolbars and tables.
+// With both classes on one element, Tailwind's CSS order decides and w-full can win.
+export const compactInputClass =
+  'block rounded-md border border-slate-300 px-3 py-2 text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/30 focus:outline-none aria-[invalid=true]:border-red-500'
+
 export const primaryButtonClass =
   'rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:ring-2 focus:ring-blue-600/40 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60'
 

@@ -138,6 +138,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         {
             e.ToTable(t => t.HasCheckConstraint("CK_LeaveRequests_Dates", "\"EndDate\" >= \"StartDate\""));
             e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.ReviewedByUserId);
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.RequestedByUserId);
+            // The overlap check looks up one employee's leave by date.
+            e.HasIndex(x => new { x.EmployeeId, x.StartDate });
+            e.HasIndex(x => x.Status);
         });
     }
 

@@ -39,6 +39,9 @@ import BillingPage from './pages/billing/BillingPage'
 import GenerateBillPage from './pages/billing/GenerateBillPage'
 import InvoicePage from './pages/billing/InvoicePage'
 import { InvoicePrintPage, ReceiptPage } from './pages/billing/InvoicePrintPage'
+import EmployeeFormPage from './pages/staff/EmployeeFormPage'
+import EmployeePage from './pages/staff/EmployeePage'
+import StaffPage from './pages/staff/StaffPage'
 
 // Pages that are built so far. Every other menu item shows a "coming soon" page.
 const builtPages: Record<string, ReactNode> = {
@@ -51,6 +54,7 @@ const builtPages: Record<string, ReactNode> = {
   '/laboratory': <LabPage />,
   '/pharmacy': <PharmacyPage />,
   '/billing': <BillingPage />,
+  '/staff': <StaffPage />,
 }
 
 export default function App() {
@@ -188,6 +192,20 @@ export default function App() {
         <Route
           path="/billing/invoices/:id"
           element={<RequireRole roles={Permissions.viewInvoiceDetails}><InvoicePage /></RequireRole>}
+        />
+
+        {/* Staff pages that are not in the menu (the Staff menu item itself is open to every role, for "My leave") */}
+        <Route
+          path="/staff/employees/new"
+          element={<RequireRole roles={Permissions.manageStaff}><EmployeeFormPage /></RequireRole>}
+        />
+        <Route
+          path="/staff/employees/:id"
+          element={<RequireRole roles={Permissions.manageStaff}><EmployeePage /></RequireRole>}
+        />
+        <Route
+          path="/staff/employees/:id/edit"
+          element={<RequireRole roles={Permissions.manageStaff}><EmployeeFormPage /></RequireRole>}
         />
       </Route>
 
