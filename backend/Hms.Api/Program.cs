@@ -81,6 +81,12 @@ builder.Services.AddScoped<PatientService>();
 builder.Services.AddScoped<PatientDocumentService>();
 builder.Services.AddScoped<DepartmentService>();
 builder.Services.AddScoped<DoctorService>();
+builder.Services.AddScoped<AppointmentService>();
+builder.Services.AddScoped<MedicalRecordService>();
+builder.Services.AddScoped<WardService>();
+builder.Services.AddScoped<AdmissionService>();
+builder.Services.AddScoped<LabService>();
+builder.Services.AddScoped<PharmacyService>();
 
 // Errors are returned as safe JSON (ProblemDetails) without stack traces.
 builder.Services.AddProblemDetails();
@@ -98,6 +104,8 @@ using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     await IdentitySeeder.SeedAsync(scope.ServiceProvider, app.Configuration, logger);
+    await MedicineSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
+    await LabTestSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
 }
 
 // ---------- HTTP request pipeline (order matters) ----------
