@@ -23,6 +23,10 @@ import AdmissionsPage from './pages/admissions/AdmissionsPage'
 import AdmitPage from './pages/admissions/AdmitPage'
 import DischargeSummaryPage from './pages/admissions/DischargeSummaryPage'
 import WardsPage from './pages/admissions/WardsPage'
+import LabPage from './pages/lab/LabPage'
+import LabReportPage from './pages/lab/LabReportPage'
+import LabRequestPage from './pages/lab/LabRequestPage'
+import LabTestsPage from './pages/lab/LabTestsPage'
 import ConsultationFormPage from './pages/medical-records/ConsultationFormPage'
 import MedicalRecordPage from './pages/medical-records/MedicalRecordPage'
 import MedicalRecordsPage from './pages/medical-records/MedicalRecordsPage'
@@ -36,6 +40,7 @@ const builtPages: Record<string, ReactNode> = {
   '/appointments': <AppointmentsPage />,
   '/medical-records': <MedicalRecordsPage />,
   '/admissions': <AdmissionsPage />,
+  '/laboratory': <LabPage />,
 }
 
 export default function App() {
@@ -136,9 +141,29 @@ export default function App() {
           path="/admissions/:id"
           element={<RequireRole roles={Permissions.viewAdmissions}><AdmissionDetailPage /></RequireRole>}
         />
+
+        {/* Laboratory pages that are not in the menu */}
+        <Route
+          path="/laboratory/tests"
+          element={<RequireRole roles={Permissions.manageLabTests}><LabTestsPage /></RequireRole>}
+        />
+        <Route
+          path="/laboratory/requests/:id"
+          element={<RequireRole roles={Permissions.viewLabRequests}><LabRequestPage /></RequireRole>}
+        />
       </Route>
 
       {/* The printable pages have no menu or header, so they are outside AppLayout. */}
+      <Route
+        path="/laboratory/requests/:id/report"
+        element={
+          <ProtectedRoute>
+            <RequireRole roles={Permissions.viewLabRequests}>
+              <LabReportPage />
+            </RequireRole>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admissions/:id/summary"
         element={
