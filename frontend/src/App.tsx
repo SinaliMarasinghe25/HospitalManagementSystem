@@ -35,7 +35,10 @@ import DispensePage from './pages/pharmacy/DispensePage'
 import MedicineFormPage from './pages/pharmacy/MedicineFormPage'
 import MedicinePage from './pages/pharmacy/MedicinePage'
 import PharmacyPage from './pages/pharmacy/PharmacyPage'
-import UsersPage from './pages/users/UsersPage'
+import BillingPage from './pages/billing/BillingPage'
+import GenerateBillPage from './pages/billing/GenerateBillPage'
+import InvoicePage from './pages/billing/InvoicePage'
+import { InvoicePrintPage, ReceiptPage } from './pages/billing/InvoicePrintPage'
 
 // Pages that are built so far. Every other menu item shows a "coming soon" page.
 const builtPages: Record<string, ReactNode> = {
@@ -47,7 +50,7 @@ const builtPages: Record<string, ReactNode> = {
   '/admissions': <AdmissionsPage />,
   '/laboratory': <LabPage />,
   '/pharmacy': <PharmacyPage />,
-  '/users': <UsersPage />,
+  '/billing': <BillingPage />,
 }
 
 export default function App() {
@@ -176,6 +179,16 @@ export default function App() {
           path="/pharmacy/prescriptions/:id"
           element={<RequireRole roles={Permissions.pharmacyQueue}><DispensePage /></RequireRole>}
         />
+
+        {/* Billing pages that are not in the menu */}
+        <Route
+          path="/billing/patients/:patientId"
+          element={<RequireRole roles={Permissions.viewInvoiceDetails}><GenerateBillPage /></RequireRole>}
+        />
+        <Route
+          path="/billing/invoices/:id"
+          element={<RequireRole roles={Permissions.viewInvoiceDetails}><InvoicePage /></RequireRole>}
+        />
       </Route>
 
       {/* The printable pages have no menu or header, so they are outside AppLayout. */}
@@ -205,6 +218,27 @@ export default function App() {
           <ProtectedRoute>
             <RequireRole roles={Permissions.viewMedicalHistory}>
               <MedicalReportPage />
+            </RequireRole>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/billing/invoices/:id/print"
+        element={
+          <ProtectedRoute>
+            <RequireRole roles={Permissions.viewInvoiceDetails}>
+              <InvoicePrintPage />
+            </RequireRole>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing/payments/:id/receipt"
+        element={
+          <ProtectedRoute>
+            <RequireRole roles={Permissions.viewInvoiceDetails}>
+              <ReceiptPage />
             </RequireRole>
           </ProtectedRoute>
         }

@@ -1,0 +1,234 @@
+import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router'
+import { ApiError } from '../../api/client'
+import { listInvoices, listUnbilledPatients } from '../../api/billing'
+import { Permissions } from '../../auth/permissions'
+import { hasAnyRole } from '../../auth/roles'
+import { useAuth } from '../../auth/useAuth'
+import { InvoiceStatusBadge } from '../../components/billing/InvoiceStatusBadge'
+import { inputClass } from '../../components/ui/FormField'
+import type { InvoiceSummary, UnbilledPatient } from '../../types/billing'
+import { addDays, formatDateTime, formatMoney, todayInHospital } from '../../utils/format'
+
+type Tab = 'unbilled' | 'due' | 'all'
+
+const tabLabels: Record<Tab, string> = {
+  unbilled: 'Ready to bill',
+  due: 'Balance due',
+  all: 'All invoices',
+}
+
+// PDF 3.8 Billing System and the Billing screen (section 7).
+// The accountant bills patients from "Ready to bill" and takes payments on "Balance due".
+// Receptionists see invoice balances only, so they can tell a patient what is still owed.
+export default function BillingPage() {
+  const { user } = useAuth()
+  const seesDetails = hasAnyRole(user?.roles, Permissions.viewInvoiceDetails)
+  const tabs: Tab[] = seesDetails ? ['unbilled', 'due', 'all'] : ['due', 'all']
+
+  const [params, setParams] = useSearchParams()
+  const requested = params.get('tab') as Tab | null
+  const tab = requested && tabs.includes(requested) ? requested : tabs[0]
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-xl font-semibold text-slate-900">Billing</h1>
+      <div role="tablist" aria-label="Billing views" className="flex flex-wrap gap-1 border-b border-slate-200">
+        {tabs.map((t) => (
+          <button
+            key={t}
+            type="button"
+            role="tab"
+            aria-selected={tab === t}
+            onClick={() => setParams({ tab: t })}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
+              tab === t ? 'border-blue-700 text-blue-700' : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            {tabLabels[t]}
+          </button>
+        ))}
+      </div>
+      {tab === 'unbilled' && <UnbilledList />}
+      {tab !== 'unbilled' && <InvoiceList key={tab} due={tab === 'due'} linkToDetails={seesDetails} />}
+    </div>
+  )
+}
+
+const card = 'overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200'
+const th = 'px-4 py-3 font-medium'
+
+function ErrorText({ error }: { error: string | null }) {
+  return error ? (
+    <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      {error}
+    </p>
+  ) : null
+}
+
+function UnbilledList() {
+  const [rows, setRows] = useState<UnbilledPatient[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    listUnbilledPatients()
+      .then(setRows)
+      .catch((err: unknown) => setError(err instanceof ApiError ? err.message : 'Could not load the list.'))
+  }, [])
+
+  return (
+    <>
+      <p className="text-sm text-slate-600">
+        Charges are added automatically when a visit is completed, a lab result is entered, medicine is dispensed or a
+        patient is discharged.
+      </p>
+      <ErrorText error={error} />
+      <div className={card}>
+        <table className="min-w-full text-left text-sm">
+          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+            <tr>
+              <th scope="col" className={th}>Patient</th>
+              <th scope="col" className={th}>Charges</th>
+              <th scope="col" className={th}>Amount</th>
+              <th scope="col" className={th}>Waiting since</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {rows?.map((p) => (
+              <tr key={p.patientId} className="hover:bg-slate-50">
+                <td className="px-4 py-3">
+                  <Link to={`/billing/patients/${p.patientId}`} className="font-medium text-blue-700 hover:underline">
+                    {p.patientName}
+                  </Link>
+                  <span className="block text-xs text-slate-500">{p.patientNumber}</span>
+                </td>
+                <td className="px-4 py-3 text-slate-700">{p.chargeCount}</td>
+                <td className="px-4 py-3 font-medium text-slate-900">{formatMoney(p.total)}</td>
+                <td className="px-4 py-3 text-slate-700">{formatDateTime(p.oldestChargeAt)}</td>
+              </tr>
+            ))}
+            {rows && rows.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-4 py-6 text-center text-slate-500">
+                  Nothing waiting to be billed.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )
+}
+
+function InvoiceList({ due, linkToDetails }: { due: boolean; linkToDetails: boolean }) {
+  const [search, setSearch] = useState('')
+  const [toDate, setToDate] = useState(() => todayInHospital())
+  const [rows, setRows] = useState<InvoiceSummary[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let ignore = false
+    // A short pause so typing a name makes one request, not one per letter.
+    const timer = setTimeout(() => {
+      const filter = due ? { due: true, search } : search.trim() ? { search } : { fromDate: addDays(toDate, -29), toDate }
+      listInvoices(filter)
+        .then((data) => {
+          if (ignore) return
+          setRows(data)
+          setError(null)
+        })
+        .catch((err: unknown) => !ignore && setError(err instanceof ApiError ? err.message : 'Could not load invoices.'))
+    }, 250)
+    return () => {
+      ignore = true
+      clearTimeout(timer)
+    }
+  }, [due, search, toDate])
+
+  const totalDue = rows?.reduce((sum, i) => sum + i.balance, 0) ?? 0
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-3 text-sm text-slate-700">
+        <label htmlFor="invoice-search" className="sr-only">
+          Search invoices
+        </label>
+        <input
+          id="invoice-search"
+          type="search"
+          placeholder="Patient name, patient no. or invoice no."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className={`${inputClass} max-w-xs`}
+        />
+        {!due && !search.trim() && (
+          <>
+            <label htmlFor="invoice-to">Issued in the 30 days up to</label>
+            <input
+              id="invoice-to"
+              type="date"
+              value={toDate}
+              onChange={(e) => e.target.value && setToDate(e.target.value)}
+              className={`${inputClass} w-auto`}
+            />
+          </>
+        )}
+        {due && rows && (
+          <p className="ml-auto">
+            Total still due: <strong>{formatMoney(totalDue)}</strong>
+          </p>
+        )}
+      </div>
+      <ErrorText error={error} />
+      <div className={card}>
+        <table className="min-w-full text-left text-sm">
+          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+            <tr>
+              <th scope="col" className={th}>Invoice</th>
+              <th scope="col" className={th}>Patient</th>
+              <th scope="col" className={th}>Issued</th>
+              <th scope="col" className={th}>Total</th>
+              <th scope="col" className={th}>Paid</th>
+              <th scope="col" className={th}>Balance</th>
+              <th scope="col" className={th}>Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {rows?.map((i) => (
+              <tr key={i.id} className={i.status === 'Cancelled' ? 'text-slate-400' : 'hover:bg-slate-50'}>
+                <td className="px-4 py-3 font-mono">
+                  {linkToDetails ? (
+                    <Link to={`/billing/invoices/${i.id}`} className="font-medium text-blue-700 hover:underline">
+                      {i.invoiceNumber}
+                    </Link>
+                  ) : (
+                    i.invoiceNumber
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  {i.patientName}
+                  <span className="block text-xs text-slate-500">{i.patientNumber}</span>
+                </td>
+                <td className="px-4 py-3">{formatDateTime(i.issuedAt)}</td>
+                <td className="px-4 py-3">{formatMoney(i.total)}</td>
+                <td className="px-4 py-3">{formatMoney(i.amountPaid)}</td>
+                <td className={`px-4 py-3 ${i.balance > 0 ? 'font-semibold text-slate-900' : ''}`}>{formatMoney(i.balance)}</td>
+                <td className="px-4 py-3">
+                  <InvoiceStatusBadge status={i.status} />
+                </td>
+              </tr>
+            ))}
+            {rows && rows.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
+                  {due ? 'No unpaid invoices.' : 'No invoices found.'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )
+}

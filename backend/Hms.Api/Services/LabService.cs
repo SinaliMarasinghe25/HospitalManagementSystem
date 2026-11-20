@@ -212,7 +212,32 @@ public class LabService(AppDbContext db)
         lab.ResultEnteredAt = DateTime.UtcNow;
         lab.ResultEnteredByUserId = userId;
         lab.Status = LabRequestStatus.Completed;
-        await db.SaveChangesAsync();
+
+        // FR-BL-02: the first result adds the test's catalogue price to the bill. A correction adds nothing.
+        if (!isCorrection)
+        {
+            var test = await db.LabTests.AsNoTracking().FirstAsync(t => t.Id == lab.LabTestId);
+            db.Charges.Add(new Charge
+            {
+                PatientId = lab.PatientId,
+                ChargeType = ChargeType.Laboratory,
+                Description = $"{test.Name} ({lab.RequestNumber})",
+                Quantity = 1,
+                UnitPrice = test.Price,
+                Amount = test.Price,
+                LabRequestId = lab.Id,
+                CreatedAt = DateTime.UtcNow,
+            });
+        }
+
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            return ServiceResult<bool>.Invalid(new() { ["Status"] = ["The result was just entered by someone else. Reload the page."] });
+        }
         return ServiceResult<bool>.Ok(isCorrection);
     }
 

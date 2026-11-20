@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { listAppointments } from '../api/appointments'
+import { getRevenueSummary } from '../api/billing'
 import { openLabRequestCount } from '../api/lab'
 import { countPharmacyAlerts } from '../api/pharmacy'
 import { Permissions } from '../auth/permissions'
@@ -8,11 +9,12 @@ import { hasAnyRole } from '../auth/roles'
 import { useAuth } from '../auth/useAuth'
 import { StatusBadge } from '../components/appointments/StatusBadge'
 import type { Appointment } from '../types/appointment'
+import type { RevenueSummary } from '../types/billing'
 import type { PharmacyAlertCounts } from '../types/pharmacy'
-import { formatClock, todayInHospital } from '../utils/format'
+import { formatClock, formatMoney, todayInHospital } from '../utils/format'
 
 // PDF section 7, Dashboard. The five tiles get real numbers as each module is built.
-const placeholderTiles = ['Total Patients', 'Revenue Summary']
+const placeholderTiles = ['Total Patients']
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -23,6 +25,16 @@ export default function DashboardPage() {
   // Role table: the Pharmacy Alerts tile is for the administrator and the pharmacist.
   const canSeePharmacy = hasAnyRole(user?.roles, Permissions.pharmacyQueue)
   const [pharmacy, setPharmacy] = useState<PharmacyAlertCounts | null>(null)
+  const canSeeRevenue = hasAnyRole(user?.roles, Permissions.viewRevenue)
+  const [revenue, setRevenue] = useState<RevenueSummary | null>(null)
+
+  // UI-DSH-03 Revenue Summary: money received today and this month (Admin and Accountant only).
+  useEffect(() => {
+    if (!canSeeRevenue) return
+    getRevenueSummary()
+      .then(setRevenue)
+      .catch(() => setRevenue(null))
+  }, [canSeeRevenue])
 
   // UI-DSH-05 Pharmacy Alerts: low stock, expiring soon and expired batches.
   useEffect(() => {
@@ -84,6 +96,20 @@ export default function DashboardPage() {
           {pharmacy && (
             <p className="text-xs text-slate-500">
               {pharmacy.lowStock} low stock, {pharmacy.nearExpiry} expiring soon, {pharmacy.expired} expired
+            </p>
+          )}
+        </Link>
+        <Link
+          to={canSeeRevenue ? '/billing?tab=due' : '/'}
+          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-blue-300"
+        >
+          <p className="text-sm text-slate-600">Revenue Summary</p>
+          <p className={`mt-2 text-2xl font-semibold ${revenue ? 'text-slate-900' : 'text-slate-400'}`}>
+            {revenue ? formatMoney(revenue.today) : '--'}
+          </p>
+          {revenue && (
+            <p className="text-xs text-slate-500">
+              received today; {formatMoney(revenue.thisMonth)} this month; {formatMoney(revenue.outstandingBalance)} still due
             </p>
           )}
         </Link>
