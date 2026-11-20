@@ -253,7 +253,34 @@ public class AppointmentService(AppDbContext db)
         }
 
         appointment.Status = next;
-        await db.SaveChangesAsync();
+
+        // FR-BL-01: a completed visit adds the doctor's consultation fee to the patient's bill,
+        // in the same save, so a completed visit always has its charge.
+        if (next == AppointmentStatus.Completed)
+        {
+            var doctor = await db.Doctors.AsNoTracking().Include(d => d.Employee).FirstAsync(d => d.Id == appointment.DoctorId);
+            db.Charges.Add(new Charge
+            {
+                PatientId = appointment.PatientId,
+                ChargeType = ChargeType.Consultation,
+                Description = $"Consultation, Dr {doctor.Employee.FirstName} {doctor.Employee.LastName}, " +
+                              $"{HospitalTime.ToLocal(appointment.StartTime):yyyy-MM-dd}",
+                Quantity = 1,
+                UnitPrice = doctor.ConsultationFee,
+                Amount = doctor.ConsultationFee,
+                AppointmentId = appointment.Id,
+                CreatedAt = DateTime.UtcNow,
+            });
+        }
+
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            return Invalid("Status", "This appointment was just completed by someone else. Reload the page.");
+        }
         return ServiceResult<AppointmentResponse>.Ok(await LoadAsync(id));
     }
 

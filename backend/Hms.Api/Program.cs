@@ -87,6 +87,7 @@ builder.Services.AddScoped<WardService>();
 builder.Services.AddScoped<AdmissionService>();
 builder.Services.AddScoped<LabService>();
 builder.Services.AddScoped<PharmacyService>();
+builder.Services.AddScoped<BillingService>();
 
 // Errors are returned as safe JSON (ProblemDetails) without stack traces.
 builder.Services.AddProblemDetails();

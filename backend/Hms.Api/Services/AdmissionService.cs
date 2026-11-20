@@ -175,10 +175,12 @@ public class AdmissionService(AppDbContext db)
     }
 
     // ---------- Discharge ----------
-    // Frees the bed. The bed charge itself is added to the bill in the Billing step (FR-BL-04),
-    // using DaysCharged and the ward's daily charge.
+    // Frees the bed and adds the bed charges to the bill (FR-BL-04), in one transaction.
     public async Task<ServiceResult<int>> DischargeAsync(int id, string summary)
     {
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        // Row lock: two people pressing Discharge at once cannot both add bed charges.
+        await db.Database.ExecuteSqlAsync($"SELECT 1 FROM \"Admissions\" WHERE \"Id\" = {id} FOR UPDATE");
         var admission = await db.Admissions.FirstOrDefaultAsync(a => a.Id == id);
         if (admission is null) return ServiceResult<int>.NotFound();
         if (admission.DischargedAt is not null)
@@ -189,8 +191,55 @@ public class AdmissionService(AppDbContext db)
         admission.DischargedAt = DateTime.UtcNow;
         admission.Status = AdmissionStatus.Discharged;
         admission.DischargeSummary = summary.Trim();
+        db.Charges.AddRange(await BedChargesAsync(admission));
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
         return ServiceResult<int>.Ok(id);
+    }
+
+    // Every started 24 hours is one bed-day (DaysBetween). Each bed-day is charged at the daily rate of the ward
+    // the patient was in when that day started, so a transfer from a general ward to ICU is charged correctly.
+    // The rate is copied into the charge, so a later price change never alters this bill.
+    private async Task<List<Charge>> BedChargesAsync(Admission admission)
+    {
+        var transfers = await db.BedTransfers.AsNoTracking()
+            .Where(t => t.AdmissionId == admission.Id)
+            .OrderBy(t => t.TransferredAt).ThenBy(t => t.Id)
+            .ToListAsync();
+        var firstBedId = transfers.Count > 0 ? transfers[0].FromBedId : admission.BedId;
+
+        var days = DaysBetween(admission.AdmittedAt, admission.DischargedAt!.Value);
+        var bedIds = new List<int>();
+        for (var day = 0; day < days; day++)
+        {
+            var dayStart = admission.AdmittedAt.AddDays(day);
+            bedIds.Add(transfers.LastOrDefault(t => t.TransferredAt <= dayStart)?.ToBedId ?? firstBedId);
+        }
+
+        var allBedIds = bedIds.Distinct().ToList();
+        var wards = await db.Beds.AsNoTracking().Include(b => b.Ward)
+            .Where(b => allBedIds.Contains(b.Id))
+            .ToDictionaryAsync(b => b.Id, b => b.Ward);
+
+        return bedIds
+            .GroupBy(bedId => wards[bedId].Id)
+            .Select(group =>
+            {
+                var ward = wards[group.First()];
+                var quantity = group.Count();
+                return new Charge
+                {
+                    PatientId = admission.PatientId,
+                    ChargeType = ChargeType.Admission,
+                    Description = $"Bed charge, {ward.Name}, {quantity} day{(quantity == 1 ? "" : "s")} ({admission.AdmissionNumber})",
+                    Quantity = quantity,
+                    UnitPrice = ward.DailyCharge,
+                    Amount = ward.DailyCharge * quantity,
+                    AdmissionId = admission.Id,
+                    CreatedAt = DateTime.UtcNow,
+                };
+            })
+            .ToList();
     }
 
     // ---------- Vital signs and nursing notes ----------

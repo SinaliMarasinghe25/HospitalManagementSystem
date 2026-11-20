@@ -273,10 +273,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     private static void ConfigureBilling(ModelBuilder builder)
     {
+        // INV-000001 and RCP-000001, taken from database sequences so two clerks never get the same number.
+        builder.HasSequence<long>("InvoiceNumbers");
+        builder.HasSequence<long>("ReceiptNumbers");
+
         builder.Entity<Charge>(e =>
         {
             // Finding a patient's unbilled charges is a common query.
             e.HasIndex(x => new { x.PatientId, x.InvoiceId });
+            // A visit, a lab test or a dispensed batch is charged once, never twice (even if two requests race).
+            // An admission can have several charges: one per ward it used.
+            e.HasIndex(x => x.AppointmentId).IsUnique().HasFilter("\"AppointmentId\" IS NOT NULL");
+            e.HasIndex(x => x.LabRequestId).IsUnique().HasFilter("\"LabRequestId\" IS NOT NULL");
+            e.HasIndex(x => x.StockMovementId).IsUnique().HasFilter("\"StockMovementId\" IS NOT NULL");
             e.ToTable(t =>
             {
                 // Exactly one source is set: appointment, lab request, stock movement or admission.
@@ -301,6 +310,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         builder.Entity<Payment>(e =>
         {
             e.HasIndex(x => x.ReceiptNumber).IsUnique();
+            // Revenue totals are summed by payment date.
+            e.HasIndex(x => x.PaidAt);
             e.ToTable(t => t.HasCheckConstraint("CK_Payments_Amount", "\"Amount\" > 0"));
             e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.ReceivedByUserId);
         });

@@ -33,6 +33,10 @@ public static class Policies
     public const string ManagePharmacyStock = nameof(ManagePharmacyStock);
     public const string DispenseMedicines = nameof(DispenseMedicines);
     public const string EditMedicinePrices = nameof(EditMedicinePrices);
+    public const string ViewInvoiceBalances = nameof(ViewInvoiceBalances);
+    public const string ViewInvoiceDetails = nameof(ViewInvoiceDetails);
+    public const string ManageBilling = nameof(ManageBilling);
+    public const string ViewRevenue = nameof(ViewRevenue);
 
     public static AuthorizationBuilder AddHmsPolicies(this AuthorizationBuilder builder) => builder
         .AddPolicy(ViewPatients, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.Nurse, Roles.Receptionist))
@@ -68,5 +72,11 @@ public static class Policies
         .AddPolicy(ViewPharmacyStock, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.Pharmacist, Roles.Accountant))
         .AddPolicy(ManagePharmacyStock, p => p.RequireRole(Roles.Pharmacist))
         .AddPolicy(DispenseMedicines, p => p.RequireRole(Roles.Pharmacist))
-        .AddPolicy(EditMedicinePrices, p => p.RequireRole(Roles.Administrator, Roles.Pharmacist, Roles.Accountant));
+        .AddPolicy(EditMedicinePrices, p => p.RequireRole(Roles.Administrator, Roles.Pharmacist, Roles.Accountant))
+        // Invoices and payments: Accountant full; Admin view; Receptionist view (balance due only, no line items).
+        .AddPolicy(ViewInvoiceBalances, p => p.RequireRole(Roles.Administrator, Roles.Receptionist, Roles.Accountant))
+        .AddPolicy(ViewInvoiceDetails, p => p.RequireRole(Roles.Administrator, Roles.Accountant))
+        .AddPolicy(ManageBilling, p => p.RequireRole(Roles.Accountant))
+        // Dashboard tile "Revenue Summary": Admin and Accountant only (UI-DSH-03).
+        .AddPolicy(ViewRevenue, p => p.RequireRole(Roles.Administrator, Roles.Accountant));
 }

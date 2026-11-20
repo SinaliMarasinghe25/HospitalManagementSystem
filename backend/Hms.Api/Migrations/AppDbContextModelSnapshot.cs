@@ -26,9 +26,13 @@ namespace Hms.Api.Migrations
 
             modelBuilder.HasSequence("EmployeeNumbers");
 
+            modelBuilder.HasSequence("InvoiceNumbers");
+
             modelBuilder.HasSequence("LabRequestNumbers");
 
             modelBuilder.HasSequence("PatientNumbers");
+
+            modelBuilder.HasSequence("ReceiptNumbers");
 
             modelBuilder.Entity("Hms.Api.Entities.Admission", b =>
                 {
@@ -427,13 +431,19 @@ namespace Hms.Api.Migrations
 
                     b.HasIndex("AdmissionId");
 
-                    b.HasIndex("AppointmentId");
+                    b.HasIndex("AppointmentId")
+                        .IsUnique()
+                        .HasFilter("\"AppointmentId\" IS NOT NULL");
 
                     b.HasIndex("InvoiceId");
 
-                    b.HasIndex("LabRequestId");
+                    b.HasIndex("LabRequestId")
+                        .IsUnique()
+                        .HasFilter("\"LabRequestId\" IS NOT NULL");
 
-                    b.HasIndex("StockMovementId");
+                    b.HasIndex("StockMovementId")
+                        .IsUnique()
+                        .HasFilter("\"StockMovementId\" IS NOT NULL");
 
                     b.HasIndex("PatientId", "InvoiceId");
 
@@ -1193,6 +1203,8 @@ namespace Hms.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("InvoiceId");
+
+                    b.HasIndex("PaidAt");
 
                     b.HasIndex("ReceiptNumber")
                         .IsUnique();

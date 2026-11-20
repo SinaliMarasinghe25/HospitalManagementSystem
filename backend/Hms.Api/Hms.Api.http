@@ -40,6 +40,12 @@ Content-Type: application/json
 
 { "userName": "pharm1", "password": "Pharm#20261", "roles": ["Pharmacist"] }
 
+### Create an accountant
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{ "userName": "acc1", "password": "Acc#20261", "roles": ["Accountant"] }
+
 ### 6. List users: expect 200
 GET {{baseUrl}}/api/users
 
