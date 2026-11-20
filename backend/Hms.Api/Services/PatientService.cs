@@ -109,14 +109,13 @@ public class PatientService(AppDbContext db)
                 m.ChiefComplaint,
                 m.Diagnoses.Select(d => d.Code == null ? d.Description : d.Code + " " + d.Description).ToList(),
                 m.Treatments.Select(t => t.Description).ToList(),
-                // Cancelled prescriptions were never given to the patient, so they are left out.
-                m.Prescriptions.Where(p => p.Status != PrescriptionStatus.Cancelled).SelectMany(p => p.Items)
+                m.Prescriptions.SelectMany(p => p.Items)
                     .Select(i => i.Medicine.Name + " " + i.Medicine.Strength + ", " + i.Dosage + ", " + i.Frequency + ", " + i.DurationDays + " days")
                     .ToList()))
             .ToListAsync();
 
         var labResults = await db.LabRequests.AsNoTracking()
-            .Where(l => l.PatientId == patientId && l.Status != LabRequestStatus.Cancelled)
+            .Where(l => l.PatientId == patientId)
             .OrderByDescending(l => l.RequestedAt)
             .Select(l => new LabResultHistoryItem(l.Id, l.LabTest.Name, l.Status, l.RequestedAt,
                 l.ResultValue, l.LabTest.Unit, l.LabTest.ReferenceRange, l.IsAbnormal))

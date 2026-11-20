@@ -1,6 +1,6 @@
 import { Roles, type Role } from './roles'
 
-const { Administrator, Doctor, Nurse, Receptionist, Pharmacist, LaboratoryStaff, Accountant } = Roles
+const { Administrator, Doctor, Nurse, Receptionist, Pharmacist, LaboratoryStaff } = Roles
 
 // Mirrors Hms.Api/Authorization/Policies.cs, so buttons only appear when the API would allow the action.
 export const Permissions = {
@@ -26,10 +26,4 @@ export const Permissions = {
   requestLabTests: [Doctor],
   processLabRequests: [LaboratoryStaff],
   manageLabTests: [Administrator],
-  viewPharmacyStock: [Administrator, Doctor, Pharmacist, Accountant],
-  managePharmacyStock: [Pharmacist],
-  dispenseMedicines: [Pharmacist],
-  editMedicinePrices: [Administrator, Pharmacist, Accountant],
-  // Not an API policy: who works from the dispensing queue screens (the API also lets doctors read prescriptions).
-  pharmacyQueue: [Administrator, Pharmacist],
 } satisfies Record<string, Role[]>

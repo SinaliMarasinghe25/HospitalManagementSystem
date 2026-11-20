@@ -161,30 +161,6 @@ public class Admission
     public string? DischargeSummary { get; set; }
 
     public List<VitalSign> VitalSigns { get; set; } = [];
-    public List<BedTransfer> BedTransfers { get; set; } = [];
-}
-
-// History of bed moves during one admission (assumption A1: "transfer bed").
-// Kept so the bed charge can later be worked out per ward, and so nobody loses track of where a patient was.
-public class BedTransfer
-{
-    public int Id { get; set; }
-
-    public int AdmissionId { get; set; }
-    public Admission Admission { get; set; } = null!;
-
-    public int FromBedId { get; set; }
-    public Bed FromBed { get; set; } = null!;
-
-    public int ToBedId { get; set; }
-    public Bed ToBed { get; set; } = null!;
-
-    public DateTime TransferredAt { get; set; }
-
-    [MaxLength(300)]
-    public string? Reason { get; set; }
-
-    public string? TransferredByUserId { get; set; }
 }
 
 public class VitalSign
