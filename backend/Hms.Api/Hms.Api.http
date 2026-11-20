@@ -21,16 +21,8 @@ Content-Type: application/json
 
 { "userName": "admin", "password": "{{adminPassword}}" }
 
-### Create a lab staff user: expect 201
-POST {{baseUrl}}/api/users
-Content-Type: application/json
-
-{ "userName": "lab1", "password": "Lab#20261", "roles": ["LaboratoryStaff"] }
-
 ### 4. Who am I? expect 200
 GET {{baseUrl}}/api/auth/me
-
-
 
 ### 5. Create a receptionist (fictitious test user): expect 201
 POST {{baseUrl}}/api/users
