@@ -2,15 +2,17 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { listAppointments } from '../api/appointments'
 import { openLabRequestCount } from '../api/lab'
+import { countPharmacyAlerts } from '../api/pharmacy'
 import { Permissions } from '../auth/permissions'
 import { hasAnyRole } from '../auth/roles'
 import { useAuth } from '../auth/useAuth'
 import { StatusBadge } from '../components/appointments/StatusBadge'
 import type { Appointment } from '../types/appointment'
+import type { PharmacyAlertCounts } from '../types/pharmacy'
 import { formatClock, todayInHospital } from '../utils/format'
 
 // PDF section 7, Dashboard. The five tiles get real numbers as each module is built.
-const placeholderTiles = ['Total Patients', 'Revenue Summary', 'Pharmacy Alerts']
+const placeholderTiles = ['Total Patients', 'Revenue Summary']
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -18,6 +20,17 @@ export default function DashboardPage() {
   const [today, setToday] = useState<Appointment[] | null>(null)
   const canSeeLab = hasAnyRole(user?.roles, Permissions.viewLabRequests)
   const [openLab, setOpenLab] = useState<number | null>(null)
+  // Role table: the Pharmacy Alerts tile is for the administrator and the pharmacist.
+  const canSeePharmacy = hasAnyRole(user?.roles, Permissions.pharmacyQueue)
+  const [pharmacy, setPharmacy] = useState<PharmacyAlertCounts | null>(null)
+
+  // UI-DSH-05 Pharmacy Alerts: low stock, expiring soon and expired batches.
+  useEffect(() => {
+    if (!canSeePharmacy) return
+    countPharmacyAlerts()
+      .then(setPharmacy)
+      .catch(() => setPharmacy(null))
+  }, [canSeePharmacy])
 
   // UI-DSH-04 Laboratory Requests: tests waiting for a sample or a result.
   useEffect(() => {
@@ -59,6 +72,20 @@ export default function DashboardPage() {
             {openLab ?? '--'}
           </p>
           {openLab !== null && <p className="text-xs text-slate-500">waiting for sample or result</p>}
+        </Link>
+        <Link
+          to={canSeePharmacy ? '/pharmacy?tab=alerts' : '/'}
+          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-blue-300"
+        >
+          <p className="text-sm text-slate-600">Pharmacy Alerts</p>
+          <p className={`mt-2 text-2xl font-semibold ${pharmacy ? 'text-slate-900' : 'text-slate-400'}`}>
+            {pharmacy ? pharmacy.lowStock + pharmacy.nearExpiry + pharmacy.expired : '--'}
+          </p>
+          {pharmacy && (
+            <p className="text-xs text-slate-500">
+              {pharmacy.lowStock} low stock, {pharmacy.nearExpiry} expiring soon, {pharmacy.expired} expired
+            </p>
+          )}
         </Link>
         {placeholderTiles.map((tile) => (
           <div key={tile} className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">

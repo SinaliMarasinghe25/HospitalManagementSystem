@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/* Screen-reader-only text (sr-only) is positioned "absolute". Inside a sideways-scrolling table box
+   it must stay inside that box, or it makes the whole page scroll sideways on a phone. */
+.overflow-x-auto {
+  position: relative;
+}

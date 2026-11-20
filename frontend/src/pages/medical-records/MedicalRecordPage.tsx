@@ -190,7 +190,12 @@ function PrescriptionsSection({ record, onChanged }: { record: MedicalRecord; on
                     <td className="py-1 pr-3">{i.dosage}</td>
                     <td className="py-1 pr-3">{i.frequency}</td>
                     <td className="py-1 pr-3">{i.durationDays}</td>
-                    <td className="py-1 pr-3">{i.quantity}</td>
+                    <td className="py-1 pr-3">
+                      {i.quantity}
+                      {i.quantityDispensed > 0 && i.quantityDispensed < i.quantity && (
+                        <span className="block text-xs text-slate-500">{i.quantityDispensed} given</span>
+                      )}
+                    </td>
                     <td className="py-1">{i.instructions ?? '-'}</td>
                   </tr>
                 ))}
