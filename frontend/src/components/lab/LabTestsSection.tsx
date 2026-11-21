@@ -17,7 +17,10 @@ export function LabTestsSection({ patientId, medicalRecordId, canRequest }: { pa
   const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
-    listLabRequests({ medicalRecordId: String(medicalRecordId) }).then(setRequests).catch(() => setRequests([]))
+    // One visit has only a few tests, so one page of 100 (the most the API sends at once) holds them all.
+    listLabRequests({ medicalRecordId: String(medicalRecordId), pageSize: '100' })
+      .then((data) => setRequests(data.items))
+      .catch(() => setRequests([]))
   }, [medicalRecordId, reloadKey])
 
   useEffect(() => {

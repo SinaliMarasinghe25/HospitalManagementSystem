@@ -8,8 +8,10 @@ import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
 import { StatusBadge } from '../../components/appointments/StatusBadge'
 import { inputClass, primaryButtonClass } from '../../components/ui/FormField'
+import { Pagination } from '../../components/ui/Pagination'
 import type { Appointment } from '../../types/appointment'
 import type { MedicalRecordSummary } from '../../types/medicalRecord'
+import type { PagedResult } from '../../types/paged'
 import { addDays, formatClock, formatDateTime, todayInHospital } from '../../utils/format'
 
 // PDF 3.5 Electronic Medical Records, the menu page.
@@ -19,8 +21,9 @@ export default function MedicalRecordsPage() {
   const canWrite = hasAnyRole(user?.roles, Permissions.editMedicalRecords)
 
   const [waiting, setWaiting] = useState<Appointment[] | null>(null)
-  const [records, setRecords] = useState<MedicalRecordSummary[] | null>(null)
+  const [records, setRecords] = useState<PagedResult<MedicalRecordSummary> | null>(null)
   const [toDate, setToDate] = useState(() => todayInHospital())
+  const [page, setPage] = useState(1)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -32,13 +35,13 @@ export default function MedicalRecordsPage() {
 
   useEffect(() => {
     let ignore = false
-    listMedicalRecords({ fromDate: addDays(toDate, -6), toDate })
-      .then((data) => !ignore && setRecords(data))
+    listMedicalRecords({ fromDate: addDays(toDate, -6), toDate, page: String(page) })
+      .then((data) => !ignore && (setRecords(data), setError(null)))
       .catch((err: unknown) => !ignore && setError(err instanceof ApiError ? err.message : 'Could not load records.'))
     return () => {
       ignore = true
     }
-  }, [toDate])
+  }, [toDate, page])
 
   return (
     <div className="space-y-6">
@@ -83,7 +86,11 @@ export default function MedicalRecordsPage() {
               id="records-to"
               type="date"
               value={toDate}
-              onChange={(e) => e.target.value && setToDate(e.target.value)}
+              onChange={(e) => {
+                if (!e.target.value) return
+                setToDate(e.target.value)
+                setPage(1) // a new date range starts on page 1
+              }}
               className={inputClass}
             />
           </div>
@@ -105,7 +112,7 @@ export default function MedicalRecordsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {records?.map((r) => (
+              {records?.items.map((r) => (
                 <tr key={r.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3 whitespace-nowrap">
                     <Link to={`/medical-records/${r.id}`} className="font-medium text-blue-700 hover:underline">
@@ -121,7 +128,7 @@ export default function MedicalRecordsPage() {
                   <td className="px-4 py-3 text-slate-700">{r.primaryDiagnosis ?? '-'}</td>
                 </tr>
               ))}
-              {records && records.length === 0 && (
+              {records && records.items.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-6 text-center text-slate-500">
                     No medical records in these 7 days.
@@ -131,6 +138,15 @@ export default function MedicalRecordsPage() {
             </tbody>
           </table>
         </div>
+        {records && (
+          <Pagination
+            totalCount={records.totalCount}
+            page={records.page}
+            pageSize={records.pageSize}
+            noun="record"
+            onPageChange={setPage}
+          />
+        )}
       </section>
     </div>
   )

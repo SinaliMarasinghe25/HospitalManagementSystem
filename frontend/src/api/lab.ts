@@ -1,5 +1,6 @@
 import type { LabRequest, LabTest } from '../types/lab'
-import { apiFetch } from './client'
+import type { PagedResult } from '../types/paged'
+import { apiFetch, queryString } from './client'
 
 // One function per endpoint in LabController.cs.
 
@@ -20,12 +21,11 @@ export function listLabRequests(filter: {
   toDate?: string
   patientId?: string
   medicalRecordId?: string
+  page?: string
+  pageSize?: string
 }) {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(filter)) {
-    if (value) params.set(key, value)
-  }
-  return apiFetch<LabRequest[]>(`/lab/requests?${params}`)
+  // One page of requests. The work queues come oldest first, everything else newest first.
+  return apiFetch<PagedResult<LabRequest>>(`/lab/requests?${queryString(filter)}`)
 }
 
 export function getLabRequest(id: number) {

@@ -44,11 +44,13 @@ public class LabController(LabService lab, DoctorService doctors, AuditService a
 
     // GET /api/lab/requests?status=Requested            (the lab queue)
     // GET /api/lab/requests?fromDate=...&toDate=...      (history)   ?patientId=  ?medicalRecordId=
+    // One page at a time: add &page=2 (20 rows unless pageSize says otherwise, at most 100).
     [HttpGet("requests")]
-    public async Task<ActionResult<List<LabRequestResponse>>> List(
-        LabRequestStatus? status, DateOnly? fromDate, DateOnly? toDate, int? patientId, int? medicalRecordId)
+    public async Task<ActionResult<PagedResult<LabRequestResponse>>> List(
+        LabRequestStatus? status, DateOnly? fromDate, DateOnly? toDate, int? patientId, int? medicalRecordId,
+        int page = 1, int pageSize = Paging.DefaultPageSize)
     {
-        var result = await lab.ListAsync(status, fromDate, toDate, patientId, medicalRecordId);
+        var result = await lab.ListAsync(status, fromDate, toDate, patientId, medicalRecordId, page, pageSize);
         return result.Succeeded ? result.Value! : this.ValidationErrors(result.Errors);
     }
 

@@ -109,3 +109,14 @@ GET {{baseUrl}}/api/audit-log
 
 ### 22. Everything that happened to patient 1 (as a receptionist: expect 403)
 GET {{baseUrl}}/api/audit-log?entityName=Patient&entityId=1
+
+### ---------- Paging (Step 26). Log in as admin first (request 3). ----------
+
+### 23. Second page of the lab queue, 5 to a page: expect 200 with "items", "page": 2, "pageSize": 5 and "totalCount"
+GET {{baseUrl}}/api/lab/requests?status=Requested&page=2&pageSize=5
+
+### 24. Invoices still due: one page, plus "totalBalance" (the money due on every page together)
+GET {{baseUrl}}/api/billing/invoices?due=true&page=1
+
+### 25. A page past the end gives the last page: "page" in the answer is the real page number
+GET {{baseUrl}}/api/staff/leave?page=999

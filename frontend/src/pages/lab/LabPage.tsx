@@ -7,7 +7,9 @@ import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
 import { LabStatusBadge, ResultText } from '../../components/lab/LabStatusBadge'
 import { inputClass, secondaryButtonClass } from '../../components/ui/FormField'
+import { Pagination } from '../../components/ui/Pagination'
 import type { LabRequest } from '../../types/lab'
+import type { PagedResult } from '../../types/paged'
 import { addDays, formatDateTime, todayInHospital } from '../../utils/format'
 import { Tabs } from '../../components/ui/Tabs'
 
@@ -27,23 +29,25 @@ export default function LabPage() {
 
   const [params, setParams] = useSearchParams()
   const tab = (params.get('tab') as Tab | null) ?? 'Requested'
+  // The page number is in the address bar too (?tab=recent&page=2), so Back and Refresh keep it.
+  const page = params.get('page') ?? '1'
   const [toDate, setToDate] = useState(() => todayInHospital())
-  const [requests, setRequests] = useState<LabRequest[] | null>(null)
+  const [requests, setRequests] = useState<PagedResult<LabRequest> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let ignore = false
     const filter = tab === 'recent' ? { fromDate: addDays(toDate, -6), toDate } : { status: tab }
-    listLabRequests(filter)
-      .then((data) => !ignore && setRequests(data))
+    // The API sends the work queues oldest first, so the longest-waiting patient is at the top of page 1.
+    listLabRequests({ ...filter, page })
+      .then((data) => !ignore && (setRequests(data), setError(null)))
       .catch((err: unknown) => !ignore && setError(err instanceof ApiError ? err.message : 'Could not load lab requests.'))
     return () => {
       ignore = true
     }
-  }, [tab, toDate])
+  }, [tab, toDate, page])
 
-  // Oldest first in the work queues, so the longest-waiting patient is at the top.
-  const rows = tab === 'recent' ? requests : requests && [...requests].reverse()
+  const rows = requests?.items
 
   return (
     <div className="space-y-4">
@@ -74,7 +78,11 @@ export default function LabPage() {
             id="lab-to"
             type="date"
             value={toDate}
-            onChange={(e) => e.target.value && setToDate(e.target.value)}
+            onChange={(e) => {
+              if (!e.target.value) return
+              setToDate(e.target.value)
+              setParams({ tab }) // a new date range starts on page 1
+            }}
             className={`${inputClass} w-auto`}
           />
         </div>
@@ -138,6 +146,16 @@ export default function LabPage() {
           </tbody>
         </table>
       </div>
+
+      {requests && (
+        <Pagination
+          totalCount={requests.totalCount}
+          page={requests.page}
+          pageSize={requests.pageSize}
+          noun="request"
+          onPageChange={(p) => setParams({ tab, page: String(p) })}
+        />
+      )}
     </div>
   )
 }

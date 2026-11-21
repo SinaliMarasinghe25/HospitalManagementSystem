@@ -6,7 +6,9 @@ import { Permissions } from '../../auth/permissions'
 import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
+import { Pagination } from '../../components/ui/Pagination'
 import type { AdmissionSummary, Ward } from '../../types/admission'
+import type { PagedResult } from '../../types/paged'
 import { addDays, formatDateTime, formatMoney, todayInHospital } from '../../utils/format'
 import { Tabs } from '../../components/ui/Tabs'
 
@@ -26,10 +28,12 @@ export default function AdmissionsPage() {
 
   const [params, setParams] = useSearchParams()
   const tab = (params.get('tab') as Tab | null) ?? 'beds'
+  // The page number is in the address bar too (?tab=current&page=2), so Back and Refresh keep it.
+  const page = params.get('page') ?? '1'
   const [toDate, setToDate] = useState(() => todayInHospital())
 
   const [wards, setWards] = useState<Ward[] | null>(null)
-  const [admissions, setAdmissions] = useState<AdmissionSummary[] | null>(null)
+  const [admissions, setAdmissions] = useState<PagedResult<AdmissionSummary> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -37,14 +41,15 @@ export default function AdmissionsPage() {
     const request =
       tab === 'beds'
         ? listWards().then((data) => !ignore && setWards(data))
-        : listAdmissions(
-            tab === 'current' ? {} : { status: 'Discharged', fromDate: addDays(toDate, -6), toDate },
-          ).then((data) => !ignore && setAdmissions(data))
+        : listAdmissions({
+            ...(tab === 'current' ? {} : { status: 'Discharged', fromDate: addDays(toDate, -6), toDate }),
+            page,
+          }).then((data) => !ignore && setAdmissions(data))
     request.catch((err: unknown) => !ignore && setError(err instanceof ApiError ? err.message : 'Could not load.'))
     return () => {
       ignore = true
     }
-  }, [tab, toDate])
+  }, [tab, toDate, page])
 
   return (
     <div className="space-y-4">
@@ -143,7 +148,11 @@ export default function AdmissionsPage() {
                 id="discharged-to"
                 type="date"
                 value={toDate}
-                onChange={(e) => e.target.value && setToDate(e.target.value)}
+                onChange={(e) => {
+                  if (!e.target.value) return
+                  setToDate(e.target.value)
+                  setParams({ tab }) // a new date range starts on page 1
+                }}
                 className={`${inputClass} w-auto`}
               />
             </div>
@@ -161,7 +170,7 @@ export default function AdmissionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {admissions?.map((a) => (
+                {admissions?.items.map((a) => (
                   <tr key={a.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3">
                       <Link to={`/admissions/${a.id}`} className="font-mono font-medium text-blue-700 hover:underline">
@@ -182,7 +191,7 @@ export default function AdmissionsPage() {
                     )}
                   </tr>
                 ))}
-                {admissions && admissions.length === 0 && (
+                {admissions && admissions.items.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
                       {tab === 'current' ? 'No patients are admitted right now.' : 'No discharges in these 7 days.'}
@@ -192,6 +201,15 @@ export default function AdmissionsPage() {
               </tbody>
             </table>
           </div>
+          {admissions && (
+            <Pagination
+              totalCount={admissions.totalCount}
+              page={admissions.page}
+              pageSize={admissions.pageSize}
+              noun="admission"
+              onPageChange={(p) => setParams({ tab, page: String(p) })}
+            />
+          )}
         </>
       )}
     </div>

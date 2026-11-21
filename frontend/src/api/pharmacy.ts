@@ -1,4 +1,5 @@
 import type { Prescription } from '../types/medicalRecord'
+import type { PagedResult } from '../types/paged'
 import type {
   DispenseView,
   MedicineDetail,
@@ -53,13 +54,14 @@ export function getPharmacyAlerts() {
   return apiFetch<PharmacyAlerts>('/pharmacy/alerts')
 }
 
-// The pharmacy queue: Pending and PartiallyDispensed, oldest first.
-export function listOpenPrescriptions() {
-  return apiFetch<Prescription[]>('/prescriptions?open=true')
+// The pharmacy queue: Pending and PartiallyDispensed, oldest first, one page at a time.
+export function listOpenPrescriptions(page = 1) {
+  return apiFetch<PagedResult<Prescription>>(`/prescriptions?open=true&page=${page}`)
 }
 
-export function listDispensedPrescriptions() {
-  return apiFetch<Prescription[]>('/prescriptions?status=Dispensed')
+// Dispensed prescriptions, newest first, one page at a time.
+export function listDispensedPrescriptions(page = 1) {
+  return apiFetch<PagedResult<Prescription>>(`/prescriptions?status=Dispensed&page=${page}`)
 }
 
 export function getDispenseView(prescriptionId: number) {

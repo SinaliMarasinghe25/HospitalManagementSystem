@@ -18,12 +18,14 @@ public class AdmissionsController(AdmissionService admissions, AuditService audi
     : ControllerBase
 {
     // GET /api/admissions                      current inpatients
-    // GET /api/admissions?status=Discharged&fromDate=2026-11-13&toDate=2026-11-19
+    // GET /api/admissions?status=Discharged&fromDate=2026-11-13&toDate=2026-11-19&page=2
+    // One page at a time (page 1 if left out, 20 rows unless pageSize says otherwise, at most 100).
     [HttpGet]
-    public async Task<ActionResult<List<AdmissionSummary>>> List(
-        AdmissionStatus? status, DateOnly? fromDate, DateOnly? toDate, int? wardId, int? patientId)
+    public async Task<ActionResult<PagedResult<AdmissionSummary>>> List(
+        AdmissionStatus? status, DateOnly? fromDate, DateOnly? toDate, int? wardId, int? patientId,
+        int page = 1, int pageSize = Paging.DefaultPageSize)
     {
-        var result = await admissions.ListAsync(status, fromDate, toDate, wardId, patientId);
+        var result = await admissions.ListAsync(status, fromDate, toDate, wardId, patientId, page, pageSize);
         return result.Succeeded ? result.Value! : this.ValidationErrors(result.Errors);
     }
 

@@ -48,8 +48,11 @@ public class LabService(AppDbContext db, NotificationService notifications)
 
     // The lab queue and history. Without a patient, a date range (hospital days) keeps the list small.
     // Open requests (Requested, SampleCollected) are always shown, whatever their date, so nothing is forgotten.
-    public async Task<ServiceResult<List<LabRequestResponse>>> ListAsync(
-        LabRequestStatus? status, DateOnly? fromDate, DateOnly? toDate, int? patientId, int? medicalRecordId)
+    // The two work queues are oldest first, so the patient who has waited longest is at the top of page 1.
+    // Everything else is newest first.
+    public async Task<ServiceResult<PagedResult<LabRequestResponse>>> ListAsync(
+        LabRequestStatus? status, DateOnly? fromDate, DateOnly? toDate, int? patientId, int? medicalRecordId,
+        int page, int pageSize)
     {
         var query = db.LabRequests.AsNoTracking();
         if (patientId is not null) query = query.Where(r => r.PatientId == patientId);
@@ -63,7 +66,7 @@ public class LabService(AppDbContext db, NotificationService notifications)
             var from = fromDate ?? to.AddDays(-6);
             if (to < from || to.DayNumber - from.DayNumber > MaxRangeDays)
             {
-                return ServiceResult<List<LabRequestResponse>>.Invalid(new()
+                return ServiceResult<PagedResult<LabRequestResponse>>.Invalid(new()
                 {
                     ["ToDate"] = [$"The end date must be on or after the start date, and at most {MaxRangeDays} days later."]
                 });
@@ -73,8 +76,11 @@ public class LabService(AppDbContext db, NotificationService notifications)
             query = query.Where(r => r.RequestedAt >= fromUtc && r.RequestedAt < toUtc);
         }
 
-        var list = await Project(query.OrderByDescending(r => r.RequestedAt).Take(500)).ToListAsync();
-        return ServiceResult<List<LabRequestResponse>>.Ok(list);
+        var sorted = isOpenQueue
+            ? query.OrderBy(r => r.RequestedAt).ThenBy(r => r.Id)
+            : query.OrderByDescending(r => r.RequestedAt).ThenByDescending(r => r.Id);
+        var result = await Project(sorted).ToPagedResultAsync(page, pageSize);
+        return ServiceResult<PagedResult<LabRequestResponse>>.Ok(result);
     }
 
     public Task<LabRequestResponse?> GetAsync(int id) =>

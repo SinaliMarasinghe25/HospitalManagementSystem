@@ -15,8 +15,9 @@ public class MedicalRecordService(AppDbContext db, NotificationService notificat
 
     // ---------- Reading ----------
 
-    public async Task<ServiceResult<List<MedicalRecordSummary>>> ListAsync(
-        DateOnly? fromDate, DateOnly? toDate, int? patientId, int? doctorId)
+    // Newest first, one page at a time.
+    public async Task<ServiceResult<PagedResult<MedicalRecordSummary>>> ListAsync(
+        DateOnly? fromDate, DateOnly? toDate, int? patientId, int? doctorId, int page, int pageSize)
     {
         var query = db.MedicalRecords.AsNoTracking();
         if (patientId is null || fromDate is not null || toDate is not null)
@@ -25,7 +26,7 @@ public class MedicalRecordService(AppDbContext db, NotificationService notificat
             var from = fromDate ?? to.AddDays(-6);
             if (to < from || to.DayNumber - from.DayNumber > MaxRangeDays)
             {
-                return ServiceResult<List<MedicalRecordSummary>>.Invalid(new()
+                return ServiceResult<PagedResult<MedicalRecordSummary>>.Invalid(new()
                 {
                     ["ToDate"] = [$"The end date must be on or after the start date, and at most {MaxRangeDays} days later."]
                 });
@@ -37,16 +38,16 @@ public class MedicalRecordService(AppDbContext db, NotificationService notificat
         if (patientId is not null) query = query.Where(m => m.PatientId == patientId);
         if (doctorId is not null) query = query.Where(m => m.DoctorId == doctorId);
 
-        var list = await query
-            .OrderByDescending(m => m.VisitDate)
+        var result = await query
+            .OrderByDescending(m => m.VisitDate).ThenByDescending(m => m.Id)
             .Select(m => new MedicalRecordSummary(
                 m.Id, m.VisitDate, m.PatientId, m.Patient.PatientNumber,
                 m.Patient.FirstName + " " + m.Patient.LastName,
                 m.Doctor.Employee.FirstName + " " + m.Doctor.Employee.LastName,
                 m.ChiefComplaint,
                 m.Diagnoses.Where(d => d.IsPrimary).Select(d => d.Description).FirstOrDefault()))
-            .ToListAsync();
-        return ServiceResult<List<MedicalRecordSummary>>.Ok(list);
+            .ToPagedResultAsync(page, pageSize);
+        return ServiceResult<PagedResult<MedicalRecordSummary>>.Ok(result);
     }
 
     public async Task<MedicalRecordDetail?> GetAsync(int id, int? myDoctorId)
@@ -242,17 +243,19 @@ public class MedicalRecordService(AppDbContext db, NotificationService notificat
 
     // Newest first. With openOnly, the pharmacy's queue: Pending and PartiallyDispensed, oldest first,
     // so the patient who has waited longest is at the top.
-    public async Task<List<PrescriptionResponse>> ListPrescriptionsAsync(PrescriptionStatus? status, int? patientId, bool openOnly = false)
+    public async Task<PagedResult<PrescriptionResponse>> ListPrescriptionsAsync(
+        PrescriptionStatus? status, int? patientId, bool openOnly, int page, int pageSize)
     {
         var query = LoadPrescriptions()
             .Where(p => status == null || p.Status == status)
             .Where(p => patientId == null || p.MedicalRecord.PatientId == patientId);
         query = openOnly
             ? query.Where(p => p.Status == PrescriptionStatus.Pending || p.Status == PrescriptionStatus.PartiallyDispensed)
-                .OrderBy(p => p.PrescribedAt)
-            : query.OrderByDescending(p => p.PrescribedAt);
-        var prescriptions = await query.Take(200).ToListAsync();
-        return prescriptions.Select(ToResponse).ToList();
+                .OrderBy(p => p.PrescribedAt).ThenBy(p => p.Id)
+            : query.OrderByDescending(p => p.PrescribedAt).ThenByDescending(p => p.Id);
+        // Each prescription is loaded with its items, then turned into the response in C#.
+        var prescriptions = await query.ToPagedResultAsync(page, pageSize);
+        return prescriptions.Map(ToResponse);
     }
 
     public async Task<PrescriptionResponse?> GetPrescriptionAsync(int id)

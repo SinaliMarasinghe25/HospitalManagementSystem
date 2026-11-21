@@ -4,6 +4,8 @@ import { createLeaveFor, listEmployees, listLeave } from '../../api/staff'
 import { LeaveRequestForm } from '../../components/staff/LeaveRequestForm'
 import { LeaveTable } from '../../components/staff/LeaveTable'
 import { secondaryButtonClass } from '../../components/ui/FormField'
+import { Pagination } from '../../components/ui/Pagination'
+import type { PagedResult } from '../../types/paged'
 import type { EmployeeSummary, LeaveForm, LeaveResponse, LeaveStatus } from '../../types/staff'
 
 const statusFilters: { value: LeaveStatus | ''; label: string }[] = [
@@ -16,7 +18,8 @@ const statusFilters: { value: LeaveStatus | ''; label: string }[] = [
 // FR-ST-04: the administrator approves or rejects leave, and can record leave for any employee.
 export default function LeaveRequestsTab() {
   const [status, setStatus] = useState<LeaveStatus | ''>('Pending')
-  const [rows, setRows] = useState<LeaveResponse[] | null>(null)
+  const [page, setPage] = useState(1)
+  const [data, setData] = useState<PagedResult<LeaveResponse> | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
   const [showForm, setShowForm] = useState(false)
@@ -24,17 +27,17 @@ export default function LeaveRequestsTab() {
 
   useEffect(() => {
     let ignore = false
-    listLeave(status)
-      .then((data) => {
+    listLeave(status, page)
+      .then((result) => {
         if (ignore) return
-        setRows(data)
+        setData(result)
         setError(null)
       })
       .catch((err: unknown) => !ignore && setError(err instanceof ApiError ? err.message : 'Could not load leave requests.'))
     return () => {
       ignore = true
     }
-  }, [status, reloadKey])
+  }, [status, page, reloadKey])
 
   function openForm() {
     setShowForm(true)
@@ -56,7 +59,10 @@ export default function LeaveRequestsTab() {
               key={f.label}
               type="button"
               aria-pressed={status === f.value}
-              onClick={() => setStatus(f.value)}
+              onClick={() => {
+                setStatus(f.value)
+                setPage(1) // another status starts on page 1
+              }}
               className={`rounded-full px-3 py-1 font-medium ring-1 ${
                 status === f.value ? 'bg-blue-700 text-white ring-blue-700' : 'bg-white text-slate-700 ring-slate-300 hover:bg-slate-50'
               }`}
@@ -97,7 +103,17 @@ export default function LeaveRequestsTab() {
         </p>
       )}
 
-      <LeaveTable rows={rows} showEmployee onReviewed={() => setReloadKey((k) => k + 1)} />
+      {/* After Approve or Reject the same page reloads. If it is now past the end, the API sends the last page. */}
+      <LeaveTable rows={data?.items ?? null} showEmployee onReviewed={() => setReloadKey((k) => k + 1)} />
+      {data && (
+        <Pagination
+          totalCount={data.totalCount}
+          page={data.page}
+          pageSize={data.pageSize}
+          noun="leave request"
+          onPageChange={setPage}
+        />
+      )}
     </>
   )
 }

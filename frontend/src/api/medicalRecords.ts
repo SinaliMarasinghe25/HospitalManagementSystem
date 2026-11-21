@@ -6,16 +6,20 @@ import type {
   Prescription,
   PrescriptionLine,
 } from '../types/medicalRecord'
-import { apiFetch } from './client'
+import type { PagedResult } from '../types/paged'
+import { apiFetch, queryString } from './client'
 
 // One function per endpoint in MedicalRecordsController.cs and PrescriptionsController.cs.
 
-export function listMedicalRecords(filter: { fromDate?: string; toDate?: string; patientId?: string; doctorId?: string }) {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(filter)) {
-    if (value) params.set(key, value)
-  }
-  return apiFetch<MedicalRecordSummary[]>(`/medical-records?${params}`)
+// One page of records, newest first.
+export function listMedicalRecords(filter: {
+  fromDate?: string
+  toDate?: string
+  patientId?: string
+  doctorId?: string
+  page?: string
+}) {
+  return apiFetch<PagedResult<MedicalRecordSummary>>(`/medical-records?${queryString(filter)}`)
 }
 
 export function getMedicalRecord(id: number) {

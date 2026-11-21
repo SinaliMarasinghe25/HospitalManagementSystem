@@ -12,6 +12,7 @@ import type {
   NewLogin,
   UnlinkedUser,
 } from '../types/staff'
+import type { PagedResult } from '../types/paged'
 import { apiFetch } from './client'
 
 // One function per endpoint in StaffController.cs.
@@ -104,8 +105,11 @@ function leaveBody(form: LeaveForm, extra: Record<string, unknown> = {}) {
   })
 }
 
-export function listLeave(status: LeaveStatus | '') {
-  return apiFetch<LeaveResponse[]>(`/staff/leave${status ? `?status=${status}` : ''}`)
+// One page of leave requests, latest start date first.
+export function listLeave(status: LeaveStatus | '', page = 1) {
+  const params = new URLSearchParams({ page: String(page) })
+  if (status) params.set('status', status)
+  return apiFetch<PagedResult<LeaveResponse>>(`/staff/leave?${params}`)
 }
 
 export function createLeaveFor(employeeId: number, form: LeaveForm) {

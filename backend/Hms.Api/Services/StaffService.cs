@@ -185,8 +185,13 @@ public class StaffService(AppDbContext db, NotificationService notifications)
 
     // ---------- Leave ----------
 
-    public Task<List<LeaveResponse>> ListLeaveAsync(LeaveStatus? status) =>
-        ListLeaveAsync(db.LeaveRequests.Where(l => status == null || l.Status == status), take: 200);
+    // The Leave requests tab: latest start date first, one page at a time.
+    public async Task<PagedResult<LeaveResponse>> ListLeaveAsync(LeaveStatus? status, int page, int pageSize)
+    {
+        var result = await LeaveQuery(db.LeaveRequests.Where(l => status == null || l.Status == status))
+            .ToPagedResultAsync(page, pageSize);
+        return result.Map(WithDays);
+    }
 
     // The latest leave of one employee, for the employee page.
     public Task<List<LeaveResponse>> ListLeaveForEmployeeAsync(int employeeId) =>
@@ -362,18 +367,23 @@ public class StaffService(AppDbContext db, NotificationService notifications)
 
     private async Task<List<LeaveResponse>> ListLeaveAsync(IQueryable<LeaveRequest> query, int take)
     {
-        var rows = await query.AsNoTracking()
+        var rows = await LeaveQuery(query).Take(take).ToListAsync();
+        return rows.Select(WithDays).ToList();
+    }
+
+    // Latest start date first. Days is filled in by WithDays after loading.
+    private IQueryable<LeaveResponse> LeaveQuery(IQueryable<LeaveRequest> query) =>
+        query.AsNoTracking()
             .OrderByDescending(l => l.StartDate).ThenByDescending(l => l.Id)
-            .Take(take)
             .Select(l => new LeaveResponse(l.Id, l.EmployeeId, l.Employee.EmployeeNumber,
                 l.Employee.FirstName + " " + l.Employee.LastName, l.Employee.Department.Name,
                 l.LeaveType, l.StartDate, l.EndDate, 0, l.Reason, l.Status, l.CreatedAt,
                 db.Users.Where(u => u.Id == l.RequestedByUserId).Select(u => u.UserName).FirstOrDefault(),
                 db.Users.Where(u => u.Id == l.ReviewedByUserId).Select(u => u.UserName).FirstOrDefault(),
-                l.ReviewedAt, l.ReviewNote))
-            .ToListAsync();
-        return rows.Select(l => l with { Days = l.EndDate.DayNumber - l.StartDate.DayNumber + 1 }).ToList();
-    }
+                l.ReviewedAt, l.ReviewNote));
+
+    private static LeaveResponse WithDays(LeaveResponse l) =>
+        l with { Days = l.EndDate.DayNumber - l.StartDate.DayNumber + 1 };
 
     private static ServiceResult<T> Invalid<T>(string field, string message) =>
         ServiceResult<T>.Invalid(new() { [field] = [message] });
