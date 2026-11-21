@@ -5,7 +5,7 @@ import { listDepartments, listDoctors } from '../../api/doctors'
 import { Permissions } from '../../auth/permissions'
 import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
-import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
+import { inputClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { Department, DoctorSummary } from '../../types/doctor'
 import { formatMoney } from '../../utils/format'
 
@@ -23,7 +23,8 @@ export default function DoctorListPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    listDepartments().then(setDepartments).catch(() => setError('Could not load departments.'))
+    // Doctors are only in clinical departments, so only those are worth filtering by.
+    listDepartments().then((all) => setDepartments(all.filter((d) => d.isClinical))).catch(() => setError('Could not load departments.'))
   }, [])
 
   useEffect(() => {
@@ -47,12 +48,14 @@ export default function DoctorListPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-slate-900">Doctors</h1>
         {canManage && (
-          <div className="flex gap-2">
-            {/* The same form as every other member of staff, with "This person is a doctor" ticked. */}
-            <Link to="/staff/employees/new?doctor=1" className={primaryButtonClass}>
-              Add doctor
-            </Link>
-          </div>
+          // People are added in one place only: Staff → Add employee, with "This person is a doctor" ticked.
+          <p className="text-sm text-slate-600">
+            To add a doctor, use{' '}
+            <Link to="/staff" className="text-blue-700 hover:underline">
+              Staff &rarr; Add employee
+            </Link>{' '}
+            and tick &ldquo;This person is a doctor&rdquo;.
+          </p>
         )}
       </div>
 

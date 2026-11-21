@@ -7,7 +7,10 @@ export function listDepartments(includeInactive = false) {
   return apiFetch<Department[]>(`/departments?includeInactive=${includeInactive}`)
 }
 
-export function saveDepartment(id: number | null, body: { name: string; description: string; isActive: boolean }) {
+export function saveDepartment(
+  id: number | null,
+  body: { name: string; description: string; isActive: boolean; isClinical: boolean },
+) {
   return apiFetch<Department>(id === null ? '/departments' : `/departments/${id}`, {
     method: id === null ? 'POST' : 'PUT',
     body: JSON.stringify(body),

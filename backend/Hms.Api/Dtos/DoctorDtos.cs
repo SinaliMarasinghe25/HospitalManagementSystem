@@ -6,10 +6,13 @@ namespace Hms.Api.Dtos;
 public record DepartmentRequest(
     [Required, MaxLength(100)] string Name,
     [MaxLength(500)] string? Description,
-    bool IsActive = true);
+    bool IsActive = true,
+    bool IsClinical = true);   // clinical staff choose from these; "Administration" is the only built-in non-clinical one
 
 // StaffCount: active employees in the department (doctors included). DoctorCount: active doctors among them.
-public record DepartmentResponse(int Id, string Name, string? Description, bool IsActive, int DoctorCount, int StaffCount);
+// IsDefault: the common non-clinical department ("Administration") given automatically to non-clinical staff.
+public record DepartmentResponse(
+    int Id, string Name, string? Description, bool IsActive, bool IsClinical, bool IsDefault, int DoctorCount, int StaffCount);
 
 // ---------- Doctors ----------
 // Doctors are added and edited on the Staff page (EmployeeRequest with a doctor profile, see StaffDtos.cs).

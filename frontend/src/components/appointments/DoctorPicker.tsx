@@ -22,7 +22,8 @@ export function DoctorPicker({
   const [doctors, setDoctors] = useState<DoctorSummary[]>([])
 
   useEffect(() => {
-    listDepartments().then(setDepartments).catch(() => setDepartments([]))
+    // Doctors are only in clinical departments, so only those are worth filtering by.
+    listDepartments().then((all) => setDepartments(all.filter((d) => d.isClinical))).catch(() => setDepartments([]))
   }, [])
 
   useEffect(() => {

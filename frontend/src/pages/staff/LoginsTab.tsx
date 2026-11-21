@@ -8,11 +8,11 @@ import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../comp
 import { roleLabels, type UserAccount } from '../../types/user'
 import { allErrors } from '../../utils/formErrors'
 
-// PDF 3.1 User Management (Administrator only). Staff accounts are never deleted, only deactivated,
-// because the audit log and clinical records must keep who did what.
-// New logins are created on the person's staff record (Staff → employee → Login account), so every login
-// belongs to someone. This page only changes existing accounts.
-export default function UsersPage() {
+// PDF 3.1 User Management (Administrator only), as the "Logins" tab of the Staff page.
+// Logins are never deleted, only deactivated, because the audit log and clinical records must keep who did what.
+// New logins are created on the person's staff record (Employees tab → the person → Login account), so every
+// login belongs to someone. This tab only changes existing logins: roles, password reset, active or not.
+export default function LoginsTab() {
   const { user: me } = useAuth()
   const [users, setUsers] = useState<UserAccount[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -43,8 +43,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">Users</h1>
+    <div className="space-y-4">
 
       {error && (
         <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
@@ -58,9 +57,9 @@ export default function UsersPage() {
       )}
 
       <p className="text-sm text-slate-600">
-        To give someone a new login, open their record on the{' '}
-        <Link to="/staff" className="text-blue-700 hover:underline">Staff</Link> page and use &ldquo;Login account&rdquo;.
-        There must always be at least one active administrator, and you cannot remove your own Administrator role.
+        To give someone a new login, open them on the{' '}
+        <Link to="/staff" className="text-blue-700 hover:underline">Employees</Link> tab and use &ldquo;Login account&rdquo;.
+        A login marked &ldquo;Not linked&rdquo; was made before this; link it from the person&apos;s page. There must always be at least one active administrator, and you cannot remove your own Administrator role.
       </p>
 
       <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">

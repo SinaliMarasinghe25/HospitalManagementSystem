@@ -59,6 +59,7 @@ export type EmployeeDetail = {
   hireDate: string
   departmentId: number
   departmentName: string
+  isClinical: boolean
   isActive: boolean
   doctor: DoctorProfile | null
   userId: string | null
@@ -85,6 +86,8 @@ export type EmployeeForm = {
   hireDate: string
   departmentId: string
   isActive: boolean
+  // Clinical staff choose a clinical department; everyone else goes to "Administration" automatically.
+  isClinical: boolean
   isDoctor: boolean
   specialization: string
   licenseNumber: string

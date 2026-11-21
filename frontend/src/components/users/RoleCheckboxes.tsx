@@ -1,7 +1,7 @@
 import { AllRoles, Roles, type Role } from '../../auth/roles'
 import { roleLabels } from '../../types/user'
 
-// Role tick boxes, used on the Users page and when creating a login on the Staff page.
+// Role tick boxes, used on the Staff page: the Logins tab and when creating a login for a person.
 // Assumption A25 (proposed): the Doctor role follows the doctor profile, so its box cannot be ticked by hand.
 // It shows ticked for a doctor's login and is added by the API; for everyone else it stays empty.
 export function RoleCheckboxes({

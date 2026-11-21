@@ -54,8 +54,8 @@ export default function DoctorDetailPage() {
         </div>
         {canManage && (
           // Doctors are edited with every other member of staff, on the Staff page.
-          <Link to={`/staff/employees/${doctor.employeeId}/edit`} className={secondaryButtonClass}>
-            Edit doctor
+          <Link to={`/staff/employees/${doctor.employeeId}`} className={secondaryButtonClass}>
+            Open staff record
           </Link>
         )}
       </div>

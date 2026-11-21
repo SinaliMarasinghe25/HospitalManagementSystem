@@ -30,6 +30,10 @@ public class Department
 
     public bool IsActive { get; set; } = true;
 
+    // Assumption A26 (proposed): clinical staff (doctors, nurses, laboratory staff, pharmacists...) choose a clinical
+    // department. Non-clinical staff are placed in the default "Administration" department automatically.
+    public bool IsClinical { get; set; }
+
     public List<Employee> Employees { get; set; } = [];
 }
 

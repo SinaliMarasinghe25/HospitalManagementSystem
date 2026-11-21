@@ -39,7 +39,8 @@ function employeeBody(form: EmployeeForm, login: NewLogin | null = null) {
     phone: form.phone.trim(),
     email: form.email.trim() || null,
     hireDate: form.hireDate || null,
-    departmentId: form.departmentId ? Number(form.departmentId) : null,
+    // Empty for non-clinical staff: the API places them in "Administration".
+    departmentId: form.isClinical && form.departmentId ? Number(form.departmentId) : null,
     isActive: form.isActive,
     doctor: form.isDoctor
       ? {

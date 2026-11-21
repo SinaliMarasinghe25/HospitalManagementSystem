@@ -5,6 +5,10 @@ export type Department = {
   name: string
   description: string | null
   isActive: boolean
+  // Clinical staff (doctors, nurses, laboratory staff, pharmacists...) choose one of these (assumption A26).
+  isClinical: boolean
+  // "Administration": given automatically to non-clinical staff. It cannot be renamed or deactivated.
+  isDefault: boolean
   doctorCount: number
   // Active employees in the department, doctors included.
   staffCount: number

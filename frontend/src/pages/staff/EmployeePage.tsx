@@ -180,7 +180,7 @@ function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
           <p>
             Linked to <strong>{employee.userName}</strong>. They can request their own leave. Reset the password or change
-            roles on the <Link to="/users" className="text-blue-700 hover:underline">Users</Link> page.
+            roles on the <Link to="/staff?tab=logins" className="text-blue-700 hover:underline">Logins</Link> tab.
           </p>
           <button
             type="button"

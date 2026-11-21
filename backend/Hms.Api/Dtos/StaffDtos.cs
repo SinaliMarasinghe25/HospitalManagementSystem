@@ -17,7 +17,9 @@ public record EmployeeRequest
     public string Phone { get; init; } = string.Empty;
     [EmailAddress, MaxLength(256)] public string? Email { get; init; }
     [Required] public DateOnly? HireDate { get; init; }
-    [Required] public int? DepartmentId { get; init; }
+    // Clinical staff (doctors, nurses, laboratory staff, pharmacists...) choose a clinical department.
+    // Leave it empty for non-clinical staff (accountants, receptionists...): they are placed in "Administration".
+    public int? DepartmentId { get; init; }
     public bool IsActive { get; init; } = true;
 
     // Set for doctors. A doctor profile can be added to an existing employee, but never removed,
@@ -75,6 +77,7 @@ public record EmployeeDetail(
     DateOnly HireDate,
     int DepartmentId,
     string DepartmentName,
+    bool IsClinical,        // works in a clinical department
     bool IsActive,
     DoctorProfile? Doctor,
     string? UserId,

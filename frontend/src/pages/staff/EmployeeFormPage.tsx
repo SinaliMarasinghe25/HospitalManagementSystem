@@ -20,6 +20,7 @@ const emptyForm: EmployeeForm = {
   hireDate: '',
   departmentId: '',
   isActive: true,
+  isClinical: false,
   isDoctor: false,
   specialization: '',
   licenseNumber: '',
@@ -29,13 +30,15 @@ const emptyForm: EmployeeForm = {
 
 // The doctor fields come back from the API as "Doctor.LicenseNumber", which errorsByField turns into this.
 const doctorFields = ['specialization', 'licenseNumber', 'consultationFee', 'slotMinutes'] as const
-type TextField = Exclude<keyof EmployeeForm, 'isActive' | 'isDoctor'>
+type TextField = Exclude<keyof EmployeeForm, 'isActive' | 'isClinical' | 'isDoctor'>
 const errorKey = (name: TextField) =>
   (doctorFields as readonly string[]).includes(name) ? `doctor.${name}` : name
 
 // The ONE form for adding or editing a member of staff (FR-ST-01, FR-ST-03), doctors included (FR-DM-01, FR-DM-02).
 // Everyone gets an employee record. Doctors also get a doctor profile. Anyone who uses the system gets a login.
-// "/staff/employees/new?doctor=1" opens it with "This person is a doctor" already ticked (from the Doctors page).
+// Assumption A26 (proposed): only clinical staff (doctors, nurses, laboratory staff, pharmacists...) choose a
+// department, and only a clinical one. Everyone else is placed in "Administration" by the API.
+// "/staff/employees/new?doctor=1" opens it with "This person is a doctor" already ticked.
 export default function EmployeeFormPage() {
   const { id } = useParams()
   const isEdit = id !== undefined
@@ -43,7 +46,7 @@ export default function EmployeeFormPage() {
   const navigate = useNavigate()
 
   const [form, setForm] = useState<EmployeeForm>(() =>
-    !isEdit && searchParams.get('doctor') === '1' ? { ...emptyForm, isDoctor: true, jobTitle: 'Doctor' } : emptyForm,
+    !isEdit && searchParams.get('doctor') === '1' ? { ...emptyForm, isDoctor: true, isClinical: true, jobTitle: 'Doctor' } : emptyForm,
   )
   const [wasDoctor, setWasDoctor] = useState(false)
   const [currentDepartmentId, setCurrentDepartmentId] = useState<number | null>(null)
@@ -72,6 +75,7 @@ export default function EmployeeFormPage() {
           hireDate: e.hireDate,
           departmentId: String(e.departmentId),
           isActive: e.isActive,
+          isClinical: e.isClinical || e.doctor !== null,
           isDoctor: e.doctor !== null,
           specialization: e.doctor?.specialization ?? '',
           licenseNumber: e.doctor?.licenseNumber ?? '',
@@ -86,7 +90,12 @@ export default function EmployeeFormPage() {
   function handleChange(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value, type } = event.target
     const newValue = type === 'checkbox' ? (event.target as HTMLInputElement).checked : value
-    setForm((current) => ({ ...current, [name]: newValue }))
+    setForm((current) => {
+      const next = { ...current, [name]: newValue }
+      // A doctor is always clinical staff.
+      if (name === 'isDoctor' && newValue === true) next.isClinical = true
+      return next
+    })
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -131,8 +140,11 @@ export default function EmployeeFormPage() {
 
   if (isLoading) return <p role="status">Loading...</p>
 
-  // Inactive departments are hidden, except the one the employee is already in.
-  const departmentOptions = departments.filter((d) => d.isActive || d.id === currentDepartmentId)
+  // Only clinical departments are offered. Inactive ones are hidden, except the one the employee is already in.
+  const departmentOptions = departments.filter(
+    (d) => d.isClinical && (d.isActive || d.id === currentDepartmentId),
+  )
+  const showDepartment = form.isClinical || form.isDoctor
   const title = isEdit ? (wasDoctor ? 'Edit doctor' : 'Edit employee') : form.isDoctor ? 'Add doctor' : 'Add employee'
 
   return (
@@ -172,25 +184,38 @@ export default function EmployeeFormPage() {
           <FormField id="jobTitle" label="Job title" required error={fieldErrors.jobTitle}>
             <input {...field('jobTitle')} required maxLength={100} placeholder="e.g. Staff Nurse, Accountant" />
           </FormField>
-          <FormField id="departmentId" label="Department" required error={fieldErrors.departmentId}>
-            <select {...field('departmentId')} required>
-              <option value="">Select...</option>
-              {departmentOptions.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                  {d.isActive ? '' : ' (inactive)'}
-                </option>
-              ))}
-            </select>
-          </FormField>
-          <p className="text-xs text-slate-500 sm:col-span-2">
-            Everyone belongs to one department. Office staff go in a non-clinical department, for example an accountant in
-            &ldquo;Finance&rdquo; or a receptionist in &ldquo;Front Office&rdquo;. Missing one?{' '}
-            <Link to="/staff?tab=departments" className="text-blue-700 hover:underline">
-              Add it on Staff &rarr; Departments
-            </Link>
-            .
+          <label className="flex items-center gap-2 self-end pb-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              name="isClinical"
+              checked={form.isClinical}
+              onChange={handleChange}
+              disabled={form.isDoctor}
+              aria-describedby="isClinical-hint"
+            />
+            Clinical staff
+          </label>
+          <p id="isClinical-hint" className="text-xs text-slate-500 sm:col-span-2">
+            Tick for doctors, nurses, laboratory staff, pharmacists and others who care for patients: they choose a
+            clinical department. Leave it empty for office staff such as accountants and receptionists: they are placed in
+            Administration automatically.
           </p>
+          {showDepartment && (
+            <FormField id="departmentId" label="Clinical department" required error={fieldErrors.departmentId}>
+              <select {...field('departmentId')} required>
+                <option value="">Select...</option>
+                {departmentOptions.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                    {d.isActive ? '' : ' (inactive)'}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          )}
+          {!showDepartment && fieldErrors.departmentId && (
+            <p className="text-sm text-red-700 sm:col-span-2">{fieldErrors.departmentId}</p>
+          )}
           <FormField id="hireDate" label="Hire date" required error={fieldErrors.hireDate}>
             <input {...field('hireDate')} type="date" max={today} required />
           </FormField>

@@ -8,7 +8,6 @@ import ComingSoonPage from './pages/ComingSoonPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
-import UsersPage from './pages/users/UsersPage'
 import DoctorDetailPage from './pages/doctors/DoctorDetailPage'
 import DoctorListPage from './pages/doctors/DoctorListPage'
 import PatientDetailPage from './pages/patients/PatientDetailPage'
@@ -55,7 +54,6 @@ const builtPages: Record<string, ReactNode> = {
   '/pharmacy': <PharmacyPage />,
   '/billing': <BillingPage />,
   '/staff': <StaffPage />,
-  '/users': <UsersPage />,
 }
 
 export default function App() {
@@ -90,6 +88,9 @@ export default function App() {
             }
           />
         ))}
+
+        {/* Logins are a tab of the Staff page now; old bookmarks to /users still work. */}
+        <Route path="/users" element={<Navigate to="/staff?tab=logins" replace />} />
 
         {/* Patient pages that are not in the menu */}
         <Route

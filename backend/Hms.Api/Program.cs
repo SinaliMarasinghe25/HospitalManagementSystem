@@ -105,13 +105,14 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// ---------- Create roles and the first admin ----------
+// ---------- Create roles, the first admin and the starter data ----------
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     await IdentitySeeder.SeedAsync(scope.ServiceProvider, app.Configuration, logger);
     await MedicineSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
     await LabTestSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
+    await DepartmentSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
 }
 
 // ---------- HTTP request pipeline (order matters) ----------

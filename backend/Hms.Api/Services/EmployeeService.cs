@@ -11,7 +11,7 @@ namespace Hms.Api.Services;
 // People: FR-ST-01 employee registration, FR-ST-03 department, FR-DM-01/02 doctors, and their login accounts.
 // This is the ONE place where a person is added or changed:
 //   employee (everyone)  +  optional doctor profile (doctors)  +  optional login (anyone who uses the system).
-// The Doctors page only reads doctors and sets their weekly schedule; the Users page only changes accounts.
+// The Doctors page only reads doctors and sets their weekly schedule; the Logins tab only changes existing logins.
 public class EmployeeService(AppDbContext db, UserAccountService accounts, StaffService staff, UserManager<AppUser> userManager)
 {
     // ---------- Reading ----------
@@ -54,14 +54,14 @@ public class EmployeeService(AppDbContext db, UserAccountService accounts, Staff
         var doctor = e.Doctor is null ? null
             : new DoctorProfile(e.Doctor.Id, e.Doctor.Specialization, e.Doctor.LicenseNumber, e.Doctor.ConsultationFee, e.Doctor.SlotMinutes);
         return new EmployeeDetail(e.Id, e.EmployeeNumber, e.FirstName, e.LastName, e.JobTitle, e.Phone, e.Email,
-            e.HireDate, e.DepartmentId, e.Department.Name, e.IsActive, doctor, e.UserId, e.User?.UserName, leave);
+            e.HireDate, e.DepartmentId, e.Department.Name, e.Department.IsClinical, e.IsActive, doctor, e.UserId, e.User?.UserName, leave);
     }
 
     // ---------- Adding and editing ----------
 
     public async Task<ServiceResult<int>> CreateAsync(EmployeeRequest request)
     {
-        var errors = await ValidateAsync(request, null);
+        var (errors, departmentId) = await ValidateAsync(request, null);
         var wantsLogin = !string.IsNullOrWhiteSpace(request.UserName);
         if (wantsLogin)
         {
@@ -97,7 +97,7 @@ public class EmployeeService(AppDbContext db, UserAccountService accounts, Staff
             .SingleAsync();
 
         var employee = new Employee { EmployeeNumber = $"EMP-{next:D4}", UserId = user?.Id };
-        Apply(employee, request);
+        Apply(employee, request, departmentId);
         db.Employees.Add(employee);
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
@@ -110,7 +110,7 @@ public class EmployeeService(AppDbContext db, UserAccountService accounts, Staff
             .FirstOrDefaultAsync(e => e.Id == id);
         if (employee is null) return ServiceResult<int>.NotFound();
 
-        var errors = await ValidateAsync(request, employee);
+        var (errors, departmentId) = await ValidateAsync(request, employee);
         if (employee.Doctor is not null && request.Doctor is null)
         {
             errors["Doctor"] = ["A doctor profile cannot be removed, because appointments and records use it. Untick Active instead."];
@@ -119,7 +119,7 @@ public class EmployeeService(AppDbContext db, UserAccountService accounts, Staff
 
         var becomesDoctor = employee.Doctor is null && request.Doctor is not null;
         await using var transaction = await db.Database.BeginTransactionAsync();
-        Apply(employee, request);
+        Apply(employee, request, departmentId);
         await db.SaveChangesAsync();
 
         // A new doctor with a login gets the Doctor role, so the doctor screens work for them straight away.
@@ -131,16 +131,52 @@ public class EmployeeService(AppDbContext db, UserAccountService accounts, Staff
         return ServiceResult<int>.Ok(id);
     }
 
-    private async Task<Dictionary<string, string[]>> ValidateAsync(EmployeeRequest request, Employee? existing)
+    // Checks the request and works out the department: the chosen clinical one, or "Administration" for
+    // non-clinical staff (assumption A26). Returns the errors and the department id to save.
+    private async Task<(Dictionary<string, string[]> Errors, int DepartmentId)> ValidateAsync(EmployeeRequest request, Employee? existing)
     {
         var errors = new Dictionary<string, string[]>();
+        var departmentId = 0;
 
-        // An employee may stay in a department that was later deactivated, but new moves need an active one.
-        var departmentOk = await db.Departments.AnyAsync(d =>
-            d.Id == request.DepartmentId && (d.IsActive || (existing != null && existing.DepartmentId == d.Id)));
-        if (!departmentOk)
+        if (request.DepartmentId is null)
         {
-            errors["DepartmentId"] = ["Choose an active department."];
+            if (request.Doctor is not null)
+            {
+                errors["DepartmentId"] = ["Choose the doctor's department."];
+            }
+            else
+            {
+                departmentId = await db.Departments
+                    .Where(d => d.Name == DepartmentSeeder.DefaultName)
+                    .Select(d => d.Id)
+                    .FirstOrDefaultAsync();
+                if (departmentId == 0)
+                {
+                    errors["DepartmentId"] = [$"The \"{DepartmentSeeder.DefaultName}\" department is missing. Restart the API to add it."];
+                }
+            }
+        }
+        else
+        {
+            // An employee may stay in a department that was later deactivated, but new moves need an active one.
+            var department = await db.Departments.AsNoTracking().FirstOrDefaultAsync(d =>
+                d.Id == request.DepartmentId && (d.IsActive || (existing != null && existing.DepartmentId == d.Id)));
+            if (department is null)
+            {
+                errors["DepartmentId"] = ["Choose an active department."];
+            }
+            else if (!department.IsClinical && department.Id != existing?.DepartmentId)
+            {
+                errors["DepartmentId"] = ["Choose a clinical department, or leave it empty for non-clinical staff."];
+            }
+            else if (request.Doctor is not null && !department.IsClinical)
+            {
+                errors["DepartmentId"] = ["A doctor must be in a clinical department, such as General Medicine or Cardiology."];
+            }
+            else
+            {
+                departmentId = department.Id;
+            }
         }
 
         if (request.HireDate > HospitalTime.Today)
@@ -168,10 +204,10 @@ public class EmployeeService(AppDbContext db, UserAccountService accounts, Staff
             }
         }
 
-        return errors;
+        return (errors, departmentId);
     }
 
-    private static void Apply(Employee employee, EmployeeRequest request)
+    private static void Apply(Employee employee, EmployeeRequest request, int departmentId)
     {
         employee.FirstName = request.FirstName.Trim();
         employee.LastName = request.LastName.Trim();
@@ -179,7 +215,7 @@ public class EmployeeService(AppDbContext db, UserAccountService accounts, Staff
         employee.Phone = request.Phone.Trim();
         employee.Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
         employee.HireDate = request.HireDate!.Value;
-        employee.DepartmentId = request.DepartmentId!.Value;
+        employee.DepartmentId = departmentId;
         employee.IsActive = request.IsActive;
 
         if (request.Doctor is not null)

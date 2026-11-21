@@ -24,16 +24,12 @@ Content-Type: application/json
 ### 4. Who am I? expect 200
 GET {{baseUrl}}/api/auth/me
 
-### 5. Create a department for office staff: expect 201 (or 400 "already exists" the second time)
-# @name dept
-POST {{baseUrl}}/api/departments
-Content-Type: application/json
-
-{ "name": "Front Office", "description": "Reception and registration", "isActive": true }
+### 5. List departments: expect 200 with the starter list (Administration first)
+GET {{baseUrl}}/api/departments
 
 ### 6. Add a receptionist with a login, in one step (fictitious person): expect 201
-# Logins are always created from the staff record. If request 5 said "already exists",
-# put the Front Office id from GET /api/departments in place of {{dept.response.body.$.id}}.
+# Non-clinical staff have no departmentId: the API places them in "Administration".
+# Logins are always created from the staff record.
 POST {{baseUrl}}/api/staff/employees
 Content-Type: application/json
 
@@ -44,7 +40,6 @@ Content-Type: application/json
   "phone": "0771234567",
   "email": "frontdesk1@example.test",
   "hireDate": "2026-01-05",
-  "departmentId": {{dept.response.body.$.id}},
   "isActive": true,
   "userName": "frontdesk1",
   "password": "Front#2026",

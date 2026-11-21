@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Hms.Api.Dtos;
 
-// Login accounts (Users page). New logins are created from a person's staff record (see StaffDtos.cs).
+// Login accounts (Staff page, Logins tab). New logins are created from a person's staff record (see StaffDtos.cs).
 
 public record UserResponse(
     string Id,

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Hms.Api.Services;
 
 // Login accounts (PDF 3.1 User Management). All the rules about accounts and roles live here,
-// so the Users page and the Staff page cannot drift apart.
+// so every screen of the Staff page applies the same rules.
 //
 // Rules:
 // - A login is created from a person's staff record (EmployeeService), never on its own.
@@ -60,7 +60,7 @@ public class UserAccountService(UserManager<AppUser> userManager)
         return ServiceResult<AppUser>.Ok(user);
     }
 
-    // ---------- Changing (Users page) ----------
+    // ---------- Changing (Staff page, Logins tab) ----------
 
     public async Task<ServiceResult<UserResponse>> UpdateRolesAsync(string id, IEnumerable<string> roles, string? currentUserId)
     {
