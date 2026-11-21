@@ -1,3 +1,4 @@
+using Hms.Api.Authorization;
 using Hms.Api.Data;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -9,7 +10,7 @@ namespace Hms.Api.Services;
 // Inpatient management (assumption A1): admit to a bed, transfer, vital signs and notes, discharge.
 // Two rules are also enforced by the database (Step 8 partial unique indexes):
 //   a bed holds one patient at a time, and a patient has only one active admission.
-public class AdmissionService(AppDbContext db)
+public class AdmissionService(AppDbContext db, NotificationService notifications)
 {
     private const int MaxRangeDays = 62;
 
@@ -133,6 +134,13 @@ public class AdmissionService(AppDbContext db)
         {
             return ServiceResult<int>.Invalid(new() { ["BedId"] = ["This bed was just taken, or the patient was just admitted. Refresh and try again."] });
         }
+
+        // The nurses who will care for the patient, and the admitting doctor.
+        var bed = await db.Beds.Where(b => b.Id == admission.BedId).Select(b => b.Ward.Name + ", bed " + b.BedNumber).FirstAsync();
+        var message = $"{await notifications.PatientLabelAsync(admission.PatientId)} admitted to {bed}.";
+        var link = $"/admissions/{admission.Id}";
+        await notifications.SendToRoleAsync(Roles.Nurse, "Patient admitted", message, link);
+        await notifications.SendToDoctorAsync(admission.AdmittingDoctorId, "Patient admitted", message, link);
         return ServiceResult<int>.Ok(admission.Id);
     }
 

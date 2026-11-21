@@ -24,3 +24,11 @@ export function changePassword(currentPassword: string, newPassword: string): Pr
 export function getCurrentUser(): Promise<CurrentUser> {
   return apiFetch<CurrentUser>('/auth/me')
 }
+
+// "Forgot password": tells the administrators. The API answers the same way whether or not the username exists.
+export function forgotPassword(userName: string): Promise<void> {
+  return apiFetch<void>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ userName }),
+  })
+}

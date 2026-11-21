@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Hms.Api.Services;
 
 // The database stores every date-time in UTC. Doctors' schedules ("Monday 08:00-12:00")
@@ -13,6 +15,13 @@ public static class HospitalTime
 
     public static DateTime ToUtc(DateOnly date, TimeOnly time) =>
         TimeZoneInfo.ConvertTimeToUtc(date.ToDateTime(time, DateTimeKind.Unspecified), Zone);
+
+    // Hospital days "from" to "to", both inclusive, as a UTC range [FromUtc, ToUtc) for database queries.
+    public static (DateTime FromUtc, DateTime ToUtc) DaysToUtc(DateOnly from, DateOnly to) =>
+        (ToUtc(from, TimeOnly.MinValue), ToUtc(to.AddDays(1), TimeOnly.MinValue));
+
+    // How times are written in notifications, e.g. "Mon 23 Nov, 09:30" (hospital time).
+    public static string Describe(DateTime utc) => ToLocal(utc).ToString("ddd d MMM, HH:mm", CultureInfo.InvariantCulture);
 
     public static DateOnly Today => DateOnly.FromDateTime(ToLocal(DateTime.UtcNow));
 

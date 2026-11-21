@@ -69,3 +69,35 @@ GET {{baseUrl}}/api/users
 
 ### 12. Log out: expect 204, then request 4 returns 401 again
 POST {{baseUrl}}/api/auth/logout
+
+### ---------- Reports (PDF 3.10). Log in as admin first (request 3). ----------
+
+### 13. Patient registrations this month: expect 200
+GET {{baseUrl}}/api/reports/patients
+
+### 14. Revenue for November 2026: expect 200; "collected" equals the sum of the payments in November
+GET {{baseUrl}}/api/reports/revenue?fromDate=2026-11-01&toDate=2026-11-30
+
+### 15. Attendance and leave for November 2026: expect 200
+GET {{baseUrl}}/api/reports/staff?year=2026&month=11
+
+### 16. End date before start date: expect 400
+GET {{baseUrl}}/api/reports/appointments?fromDate=2026-11-30&toDate=2026-11-01
+
+### ---------- Notifications and forgot password (Step 23) ----------
+
+### 17. Forgot password: always expect 204, even for a username that does not exist.
+###     For a real, active username, every administrator gets a "Password reset requested" notification.
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: application/json
+
+{ "userName": "frontdesk1" }
+
+### 18. My notifications (log in first, request 3): expect 200 with "items" and "unreadCount"
+GET {{baseUrl}}/api/notifications
+
+### 19. How many are unread: expect 200 { "count": ... }
+GET {{baseUrl}}/api/notifications/unread-count
+
+### 20. Mark all my notifications as read: expect 204
+POST {{baseUrl}}/api/notifications/read-all

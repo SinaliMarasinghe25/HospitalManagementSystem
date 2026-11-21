@@ -8,6 +8,7 @@ import ComingSoonPage from './pages/ComingSoonPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import DoctorDetailPage from './pages/doctors/DoctorDetailPage'
 import DoctorListPage from './pages/doctors/DoctorListPage'
 import PatientDetailPage from './pages/patients/PatientDetailPage'
@@ -41,6 +42,7 @@ import { InvoicePrintPage, ReceiptPage } from './pages/billing/InvoicePrintPage'
 import EmployeeFormPage from './pages/staff/EmployeeFormPage'
 import EmployeePage from './pages/staff/EmployeePage'
 import StaffPage from './pages/staff/StaffPage'
+import ReportsPage from './pages/reports/ReportsPage'
 
 // Pages that are built so far. Every other menu item shows a "coming soon" page.
 const builtPages: Record<string, ReactNode> = {
@@ -54,12 +56,15 @@ const builtPages: Record<string, ReactNode> = {
   '/pharmacy': <PharmacyPage />,
   '/billing': <BillingPage />,
   '/staff': <StaffPage />,
+  '/reports': <ReportsPage />,
 }
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      {/* Forgot password: open to everyone, because the person cannot log in. */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route
         path="/change-password"
         element={

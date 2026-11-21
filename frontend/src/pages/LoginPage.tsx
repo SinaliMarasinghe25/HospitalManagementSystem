@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/useAuth'
+import { AuthAlert, AuthCard, AuthNotice } from '../components/auth/AuthCard'
+import { FormField, inputClass, primaryButtonClass } from '../components/ui/FormField'
 
 // PDF section 7, Login Page: Username, Password, Login Button.
 export default function LoginPage() {
@@ -36,65 +38,49 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-      <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-        <h1 className="text-2xl font-semibold text-slate-900">Hospital Management System</h1>
-        <p className="mt-1 text-sm text-slate-600">Sign in with your staff account.</p>
+    <AuthCard title="Hospital Management System">
+      <p className="mt-1 text-sm text-slate-600">Sign in with your staff account.</p>
 
-        {sessionExpired && !error && (
-          <p className="mt-4 rounded-md bg-amber-50 p-3 text-sm text-amber-800" role="status">
-            Your session expired. Please sign in again.
-          </p>
-        )}
+      {sessionExpired && !error && <AuthNotice>Your session expired. Please sign in again.</AuthNotice>}
+      {error && <AuthAlert>{error}</AuthAlert>}
 
-        {error && (
-          <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
-            {error}
-          </p>
-        )}
+      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+        <FormField id="userName" label="Username">
+          <input
+            id="userName"
+            name="userName"
+            type="text"
+            autoComplete="username"
+            required
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            className={inputClass}
+          />
+        </FormField>
 
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate={false}>
-          <div>
-            <label htmlFor="userName" className="block text-sm font-medium text-slate-700">
-              Username
-            </label>
-            <input
-              id="userName"
-              name="userName"
-              type="text"
-              autoComplete="username"
-              required
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/30 focus:outline-none"
-            />
-          </div>
+        <FormField id="password" label="Password">
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={inputClass}
+          />
+        </FormField>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/30 focus:outline-none"
-            />
-          </div>
+        <button type="submit" disabled={isSubmitting} className={`${primaryButtonClass} w-full`}>
+          {isSubmitting ? 'Signing in...' : 'Login'}
+        </button>
+      </form>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full rounded-md bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 focus:ring-2 focus:ring-blue-600/40 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? 'Signing in...' : 'Login'}
-          </button>
-        </form>
-      </div>
-    </main>
+      <p className="mt-4 text-center text-sm">
+        <Link to="/forgot-password" className="text-blue-700 hover:underline">
+          Forgot password?
+        </Link>
+      </p>
+    </AuthCard>
   )
 }

@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Hms.Api.Authorization;
+using Hms.Api.Controllers;
 using Hms.Api.Data;
 using Hms.Api.Entities;
 using Hms.Api.Services;
@@ -63,6 +65,17 @@ builder.Services.ConfigureApplicationCookie(options =>
         context.Response.StatusCode = StatusCodes.Status403Forbidden;
         return Task.CompletedTask;
     };
+
+    // The notification bell asks for its unread count every minute. That automatic question must not
+    // count as "activity", or an unattended screen would never reach the 20-minute timeout.
+    options.Events.OnCheckSlidingExpiration = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api/notifications/unread-count"))
+        {
+            context.ShouldRenew = false;
+        }
+        return Task.CompletedTask;
+    };
 });
 
 // Re-check every minute that the user's security stamp is unchanged,
@@ -76,9 +89,29 @@ builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
     .AddHmsPolicies();   // named permissions, see Authorization/Policies.cs
 
+// ---------- Rate limit for "forgot password" ----------
+// At most 5 requests per 15 minutes from one IP address, so nobody can flood the administrators with requests.
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy(AuthController.PasswordResetRateLimit, context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(15) }));
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            title = "Too many attempts. Wait 15 minutes, then try again.",
+            status = StatusCodes.Status429TooManyRequests,
+        }, cancellationToken);
+    };
+});
+
 // ---------- Our services ----------
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuditService>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<PatientService>();
 builder.Services.AddScoped<PatientDocumentService>();
 builder.Services.AddScoped<DepartmentService>();
@@ -93,6 +126,7 @@ builder.Services.AddScoped<BillingService>();
 builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<UserAccountService>();
+builder.Services.AddScoped<ReportService>();
 
 // Errors are returned as safe JSON (ProblemDetails) without stack traces.
 builder.Services.AddProblemDetails();
@@ -128,6 +162,7 @@ else
 
 app.UseHttpsRedirection();
 
+app.UseRateLimiter();      // 0. Too many "forgot password" requests are refused here.
 app.UseAuthentication();   // 1. Who are you? (reads the cookie)
 app.UseMustChangePassword(); // 1b. A temporary password must be replaced before anything else.
 app.UseAuthorization();    // 2. Are you allowed? (checks roles and policies)

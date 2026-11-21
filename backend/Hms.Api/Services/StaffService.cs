@@ -1,3 +1,4 @@
+using Hms.Api.Authorization;
 using Hms.Api.Data;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -13,7 +14,7 @@ namespace Hms.Api.Services;
 //   There is no holiday calendar in the PDF, so weekends and public holidays are not skipped.
 // Assumption A24 (proposed): leave can start up to 30 days in the past (sick leave is often
 //   recorded afterwards), must end within a year from today, and one request covers at most 180 days.
-public class StaffService(AppDbContext db)
+public class StaffService(AppDbContext db, NotificationService notifications)
 {
     public const int LeavePastDays = 30;
     public const int LeaveFutureDays = 365;
@@ -283,6 +284,9 @@ public class StaffService(AppDbContext db)
         db.LeaveRequests.Add(leave);
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
+
+        await notifications.SendToRoleAsync(Roles.Administrator, "Leave request to review",
+            $"{employee.FirstName} {employee.LastName}: {type} leave, {DescribeDays(start, end)}.", "/staff?tab=leave");
         return ServiceResult<int>.Ok(leave.Id);
     }
 
@@ -323,6 +327,11 @@ public class StaffService(AppDbContext db)
         leave.ReviewedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
+
+        var employeeUserId = await db.Employees.Where(e => e.Id == leave.EmployeeId).Select(e => e.UserId).FirstAsync();
+        await notifications.SendToUserAsync(employeeUserId, approve ? "Leave approved" : "Leave rejected",
+            $"Your {leave.LeaveType} leave, {DescribeDays(leave.StartDate, leave.EndDate)}" +
+            (note is null ? "." : $". Note: {note}"), "/staff?tab=mine");
         return ServiceResult<int>.Ok(id);
     }
 
@@ -368,4 +377,7 @@ public class StaffService(AppDbContext db)
 
     private static ServiceResult<T> Invalid<T>(string field, string message) =>
         ServiceResult<T>.Invalid(new() { [field] = [message] });
+
+    private static string DescribeDays(DateOnly start, DateOnly end) =>
+        start == end ? $"{start:yyyy-MM-dd}" : $"{start:yyyy-MM-dd} to {end:yyyy-MM-dd}";
 }

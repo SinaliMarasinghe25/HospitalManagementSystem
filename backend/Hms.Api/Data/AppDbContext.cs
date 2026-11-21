@@ -50,6 +50,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    // In-app notifications
+    public DbSet<Notification> Notifications => Set<Notification>();
+
     // Rules that apply to every property of a type, in one place.
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -71,6 +74,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         ConfigureClinical(builder);
         ConfigureLabAndPharmacy(builder);
         ConfigureBilling(builder);
+        ConfigureNotifications(builder);
 
         // Hospital data is never hard-deleted: block deletes that would remove related rows.
         foreach (var foreignKey in builder.Model.GetEntityTypes()
@@ -325,6 +329,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             e.Property(x => x.Changes).HasColumnType("jsonb");
             e.HasIndex(x => x.Timestamp);
             e.HasIndex(x => new { x.EntityName, x.EntityId });
+        });
+    }
+
+    private static void ConfigureNotifications(ModelBuilder builder)
+    {
+        builder.Entity<Notification>(e =>
+        {
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId);
+            // The bell asks for "my newest notifications" and "how many are unread" on every page.
+            e.HasIndex(x => new { x.UserId, x.CreatedAt });
         });
     }
 }

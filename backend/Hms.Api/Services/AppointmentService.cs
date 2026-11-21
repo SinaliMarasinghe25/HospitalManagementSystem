@@ -11,7 +11,7 @@ namespace Hms.Api.Services;
 public record AppointmentAccess(bool SeesAll, int? MyDoctorId, bool IsAdmin, bool IsFrontDesk);
 
 // Business logic for PDF 3.4 Appointment Management.
-public class AppointmentService(AppDbContext db)
+public class AppointmentService(AppDbContext db, NotificationService notifications)
 {
     // Appointments in these states no longer hold their time slot.
     private static readonly AppointmentStatus[] FreedStatuses = [AppointmentStatus.Cancelled, AppointmentStatus.Rescheduled];
@@ -134,7 +134,11 @@ public class AppointmentService(AppDbContext db)
             return SlotJustTaken();
         }
         await transaction.CommitAsync();
-        return ServiceResult<AppointmentResponse>.Ok(await LoadAsync(appointment.Id));
+
+        var booked = await LoadAsync(appointment.Id);
+        await TellDoctorAsync(booked.DoctorId, booked.Id, "New appointment",
+            $"{booked.PatientName} ({booked.PatientNumber}) on {HospitalTime.Describe(booked.StartTime)}.");
+        return ServiceResult<AppointmentResponse>.Ok(booked);
     }
 
     // ---------- Reschedule (FR-AP-03) ----------
@@ -187,7 +191,17 @@ public class AppointmentService(AppDbContext db)
             return SlotJustTaken(); // the transaction is not committed, so the old appointment stays Scheduled
         }
         await transaction.CommitAsync();
-        return ServiceResult<AppointmentResponse>.Ok(await LoadAsync(replacement.Id));
+
+        var moved = await LoadAsync(replacement.Id);
+        await TellDoctorAsync(moved.DoctorId, moved.Id, "Appointment rescheduled",
+            $"{moved.PatientName} ({moved.PatientNumber}) is now on {HospitalTime.Describe(moved.StartTime)} " +
+            $"(was {HospitalTime.Describe(old.StartTime)}).");
+        if (old.DoctorId != moved.DoctorId)
+        {
+            await TellDoctorAsync(old.DoctorId, moved.Id, "Appointment moved to another doctor",
+                $"{moved.PatientName} ({moved.PatientNumber}) on {HospitalTime.Describe(old.StartTime)} now sees Dr {moved.DoctorName}.");
+        }
+        return ServiceResult<AppointmentResponse>.Ok(moved);
     }
 
     // ---------- Cancel (FR-AP-02) ----------
@@ -206,7 +220,12 @@ public class AppointmentService(AppDbContext db)
         appointment.Status = AppointmentStatus.Cancelled;
         appointment.CancellationReason = reason.Trim();
         await db.SaveChangesAsync();
-        return ServiceResult<AppointmentResponse>.Ok(await LoadAsync(id));
+
+        var cancelled = await LoadAsync(id);
+        await TellDoctorAsync(cancelled.DoctorId, id, "Appointment cancelled",
+            $"{cancelled.PatientName} ({cancelled.PatientNumber}) on {HospitalTime.Describe(cancelled.StartTime)}. " +
+            $"Reason: {cancelled.CancellationReason}");
+        return ServiceResult<AppointmentResponse>.Ok(cancelled);
     }
 
     // ---------- Status tracking (FR-AP-04) ----------
@@ -277,7 +296,14 @@ public class AppointmentService(AppDbContext db)
         {
             return Invalid("Status", "This appointment was just completed by someone else. Reload the page.");
         }
-        return ServiceResult<AppointmentResponse>.Ok(await LoadAsync(id));
+
+        var updated = await LoadAsync(id);
+        if (next == AppointmentStatus.CheckedIn)
+        {
+            await TellDoctorAsync(updated.DoctorId, id, "Patient checked in",
+                $"{updated.PatientName} ({updated.PatientNumber}) has arrived for {HospitalTime.Describe(updated.StartTime)}.");
+        }
+        return ServiceResult<AppointmentResponse>.Ok(updated);
     }
 
     // ---------- Rules shared by booking and rescheduling ----------
@@ -400,6 +426,10 @@ public class AppointmentService(AppDbContext db)
 
     private async Task<AppointmentResponse> LoadAsync(int id) =>
         await Project(db.Appointments.AsNoTracking().Where(a => a.Id == id)).SingleAsync();
+
+    // Every appointment notification goes to the appointment's doctor and opens the appointment.
+    private Task TellDoctorAsync(int doctorId, int appointmentId, string title, string message) =>
+        notifications.SendToDoctorAsync(doctorId, title, message, $"/appointments/{appointmentId}");
 
     private static ServiceResult<AppointmentResponse> Invalid(string field, string message) =>
         ServiceResult<AppointmentResponse>.Invalid(new() { [field] = [message] });

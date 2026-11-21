@@ -1,3 +1,4 @@
+using Hms.Api.Authorization;
 using Hms.Api.Data;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -8,7 +9,7 @@ namespace Hms.Api.Services;
 
 // Business logic for PDF 3.6 Laboratory Management.
 // A request moves Requested -> SampleCollected -> Completed. A doctor can cancel it while it is still Requested.
-public class LabService(AppDbContext db)
+public class LabService(AppDbContext db, NotificationService notifications)
 {
     private const int MaxRangeDays = 62;
 
@@ -136,6 +137,10 @@ public class LabService(AppDbContext db)
         db.LabRequests.AddRange(created);
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
+
+        var patient = await notifications.PatientLabelAsync(created[0].PatientId);
+        await notifications.SendToRoleAsync(Roles.LaboratoryStaff, "New lab request",
+            $"{created.Count} test(s) requested for {patient}.", "/laboratory");
         return ServiceResult<List<int>>.Ok(created.Select(c => c.Id).ToList());
     }
 
@@ -235,6 +240,14 @@ public class LabService(AppDbContext db)
         {
             return ServiceResult<bool>.Invalid(new() { ["Status"] = ["The result was just entered by someone else. Reload the page."] });
         }
+
+        // The requesting doctor is told the result is ready. The result itself is only on the linked page.
+        var testName = await db.LabTests.Where(t => t.Id == lab.LabTestId).Select(t => t.Name).FirstAsync();
+        await notifications.SendToDoctorAsync(lab.RequestedByDoctorId,
+            isCorrection ? "Lab result corrected" : "Lab result ready",
+            $"{testName} ({lab.RequestNumber}) for {await notifications.PatientLabelAsync(lab.PatientId)}" +
+            (lab.IsAbnormal == true ? ", marked abnormal." : "."),
+            $"/laboratory/requests/{lab.Id}");
         return ServiceResult<bool>.Ok(isCorrection);
     }
 
