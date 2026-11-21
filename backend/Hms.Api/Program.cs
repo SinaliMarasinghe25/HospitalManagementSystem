@@ -66,11 +66,13 @@ builder.Services.ConfigureApplicationCookie(options =>
         return Task.CompletedTask;
     };
 
-    // The notification bell asks for its unread count every minute. That automatic question must not
-    // count as "activity", or an unattended screen would never reach the 20-minute timeout.
+    // The notification bell asks for its unread count every minute, and an open dashboard reloads its numbers
+    // every 30 seconds. Those automatic questions must not count as "activity",
+    // or an unattended screen would never reach the 20-minute timeout.
     options.Events.OnCheckSlidingExpiration = context =>
     {
-        if (context.Request.Path.StartsWithSegments("/api/notifications/unread-count"))
+        if (context.Request.Path.StartsWithSegments("/api/notifications/unread-count") ||
+            context.Request.Path.StartsWithSegments("/api/dashboard"))
         {
             context.ShouldRenew = false;
         }
@@ -127,6 +129,7 @@ builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<UserAccountService>();
 builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<DashboardService>();
 
 // Errors are returned as safe JSON (ProblemDetails) without stack traces.
 builder.Services.AddProblemDetails();

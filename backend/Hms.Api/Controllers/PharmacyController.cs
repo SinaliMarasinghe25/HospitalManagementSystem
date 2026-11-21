@@ -110,10 +110,6 @@ public class PharmacyController(PharmacyService pharmacy, AuditService audit, Us
     [HttpGet("alerts")]
     public Task<PharmacyAlerts> Alerts() => pharmacy.GetAlertsAsync(ShowCost);
 
-    // GET /api/pharmacy/alerts/count   (dashboard tile "Pharmacy Alerts", UI-DSH-05)
-    [HttpGet("alerts/count")]
-    public Task<PharmacyAlertCounts> AlertCount() => pharmacy.CountAlertsAsync();
-
     // ---------- FR-PH-02 Prescription processing ----------
 
     // GET /api/pharmacy/prescriptions/5   (the prescription, stock for each medicine, and what was handed over)

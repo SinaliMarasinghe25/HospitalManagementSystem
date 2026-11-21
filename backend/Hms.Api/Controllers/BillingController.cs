@@ -115,11 +115,4 @@ public class BillingController(BillingService billing, AuditService audit, UserM
         var receipt = await billing.GetReceiptAsync(paymentId);
         return receipt is null ? NotFound() : receipt;
     }
-
-    // ---------- Dashboard ----------
-
-    // GET /api/billing/revenue-summary   (UI-DSH-03, Admin and Accountant only)
-    [HttpGet("revenue-summary")]
-    [Authorize(Policy = Policies.ViewRevenue)]
-    public Task<RevenueSummary> RevenueSummary() => billing.GetRevenueSummaryAsync();
 }

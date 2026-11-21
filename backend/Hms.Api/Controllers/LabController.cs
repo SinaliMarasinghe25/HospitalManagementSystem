@@ -52,10 +52,6 @@ public class LabController(LabService lab, DoctorService doctors, AuditService a
         return result.Succeeded ? result.Value! : this.ValidationErrors(result.Errors);
     }
 
-    // GET /api/lab/requests/open-count   (dashboard tile "Laboratory Requests", UI-DSH-04)
-    [HttpGet("requests/open-count")]
-    public async Task<ActionResult<object>> OpenCount() => new { count = await lab.CountOpenAsync() };
-
     // GET /api/lab/requests/5   (also used by the printable lab report, FR-LAB-04)
     [HttpGet("requests/{id:int}")]
     public async Task<ActionResult<LabRequestResponse>> Get(int id)

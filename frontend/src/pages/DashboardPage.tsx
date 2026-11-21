@@ -1,141 +1,94 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { listAppointments } from '../api/appointments'
-import { getRevenueSummary } from '../api/billing'
-import { openLabRequestCount } from '../api/lab'
-import { searchPatients } from '../api/patients'
-import { countPharmacyAlerts } from '../api/pharmacy'
 import { Permissions } from '../auth/permissions'
-import { hasAnyRole } from '../auth/roles'
+import { hasAnyRole, Roles, type Role } from '../auth/roles'
 import { useAuth } from '../auth/useAuth'
 import { StatusBadge } from '../components/appointments/StatusBadge'
-import type { Appointment } from '../types/appointment'
-import type { RevenueSummary } from '../types/billing'
-import type { PharmacyAlertCounts } from '../types/pharmacy'
-import { formatClock, formatMoney, todayInHospital } from '../utils/format'
+import { DashboardTile } from '../components/dashboard/DashboardTile'
+import { useDashboard } from '../components/dashboard/useDashboard'
+import type { DashboardSummary, DashboardTile as TileKey } from '../types/dashboard'
+import { formatClock, formatMoney, formatTimestamp } from '../utils/format'
 
-// PDF section 7, Dashboard: five tiles (UI-DSH-01 to 05). Each tile shows -- to roles that may not see it.
+// PDF section 7, Dashboard: five tiles (UI-DSH-01 to 05).
+// The API decides which tiles each role gets (Services/DashboardService.cs) and sends every number in one answer,
+// so all tiles are counted at the same moment. A role only sees its own tiles; nothing is shown as "--".
 
 export default function DashboardPage() {
   const { user } = useAuth()
-  const canSeePatients = hasAnyRole(user?.roles, Permissions.viewPatients)
-  const [patients, setPatients] = useState<number | null>(null)
-  const canSeeAppointments = hasAnyRole(user?.roles, Permissions.viewAppointments)
-  const [today, setToday] = useState<Appointment[] | null>(null)
-  const canSeeLab = hasAnyRole(user?.roles, Permissions.viewLabRequests)
-  const [openLab, setOpenLab] = useState<number | null>(null)
-  // Role table: the Pharmacy Alerts tile is for the administrator and the pharmacist.
-  const canSeePharmacy = hasAnyRole(user?.roles, Permissions.pharmacyQueue)
-  const [pharmacy, setPharmacy] = useState<PharmacyAlertCounts | null>(null)
-  const canSeeRevenue = hasAnyRole(user?.roles, Permissions.viewRevenue)
-  const [revenue, setRevenue] = useState<RevenueSummary | null>(null)
+  const { summary, error, loading, refresh } = useDashboard()
+  const can = (allowed: readonly Role[]) => hasAnyRole(user?.roles, allowed)
+  // A doctor's tile counts only their own appointments (role table: Doctor "Own").
+  const ownAppointmentsOnly = can([Roles.Doctor]) && !can([Roles.Administrator, Roles.Nurse, Roles.Receptionist])
 
-  // UI-DSH-01 Total Patients: the patient search already returns the total, so ask for one row only.
-  useEffect(() => {
-    if (!canSeePatients) return
-    searchPatients('', 1, 1)
-      .then((r) => setPatients(r.totalCount))
-      .catch(() => setPatients(null))
-  }, [canSeePatients])
+  // How each tile looks. `to` is only set when the user may open that page.
+  function tile(key: TileKey, s: DashboardSummary) {
+    switch (key) {
+      case 'patients':
+        return (
+          <DashboardTile key={key} label="Total Patients" value={s.totalPatients} detail="registered"
+            to={can(Permissions.viewPatients) ? '/patients' : undefined} />
+        )
+      case 'appointments':
+        return (
+          <DashboardTile key={key} label="Today's Appointments" value={s.appointments?.count}
+            detail={ownAppointmentsOnly ? 'yours, not cancelled' : 'not cancelled'}
+            to="/appointments" />
+        )
+      case 'lab':
+        return (
+          <DashboardTile key={key} label="Laboratory Requests" value={s.openLabRequests}
+            detail="waiting for sample or result" to="/laboratory" />
+        )
+      case 'pharmacy': {
+        const p = s.pharmacyAlerts!
+        return (
+          <DashboardTile key={key} label="Pharmacy Alerts" value={p.lowStock + p.nearExpiry + p.expired}
+            detail={`${p.lowStock} low stock, ${p.nearExpiry} expiring soon, ${p.expired} expired`}
+            to="/pharmacy?tab=alerts" />
+        )
+      }
+      case 'revenue': {
+        const r = s.revenue!
+        return (
+          <DashboardTile key={key} label="Revenue Summary" value={formatMoney(r.today)}
+            detail={`received today; ${formatMoney(r.thisMonth)} this month; ${formatMoney(r.outstandingBalance)} still due`}
+            to="/billing?tab=due" />
+        )
+      }
+    }
+  }
 
-  // UI-DSH-03 Revenue Summary: money received today and this month (Admin and Accountant only).
-  useEffect(() => {
-    if (!canSeeRevenue) return
-    getRevenueSummary()
-      .then(setRevenue)
-      .catch(() => setRevenue(null))
-  }, [canSeeRevenue])
-
-  // UI-DSH-05 Pharmacy Alerts: low stock, expiring soon and expired batches.
-  useEffect(() => {
-    if (!canSeePharmacy) return
-    countPharmacyAlerts()
-      .then(setPharmacy)
-      .catch(() => setPharmacy(null))
-  }, [canSeePharmacy])
-
-  // UI-DSH-04 Laboratory Requests: tests waiting for a sample or a result.
-  useEffect(() => {
-    if (!canSeeLab) return
-    openLabRequestCount()
-      .then((r) => setOpenLab(r.count))
-      .catch(() => setOpenLab(null))
-  }, [canSeeLab])
-
-  useEffect(() => {
-    if (!canSeeAppointments) return
-    const date = todayInHospital()
-    listAppointments({ fromDate: date, toDate: date })
-      // Cancelled and rescheduled appointments are not real visits today.
-      .then((data) => setToday(data.filter((a) => a.status !== 'Cancelled' && a.status !== 'Rescheduled')))
-      .catch(() => setToday(null))
-  }, [canSeeAppointments])
+  const today = summary?.appointments?.items ?? []
 
   return (
     <>
-      <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <Link
-          to={canSeePatients ? '/patients' : '/'}
-          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-blue-300"
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
+        <span className="text-xs text-slate-500" aria-live="polite">
+          {summary ? `Updated ${formatTimestamp(summary.generatedAt)}` : loading ? 'Loading...' : ''}
+        </span>
+        <button
+          type="button"
+          onClick={refresh}
+          disabled={loading}
+          className="ml-auto rounded-md px-3 py-1.5 text-sm font-medium text-blue-700 ring-1 ring-slate-300 hover:bg-slate-50 disabled:opacity-50"
         >
-          <p className="text-sm text-slate-600">Total Patients</p>
-          <p className={`mt-2 text-2xl font-semibold ${patients !== null ? 'text-slate-900' : 'text-slate-400'}`}>
-            {patients ?? '--'}
-          </p>
-          {patients !== null && <p className="text-xs text-slate-500">registered</p>}
-        </Link>
-        {/* UI-DSH-02 Today's Appointments (a doctor sees only their own) */}
-        <Link
-          to={canSeeAppointments ? '/appointments' : '/'}
-          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-blue-300"
-        >
-          <p className="text-sm text-slate-600">Today&apos;s Appointments</p>
-          <p className={`mt-2 text-2xl font-semibold ${today ? 'text-slate-900' : 'text-slate-400'}`}>
-            {today ? today.length : '--'}
-          </p>
-        </Link>
-        <Link
-          to={canSeeLab ? '/laboratory' : '/'}
-          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-blue-300"
-        >
-          <p className="text-sm text-slate-600">Laboratory Requests</p>
-          <p className={`mt-2 text-2xl font-semibold ${openLab !== null ? 'text-slate-900' : 'text-slate-400'}`}>
-            {openLab ?? '--'}
-          </p>
-          {openLab !== null && <p className="text-xs text-slate-500">waiting for sample or result</p>}
-        </Link>
-        <Link
-          to={canSeePharmacy ? '/pharmacy?tab=alerts' : '/'}
-          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-blue-300"
-        >
-          <p className="text-sm text-slate-600">Pharmacy Alerts</p>
-          <p className={`mt-2 text-2xl font-semibold ${pharmacy ? 'text-slate-900' : 'text-slate-400'}`}>
-            {pharmacy ? pharmacy.lowStock + pharmacy.nearExpiry + pharmacy.expired : '--'}
-          </p>
-          {pharmacy && (
-            <p className="text-xs text-slate-500">
-              {pharmacy.lowStock} low stock, {pharmacy.nearExpiry} expiring soon, {pharmacy.expired} expired
-            </p>
-          )}
-        </Link>
-        <Link
-          to={canSeeRevenue ? '/billing?tab=due' : '/'}
-          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-blue-300"
-        >
-          <p className="text-sm text-slate-600">Revenue Summary</p>
-          <p className={`mt-2 text-2xl font-semibold ${revenue ? 'text-slate-900' : 'text-slate-400'}`}>
-            {revenue ? formatMoney(revenue.today) : '--'}
-          </p>
-          {revenue && (
-            <p className="text-xs text-slate-500">
-              received today; {formatMoney(revenue.thisMonth)} this month; {formatMoney(revenue.outstandingBalance)} still due
-            </p>
-          )}
-        </Link>
+          Refresh
+        </button>
       </div>
 
-      {today && today.length > 0 && (
+      {error && (
+        <p role="alert" className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
+          {error} {summary && 'The numbers below may be out of date.'}
+        </p>
+      )}
+
+      {summary && (
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          {summary.tiles.map((key) => tile(key, summary))}
+        </div>
+      )}
+
+      {today.length > 0 && (
         <section className="mt-6 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-labelledby="today-heading">
           <h2 id="today-heading" className="font-semibold text-slate-900">Today&apos;s appointments</h2>
           <ul className="mt-2 divide-y divide-slate-100">

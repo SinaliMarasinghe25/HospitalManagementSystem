@@ -32,10 +32,6 @@ export function getLabRequest(id: number) {
   return apiFetch<LabRequest>(`/lab/requests/${id}`)
 }
 
-export function openLabRequestCount() {
-  return apiFetch<{ count: number }>('/lab/requests/open-count')
-}
-
 export function requestLabTests(patientId: number, medicalRecordId: number | null, labTestIds: number[]) {
   return apiFetch<number[]>('/lab/requests', {
     method: 'POST',

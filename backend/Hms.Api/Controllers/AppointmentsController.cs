@@ -100,16 +100,8 @@ public class AppointmentsController(AppointmentService appointments, DoctorServi
         return result.Value!;
     }
 
-    private async Task<AppointmentAccess> AccessAsync()
-    {
-        var isAdmin = User.IsInRole(Roles.Administrator);
-        var isReception = User.IsInRole(Roles.Receptionist);
-        var seesAll = isAdmin || isReception || User.IsInRole(Roles.Nurse);
-        var myDoctorId = User.IsInRole(Roles.Doctor)
-            ? await doctors.DoctorIdForUserAsync(userManager.GetUserId(User))
-            : null;
-        return new AppointmentAccess(seesAll, myDoctorId, isAdmin, isAdmin || isReception);
-    }
+    private Task<AppointmentAccess> AccessAsync() =>
+        AppointmentAccessRules.ForAsync(User, userManager.GetUserId(User), doctors);
 
     // Enums are written as text ("Cancelled"), so the audit log is readable.
     private Task Audit(AuditAction action, int appointmentId, object changes) =>
