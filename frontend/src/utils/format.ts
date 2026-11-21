@@ -78,3 +78,8 @@ export function formatDayHeading(isoDate: string) {
 export function formatClock(iso: string) {
   return new Date(iso).toLocaleTimeString('en-GB', { timeZone, hour: '2-digit', minute: '2-digit' })
 }
+
+// "21 Nov 2026, 13:15:42" in hospital time, for the audit log where seconds matter.
+export function formatTimestamp(iso: string) {
+  return new Date(iso).toLocaleString('en-GB', { timeZone, dateStyle: 'medium', timeStyle: 'medium' })
+}

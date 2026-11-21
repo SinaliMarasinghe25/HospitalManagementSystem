@@ -4,7 +4,6 @@ import { ProtectedRoute } from './auth/ProtectedRoute'
 import { RequireRole } from './auth/RequireRole'
 import { AppLayout } from './components/layout/AppLayout'
 import { navItems } from './navigation'
-import ComingSoonPage from './pages/ComingSoonPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
@@ -43,9 +42,10 @@ import EmployeeFormPage from './pages/staff/EmployeeFormPage'
 import EmployeePage from './pages/staff/EmployeePage'
 import StaffPage from './pages/staff/StaffPage'
 import ReportsPage from './pages/reports/ReportsPage'
+import AuditLogPage from './pages/audit/AuditLogPage'
 
-// Pages that are built so far. Every other menu item shows a "coming soon" page.
-const builtPages: Record<string, ReactNode> = {
+// The page for each menu item in navigation.ts.
+const pages: Record<string, ReactNode> = {
   '/': <DashboardPage />,
   '/patients': <PatientListPage />,
   '/doctors': <DoctorListPage />,
@@ -57,6 +57,7 @@ const builtPages: Record<string, ReactNode> = {
   '/billing': <BillingPage />,
   '/staff': <StaffPage />,
   '/reports': <ReportsPage />,
+  '/audit-log': <AuditLogPage />,
 }
 
 export default function App() {
@@ -88,7 +89,7 @@ export default function App() {
             path={item.path}
             element={
               <RequireRole roles={item.roles}>
-                {builtPages[item.path] ?? <ComingSoonPage title={item.label} pdfRef={item.pdfRef} />}
+                {pages[item.path]}
               </RequireRole>
             }
           />

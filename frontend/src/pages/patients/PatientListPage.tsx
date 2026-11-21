@@ -6,7 +6,9 @@ import { Permissions } from '../../auth/permissions'
 import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
-import type { PagedResult, PatientSummary } from '../../types/patient'
+import { Pagination } from '../../components/ui/Pagination'
+import type { PagedResult } from '../../types/paged'
+import type { PatientSummary } from '../../types/patient'
 import { ageFrom } from '../../utils/format'
 
 // PDF 3.2 "Search Patient" and section 7 Patient Screen.
@@ -36,8 +38,6 @@ export default function PatientListPage() {
     event.preventDefault()
     setParams(searchInput.trim() ? { search: searchInput.trim() } : {})
   }
-
-  const totalPages = result ? Math.max(1, Math.ceil(result.totalCount / result.pageSize)) : 1
 
   return (
     <div className="space-y-4">
@@ -111,30 +111,14 @@ export default function PatientListPage() {
         </table>
       </div>
 
-      {result && result.totalCount > 0 && (
-        <nav className="flex items-center justify-between text-sm text-slate-600" aria-label="Pagination">
-          <span>
-            {result.totalCount} patient{result.totalCount === 1 ? '' : 's'}, page {page} of {totalPages}
-          </span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className={secondaryButtonClass}
-              disabled={page <= 1}
-              onClick={() => setParams({ ...(search && { search }), page: String(page - 1) })}
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              className={secondaryButtonClass}
-              disabled={page >= totalPages}
-              onClick={() => setParams({ ...(search && { search }), page: String(page + 1) })}
-            >
-              Next
-            </button>
-          </div>
-        </nav>
+      {result && (
+        <Pagination
+          totalCount={result.totalCount}
+          page={page}
+          pageSize={result.pageSize}
+          noun="patient"
+          onPageChange={(p) => setParams({ ...(search && { search }), page: String(p) })}
+        />
       )}
     </div>
   )

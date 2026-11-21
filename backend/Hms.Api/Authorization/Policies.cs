@@ -42,6 +42,7 @@ public static class Policies
     public const string ViewAppointmentReport = nameof(ViewAppointmentReport);
     public const string ViewPharmacyReport = nameof(ViewPharmacyReport);
     public const string ViewLabReport = nameof(ViewLabReport);
+    public const string ViewAuditLog = nameof(ViewAuditLog);
 
     public static AuthorizationBuilder AddHmsPolicies(this AuthorizationBuilder builder) => builder
         .AddPolicy(ViewPatients, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.Nurse, Roles.Receptionist))
@@ -91,5 +92,7 @@ public static class Policies
         .AddPolicy(ViewPatientReport, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.Nurse))
         .AddPolicy(ViewAppointmentReport, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.Receptionist))
         .AddPolicy(ViewPharmacyReport, p => p.RequireRole(Roles.Administrator, Roles.Pharmacist))
-        .AddPolicy(ViewLabReport, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.LaboratoryStaff));
+        .AddPolicy(ViewLabReport, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.LaboratoryStaff))
+        // Audit logs row of the role table: Admin view, everyone else none.
+        .AddPolicy(ViewAuditLog, p => p.RequireRole(Roles.Administrator));
 }

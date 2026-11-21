@@ -47,13 +47,6 @@ export type PatientDetail = {
   updatedAt: string | null
 }
 
-export type PagedResult<T> = {
-  items: T[]
-  page: number
-  pageSize: number
-  totalCount: number
-}
-
 export type PatientDocument = {
   id: number
   fileName: string
