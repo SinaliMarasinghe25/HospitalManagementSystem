@@ -1,48 +1,99 @@
 # Hospital Management System (HMS)
 
-A web-based Hospital Management System that manages patients, doctors, appointments, electronic medical records, laboratory, pharmacy, billing, inpatient and outpatient care, staff, and reports, with role-based access for seven hospital roles.
+A web-based Hospital Management System for one hospital. It keeps patients, doctors, appointments, electronic medical records, admissions, laboratory, pharmacy, billing, staff and reports in one secure application, used by seven staff roles.
 
-> **Status:** In development (Phase 2: environment setup).
-> This is an academic demonstration project. It uses fictitious data only and must not store real patient information.
+> This is an academic demonstration project. It uses fictitious data only and must never store real patient information.
 
-## Planned features
+**Status:** all modules are built and covered by automated tests. Still to come: deployment to a live server (with backup and recovery) and a visual redesign.
 
-- User management: login, logout, password management, role-based access control
-- Patient management: registration, search, medical history, documents
-- Doctor management: departments and schedules
-- Appointments: booking, cancelling, rescheduling, calendar view
-- Electronic medical records: diagnoses, prescriptions, treatment history, reports
-- Laboratory, pharmacy, billing and payments
-- Inpatient and outpatient management
-- Staff management: attendance and leave
-- Reports and dashboard analytics
+## Features
 
-## User roles
+| Module | What it does |
+| --- | --- |
+| Login and accounts | Login, logout, 20-minute idle timeout, lockout after 5 wrong passwords, change password, temporary passwords that must be changed, "forgot password" request to the administrators |
+| Dashboard | Total patients, today's appointments, pending lab requests, pharmacy alerts and revenue. Each role sees only its own tiles |
+| Patients | Register, edit, search (paged), medical history, upload PDF/JPG/PNG documents (up to 5 MB) |
+| Doctors | Doctor list by department, weekly schedule and slot length |
+| Appointments | Book from free slots, reschedule, cancel, check in, no-show, complete. Day and week calendar |
+| Medical records | Consultations with diagnoses, treatments, prescriptions and lab requests. Printable medical report |
+| Admissions | Bed board, admit, transfer between beds, vital signs, discharge with summary and bed charges |
+| Laboratory | Test catalogue, work queue, sample collection, results with abnormal flag, printable lab report |
+| Pharmacy | Medicines with batches and expiry, stock in, adjustments, write-offs, dispensing, low-stock and expiry alerts |
+| Billing | Charges collected automatically, invoices with discount, part and full payments, printable invoice and receipt |
+| Staff | Employees, departments, logins and roles, daily attendance, leave requests |
+| Reports | Patient, appointment, revenue, pharmacy, laboratory and staff reports with CSV export and print |
+| Notifications | In-app bell for new prescriptions, lab results, admissions, leave decisions and more |
+| Audit log | Every login, change and sensitive view, read-only, searchable by the administrator |
 
-Administrator, Doctor, Nurse, Receptionist, Laboratory Staff, Pharmacist, Accountant.
-
-## Technology stack
+## Technology
 
 | Part | Technology |
 | --- | --- |
-| Frontend | React, TypeScript, Vite, Tailwind CSS, React Router |
-| Backend | C#, ASP.NET Core Web API (.NET 10), ASP.NET Core Identity |
-| Database | PostgreSQL with Entity Framework Core (Npgsql) |
-| Testing | xUnit, Vitest, React Testing Library |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, React Router |
+| Backend | C#, ASP.NET Core Web API (.NET 10), ASP.NET Core Identity (cookie login) |
+| Database | PostgreSQL, Entity Framework Core 10 (Npgsql) with migrations |
+| Tests | xUnit v3 (backend), Vitest and React Testing Library (frontend) |
+
+## Quick start (Windows, PowerShell)
+
+You need the .NET 10 SDK, the `dotnet-ef` tool, Node.js LTS and PostgreSQL 17 or newer.
+The full, step-by-step version is in the [setup guide](docs/guides/setup-guide.md).
+
+```powershell
+# 1. Settings for the API (once). Use your own PostgreSQL login and passwords.
+cd backend\Hms.Api
+dotnet user-secrets set "ConnectionStrings:HmsDatabase" "Host=localhost;Port=5432;Database=hms;Username=hms_app;Password=YOUR_DB_PASSWORD"
+dotnet user-secrets set "Seed:AdminPassword" "YOUR_ADMIN_PASSWORD"
+
+# 2. Create the tables and start the API on https://localhost:7019
+dotnet ef database update
+dotnet run --launch-profile https
+
+# 3. In a second terminal: start the frontend on http://localhost:5173
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 and log in as `admin` with the password from step 1.
+
+## Running the tests
+
+```powershell
+cd backend
+dotnet test        # 361 backend tests; needs PostgreSQL and a login that may create databases
+
+cd ..\frontend
+npm test           # 61 frontend tests
+```
+
+See the [testing guide](docs/testing/testing-guide.md) for what is tested and how the test database works.
+
+## Documentation
+
+| Document | For |
+| --- | --- |
+| [Setup guide](docs/guides/setup-guide.md) | Installing the tools, the database, secrets, running the app, troubleshooting |
+| [User manual](docs/guides/user-manual.md) | How each of the seven roles uses the system |
+| [Architecture](docs/architecture/architecture.md) | Layers, folders, how a request flows, security design |
+| [Roles and permissions](docs/architecture/roles-and-permissions.md) | Exactly what each role may see and do |
+| [Database](docs/architecture/database.md) | Tables, relationships (ER diagram), rules enforced by the database, migrations |
+| [API reference](docs/api/api-reference.md) | Every endpoint, who may call it, request conventions |
+| [Testing guide](docs/testing/testing-guide.md) | Running and understanding the automated tests |
+| [Project plan](docs/project-plan.md) | Requirements, traceability matrix and plan |
 
 ## Repository structure
 
 | Folder | Contents |
 | --- | --- |
-| `backend/` | ASP.NET Core Web API |
+| `backend/Hms.Api/` | ASP.NET Core Web API: controllers, services, entities, migrations |
 | `frontend/` | React application |
-| `tests/` | Automated backend tests |
-| `docs/` | Requirements, architecture, guides and reports |
+| `tests/Hms.Api.Tests/` | Backend unit and integration tests |
+| `docs/` | Plan, guides, architecture, API reference |
 
-## Getting started
+## Roles
 
-Setup instructions will be added as each part is built.
-Prerequisites: .NET 10 SDK, Node.js LTS, PostgreSQL, Git.
+Administrator, Doctor, Nurse, Receptionist, Laboratory Staff, Pharmacist, Accountant. A login can have more than one role.
 
 ## Author
 
