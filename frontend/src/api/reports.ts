@@ -6,42 +6,34 @@ import type {
   RevenueReport,
   StaffReport,
 } from '../types/report'
-import { apiFetch } from './client'
+import { apiFetch, queryString } from './client'
 
 // One function per endpoint in ReportsController.cs. Empty filter values are left out of the address.
 
 export type PeriodFilter = { fromDate: string; toDate: string }
 
-function query(filter: Record<string, string>) {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(filter)) {
-    if (value) params.set(key, value)
-  }
-  return params.toString()
-}
-
 export function getPatientReport(filter: PeriodFilter) {
-  return apiFetch<PatientReport>(`/reports/patients?${query(filter)}`)
+  return apiFetch<PatientReport>(`/reports/patients?${queryString(filter)}`)
 }
 
 export function getAppointmentReport(filter: PeriodFilter & { doctorId: string; status: string }) {
-  return apiFetch<AppointmentReport>(`/reports/appointments?${query(filter)}`)
+  return apiFetch<AppointmentReport>(`/reports/appointments?${queryString(filter)}`)
 }
 
 export function getRevenueReport(filter: PeriodFilter) {
-  return apiFetch<RevenueReport>(`/reports/revenue?${query(filter)}`)
+  return apiFetch<RevenueReport>(`/reports/revenue?${queryString(filter)}`)
 }
 
 export function getPharmacyReport(filter: PeriodFilter) {
-  return apiFetch<PharmacyReport>(`/reports/pharmacy?${query(filter)}`)
+  return apiFetch<PharmacyReport>(`/reports/pharmacy?${queryString(filter)}`)
 }
 
 export function getLabReport(filter: PeriodFilter & { labTestId: string; status: string }) {
-  return apiFetch<LabReport>(`/reports/laboratory?${query(filter)}`)
+  return apiFetch<LabReport>(`/reports/laboratory?${queryString(filter)}`)
 }
 
 // month: "YYYY-MM", as an <input type="month"> gives it.
 export function getStaffReport(filter: { month: string; departmentId: string }) {
   const [year, month] = filter.month.split('-')
-  return apiFetch<StaffReport>(`/reports/staff?${query({ year, month: String(Number(month)), departmentId: filter.departmentId })}`)
+  return apiFetch<StaffReport>(`/reports/staff?${queryString({ year, month: String(Number(month)), departmentId: filter.departmentId })}`)
 }

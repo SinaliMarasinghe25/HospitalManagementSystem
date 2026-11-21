@@ -23,6 +23,15 @@ type ProblemDetails = {
   errors?: Record<string, string[]>
 }
 
+// Filter values as "a=1&b=2". Empty values are left out, so they mean "any".
+export function queryString(filter: Record<string, string>) {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(filter)) {
+    if (value) params.set(key, value)
+  }
+  return params.toString()
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`/api${path}`, {
     ...options,

@@ -101,3 +101,11 @@ GET {{baseUrl}}/api/notifications/unread-count
 
 ### 20. Mark all my notifications as read: expect 204
 POST {{baseUrl}}/api/notifications/read-all
+
+### ---------- Audit log (Step 24). Log in as admin first (request 3). ----------
+
+### 21. Newest 50 audit entries: expect 200 with "items", "page", "pageSize" and "totalCount"
+GET {{baseUrl}}/api/audit-log
+
+### 22. Everything that happened to patient 1 (as a receptionist: expect 403)
+GET {{baseUrl}}/api/audit-log?entityName=Patient&entityId=1

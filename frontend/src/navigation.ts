@@ -6,7 +6,7 @@ export type NavItem = {
   label: string
   path: string
   roles: readonly Role[]
-  // PDF requirement this module delivers, shown on the placeholder page.
+  // PDF requirement this module delivers.
   pdfRef: string
 }
 

@@ -1,11 +1,11 @@
 import type {
   MedicalHistory,
-  PagedResult,
   PatientDetail,
   PatientDocument,
   PatientRequest,
   PatientSummary,
 } from '../types/patient'
+import type { PagedResult } from '../types/paged'
 import { apiFetch } from './client'
 
 // One function per endpoint in PatientsController.cs.
