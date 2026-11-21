@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
@@ -22,5 +23,10 @@ export default defineConfig({
         secure: false,
       },
     },
+  },
+  // Automated tests (npm test). They run in Node with jsdom, a pretend browser, so no real browser is needed.
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
   },
 })
