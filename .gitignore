@@ -493,3 +493,5 @@ coverage/
 *.dump
 *.backup
 uploads/
+# Uploaded patient documents (backend/Hms.Api/App_Data). Never commit them.
+**/App_Data/
