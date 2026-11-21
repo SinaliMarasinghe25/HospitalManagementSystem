@@ -93,6 +93,7 @@ builder.Services.AddScoped<BillingService>();
 builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<UserAccountService>();
+builder.Services.AddScoped<ReportService>();
 
 // Errors are returned as safe JSON (ProblemDetails) without stack traces.
 builder.Services.AddProblemDetails();

@@ -35,6 +35,11 @@ export const Permissions = {
   manageBilling: [Accountant],
   viewRevenue: [Administrator, Accountant],
   manageStaff: [Administrator],
+  // Reports row of the role table. The revenue report uses viewRevenue and the staff report manageStaff.
+  viewPatientReport: [Administrator, Doctor, Nurse],
+  viewAppointmentReport: [Administrator, Doctor, Receptionist],
+  viewPharmacyReport: [Administrator, Pharmacist],
+  viewLabReport: [Administrator, Doctor, LaboratoryStaff],
   // Not an API policy: who works from the dispensing queue screens (the API also lets doctors read prescriptions).
   pharmacyQueue: [Administrator, Pharmacist],
 } satisfies Record<string, Role[]>

@@ -41,6 +41,7 @@ import { InvoicePrintPage, ReceiptPage } from './pages/billing/InvoicePrintPage'
 import EmployeeFormPage from './pages/staff/EmployeeFormPage'
 import EmployeePage from './pages/staff/EmployeePage'
 import StaffPage from './pages/staff/StaffPage'
+import ReportsPage from './pages/reports/ReportsPage'
 
 // Pages that are built so far. Every other menu item shows a "coming soon" page.
 const builtPages: Record<string, ReactNode> = {
@@ -54,6 +55,7 @@ const builtPages: Record<string, ReactNode> = {
   '/pharmacy': <PharmacyPage />,
   '/billing': <BillingPage />,
   '/staff': <StaffPage />,
+  '/reports': <ReportsPage />,
 }
 
 export default function App() {

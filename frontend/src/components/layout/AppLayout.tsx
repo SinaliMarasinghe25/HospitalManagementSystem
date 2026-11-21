@@ -16,8 +16,8 @@ export function AppLayout() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4">
+    <div className="min-h-screen bg-slate-100 print:bg-white">
+      <header className="sticky top-0 z-20 flex print:hidden h-14 items-center justify-between border-b border-slate-200 bg-white px-4">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -52,7 +52,7 @@ export function AppLayout() {
 
       <div className="flex">
         {/* Desktop: always visible */}
-        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 overflow-y-auto border-r border-slate-200 bg-white lg:block">
+        <aside className="sticky top-14 hidden print:hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 overflow-y-auto border-r border-slate-200 bg-white lg:block">
           <Sidebar />
         </aside>
 
@@ -67,7 +67,7 @@ export function AppLayout() {
           </div>
         )}
 
-        <main className="min-w-0 flex-1 p-4 sm:p-6">
+        <main className="min-w-0 flex-1 p-4 sm:p-6 print:p-0">
           <Outlet />
         </main>
       </div>
