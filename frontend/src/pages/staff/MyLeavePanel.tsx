@@ -6,6 +6,7 @@ import { LeaveStatusBadge } from '../../components/staff/StaffBadges'
 import { secondaryButtonClass } from '../../components/ui/FormField'
 import type { LeaveForm, MyLeave } from '../../types/staff'
 import { formatDate, todayInHospital } from '../../utils/format'
+import { firstError } from '../../utils/formErrors'
 
 // "Own (leave)" in the role table: every member of staff requests leave and follows its status.
 // The API finds the employee from the login, so nobody can ask for leave in someone else's name.
@@ -32,8 +33,7 @@ export default function MyLeavePanel() {
       await cancelMyLeave(id)
       setReloadKey((k) => k + 1)
     } catch (err) {
-      const fieldMessage = err instanceof ApiError ? Object.values(err.fieldErrors).flat()[0] : undefined
-      setError(fieldMessage ?? (err instanceof ApiError ? err.message : 'Could not withdraw the request.'))
+      setError(firstError(err, 'Could not withdraw the request.'))
     }
   }
 

@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Hms.Api.Authorization;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -16,7 +14,7 @@ namespace Hms.Api.Controllers;
 [ApiController]
 [Route("api/appointments")]
 [Authorize(Policy = Policies.ViewAppointments)]
-public class AppointmentsController(AppointmentService appointments, AuditService audit, UserManager<AppUser> userManager)
+public class AppointmentsController(AppointmentService appointments, DoctorService doctors, AuditService audit, UserManager<AppUser> userManager)
     : ControllerBase
 {
     // GET /api/appointments?fromDate=2026-11-16&toDate=2026-11-22&doctorId=1&status=Scheduled
@@ -108,15 +106,12 @@ public class AppointmentsController(AppointmentService appointments, AuditServic
         var isReception = User.IsInRole(Roles.Receptionist);
         var seesAll = isAdmin || isReception || User.IsInRole(Roles.Nurse);
         var myDoctorId = User.IsInRole(Roles.Doctor)
-            ? await appointments.DoctorIdForUserAsync(userManager.GetUserId(User))
+            ? await doctors.DoctorIdForUserAsync(userManager.GetUserId(User))
             : null;
         return new AppointmentAccess(seesAll, myDoctorId, isAdmin, isAdmin || isReception);
     }
 
     // Enums are written as text ("Cancelled"), so the audit log is readable.
-    private static readonly JsonSerializerOptions AuditJson = new() { Converters = { new JsonStringEnumConverter() } };
-
     private Task Audit(AuditAction action, int appointmentId, object changes) =>
-        audit.LogAsync(action, userManager.GetUserId(User), User.Identity?.Name, "Appointment",
-            appointmentId.ToString(), JsonSerializer.Serialize(changes, AuditJson));
+        audit.LogChangeAsync(action, "Appointment", appointmentId, changes);
 }

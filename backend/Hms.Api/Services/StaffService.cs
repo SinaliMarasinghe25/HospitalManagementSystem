@@ -6,7 +6,8 @@ using Npgsql;
 
 namespace Hms.Api.Services;
 
-// Business logic for PDF 3.9 Staff Management: employees, daily attendance and leave.
+// Business logic for PDF 3.9 Staff Management: daily attendance and leave.
+// Adding and editing people (employees, doctors, logins) is in EmployeeService.
 //
 // Assumption A23 (proposed): leave is counted in calendar days, both ends included.
 //   There is no holiday calendar in the PDF, so weekends and public holidays are not skipped.
@@ -21,174 +22,6 @@ public class StaffService(AppDbContext db)
 
     // Leave that blocks a new request for the same days. Rejected and cancelled requests do not.
     private static readonly LeaveStatus[] ActiveLeave = [LeaveStatus.Pending, LeaveStatus.Approved];
-
-    // ---------- Employees ----------
-
-    public Task<List<EmployeeSummary>> ListEmployeesAsync(string? search, int? departmentId, bool includeInactive)
-    {
-        var query = db.Employees.AsNoTracking()
-            .Where(e => includeInactive || e.IsActive)
-            .Where(e => departmentId == null || e.DepartmentId == departmentId);
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var pattern = $"%{search.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_")}%";
-            query = query.Where(e =>
-                EF.Functions.ILike(e.FirstName + " " + e.LastName, pattern, "\\") ||
-                EF.Functions.ILike(e.EmployeeNumber, pattern, "\\") ||
-                EF.Functions.ILike(e.JobTitle, pattern, "\\"));
-        }
-
-        return query
-            .OrderBy(e => e.LastName).ThenBy(e => e.FirstName)
-            .Select(e => new EmployeeSummary(e.Id, e.EmployeeNumber, e.FirstName + " " + e.LastName, e.JobTitle,
-                e.DepartmentId, e.Department.Name, e.Phone, e.IsActive,
-                e.Doctor == null ? null : e.Doctor.Id,
-                e.User == null ? null : e.User.UserName))
-            .ToListAsync();
-    }
-
-    public async Task<EmployeeDetail?> GetEmployeeAsync(int id)
-    {
-        var e = await db.Employees.AsNoTracking()
-            .Include(x => x.Department)
-            .Include(x => x.Doctor)
-            .Include(x => x.User)
-            .FirstOrDefaultAsync(x => x.Id == id);
-        if (e is null) return null;
-
-        var leave = await ListLeaveAsync(db.LeaveRequests.Where(l => l.EmployeeId == id), take: 50);
-        return new EmployeeDetail(e.Id, e.EmployeeNumber, e.FirstName, e.LastName, e.JobTitle, e.Phone, e.Email,
-            e.HireDate, e.DepartmentId, e.Department.Name, e.IsActive, e.Doctor?.Id, e.UserId, e.User?.UserName, leave);
-    }
-
-    public async Task<ServiceResult<int>> CreateEmployeeAsync(EmployeeRequest request)
-    {
-        var errors = await ValidateEmployeeAsync(request, null);
-        if (errors.Count > 0) return ServiceResult<int>.Invalid(errors);
-
-        // EMP-0001, EMP-0002... shared with doctors, so every employee number is unique.
-        var next = await db.Database
-            .SqlQuery<long>($"SELECT nextval('\"EmployeeNumbers\"') AS \"Value\"")
-            .SingleAsync();
-
-        var employee = new Employee { EmployeeNumber = $"EMP-{next:D4}" };
-        Apply(employee, request);
-        db.Employees.Add(employee);
-        await db.SaveChangesAsync();
-        return ServiceResult<int>.Ok(employee.Id);
-    }
-
-    public async Task<ServiceResult<int>> UpdateEmployeeAsync(int id, EmployeeRequest request)
-    {
-        var employee = await db.Employees.Include(e => e.Doctor).FirstOrDefaultAsync(e => e.Id == id);
-        if (employee is null) return ServiceResult<int>.NotFound();
-
-        if (employee.Doctor is not null)
-        {
-            // A doctor's name, department and status are kept in one place: the Doctors page.
-            return Invalid<int>("Employee", "This employee is a doctor. Edit them on the Doctors page.");
-        }
-
-        var errors = await ValidateEmployeeAsync(request, employee);
-        if (errors.Count > 0) return ServiceResult<int>.Invalid(errors);
-
-        Apply(employee, request);
-        await db.SaveChangesAsync();
-        return ServiceResult<int>.Ok(id);
-    }
-
-    // Links a login account to the employee (or unlinks it when userId is null).
-    public async Task<ServiceResult<int>> SetLoginAsync(int id, string? userId)
-    {
-        var employee = await db.Employees.FirstOrDefaultAsync(e => e.Id == id);
-        if (employee is null) return ServiceResult<int>.NotFound();
-
-        userId = string.IsNullOrWhiteSpace(userId) ? null : userId;
-        if (userId is not null)
-        {
-            if (!await db.Users.AnyAsync(u => u.Id == userId))
-            {
-                return Invalid<int>("UserId", "This login account does not exist.");
-            }
-            if (await db.Employees.AnyAsync(e => e.UserId == userId && e.Id != id))
-            {
-                return Invalid<int>("UserId", "This login account is already linked to another employee.");
-            }
-        }
-
-        employee.UserId = userId;
-        try
-        {
-            await db.SaveChangesAsync();
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
-        {
-            // Two administrators linked the same login at the same moment; the unique index kept only one.
-            return Invalid<int>("UserId", "This login account is already linked to another employee.");
-        }
-        return ServiceResult<int>.Ok(id);
-    }
-
-    // Login accounts that no employee uses yet, for the "Link login" list.
-    public async Task<List<UnlinkedUser>> ListUnlinkedUsersAsync()
-    {
-        var users = await db.Users.AsNoTracking()
-            .Where(u => !db.Employees.Any(e => e.UserId == u.Id))
-            .OrderBy(u => u.UserName)
-            .Select(u => new
-            {
-                u.Id,
-                u.UserName,
-                Roles = db.UserRoles.Where(ur => ur.UserId == u.Id)
-                    .Join(db.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Name!)
-                    .ToList(),
-            })
-            .ToListAsync();
-        return users.Select(u => new UnlinkedUser(u.Id, u.UserName ?? "", u.Roles)).ToList();
-    }
-
-    private async Task<Dictionary<string, string[]>> ValidateEmployeeAsync(EmployeeRequest request, Employee? existing)
-    {
-        var errors = new Dictionary<string, string[]>();
-
-        // An employee may stay in a department that was later deactivated, but new moves need an active one.
-        var departmentOk = await db.Departments.AnyAsync(d =>
-            d.Id == request.DepartmentId && (d.IsActive || (existing != null && existing.DepartmentId == d.Id)));
-        if (!departmentOk)
-        {
-            errors["DepartmentId"] = ["Choose an active department."];
-        }
-
-        if (request.HireDate > HospitalTime.Today)
-        {
-            errors["HireDate"] = ["Hire date cannot be in the future."];
-        }
-        else if (existing is not null)
-        {
-            // Attendance before the hire date would make no sense.
-            var firstAttendance = await db.Attendance.Where(a => a.EmployeeId == existing.Id)
-                .OrderBy(a => a.Date).Select(a => (DateOnly?)a.Date).FirstOrDefaultAsync();
-            if (firstAttendance is not null && request.HireDate > firstAttendance)
-            {
-                errors["HireDate"] = [$"Attendance is already recorded from {firstAttendance:yyyy-MM-dd}. The hire date must be on or before it."];
-            }
-        }
-
-        return errors;
-    }
-
-    private static void Apply(Employee employee, EmployeeRequest request)
-    {
-        employee.FirstName = request.FirstName.Trim();
-        employee.LastName = request.LastName.Trim();
-        employee.JobTitle = request.JobTitle.Trim();
-        employee.Phone = request.Phone.Trim();
-        employee.Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
-        employee.HireDate = request.HireDate!.Value;
-        employee.DepartmentId = request.DepartmentId!.Value;
-        employee.IsActive = request.IsActive;
-    }
 
     // ---------- Attendance ----------
 
@@ -353,6 +186,10 @@ public class StaffService(AppDbContext db)
 
     public Task<List<LeaveResponse>> ListLeaveAsync(LeaveStatus? status) =>
         ListLeaveAsync(db.LeaveRequests.Where(l => status == null || l.Status == status), take: 200);
+
+    // The latest leave of one employee, for the employee page.
+    public Task<List<LeaveResponse>> ListLeaveForEmployeeAsync(int employeeId) =>
+        ListLeaveAsync(db.LeaveRequests.Where(l => l.EmployeeId == employeeId), take: 50);
 
     public async Task<LeaveResponse?> GetLeaveAsync(int id) =>
         (await ListLeaveAsync(db.LeaveRequests.Where(l => l.Id == id), take: 1)).FirstOrDefault();

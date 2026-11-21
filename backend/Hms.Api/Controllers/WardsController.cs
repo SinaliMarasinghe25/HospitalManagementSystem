@@ -1,10 +1,8 @@
-using System.Text.Json;
 using Hms.Api.Authorization;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
 using Hms.Api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hms.Api.Controllers;
@@ -13,7 +11,7 @@ namespace Hms.Api.Controllers;
 [ApiController]
 [Route("api/wards")]
 [Authorize(Policy = Policies.ViewAdmissions)]
-public class WardsController(WardService wards, AuditService audit, UserManager<AppUser> userManager) : ControllerBase
+public class WardsController(WardService wards, AuditService audit) : ControllerBase
 {
     // GET /api/wards   (bed board)
     [HttpGet]
@@ -26,7 +24,7 @@ public class WardsController(WardService wards, AuditService audit, UserManager<
     {
         var result = await wards.CreateAsync(request);
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
-        await Audit(AuditAction.Create, "Ward", result.Value, request);
+        await audit.LogChangeAsync(AuditAction.Create, "Ward", result.Value, request);
         return StatusCode(StatusCodes.Status201Created, new { id = result.Value });
     }
 
@@ -38,7 +36,7 @@ public class WardsController(WardService wards, AuditService audit, UserManager<
         var result = await wards.UpdateAsync(id, request);
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
-        await Audit(AuditAction.Update, "Ward", id, request);
+        await audit.LogChangeAsync(AuditAction.Update, "Ward", id, request);
         return NoContent();
     }
 
@@ -49,7 +47,7 @@ public class WardsController(WardService wards, AuditService audit, UserManager<
     {
         var result = await wards.AddBedsAsync(id, request);
         if (result.IsNotFound) return NotFound();
-        await Audit(AuditAction.Create, "Bed", id, request);
+        await audit.LogChangeAsync(AuditAction.Create, "Bed", id, request);
         return NoContent();
     }
 
@@ -61,11 +59,7 @@ public class WardsController(WardService wards, AuditService audit, UserManager<
         var result = await wards.SetBedStatusAsync(bedId, request.IsActive);
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
-        await Audit(AuditAction.Update, "Bed", bedId, request);
+        await audit.LogChangeAsync(AuditAction.Update, "Bed", bedId, request);
         return NoContent();
     }
-
-    private Task Audit(AuditAction action, string entity, int id, object changes) =>
-        audit.LogAsync(action, userManager.GetUserId(User), User.Identity?.Name, entity, id.ToString(),
-            JsonSerializer.Serialize(changes));
 }

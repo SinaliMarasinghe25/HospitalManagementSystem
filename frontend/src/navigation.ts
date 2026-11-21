@@ -24,6 +24,5 @@ export const navItems: NavItem[] = [
   { label: 'Billing', path: '/billing', roles: [Administrator, Receptionist, Accountant], pdfRef: 'Section 3.8, Billing System' },
   { label: 'Staff', path: '/staff', roles: AllRoles, pdfRef: 'Section 3.9, Staff Management' },
   { label: 'Reports', path: '/reports', roles: AllRoles, pdfRef: 'Section 3.10, Reports' },
-  { label: 'Users', path: '/users', roles: [Administrator], pdfRef: 'Section 3.1, User Management' },
   { label: 'Audit Log', path: '/audit-log', roles: [Administrator], pdfRef: 'Section 4, Audit Logs' },
 ]

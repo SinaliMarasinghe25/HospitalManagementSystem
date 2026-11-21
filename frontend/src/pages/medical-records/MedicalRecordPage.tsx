@@ -6,6 +6,7 @@ import { LabTestsSection } from '../../components/lab/LabTestsSection'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { Medicine, MedicalRecord, Prescription, PrescriptionLine } from '../../types/medicalRecord'
 import { ageFrom, formatDate, formatDateTime } from '../../utils/format'
+import { firstError } from '../../utils/formErrors'
 
 // One visit's medical record (FR-EMR-01 to 03), with its prescriptions (FR-EMR-02)
 // and a link to the printable medical report (FR-EMR-04).
@@ -133,7 +134,7 @@ function PrescriptionsSection({ record, onChanged }: { record: MedicalRecord; on
       await cancelPrescription(id)
       onChanged()
     } catch (err) {
-      setError(err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : 'Could not cancel.')
+      setError(firstError(err, 'Could not cancel.'))
     }
   }
 

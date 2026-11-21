@@ -10,6 +10,10 @@ public class AppUser : IdentityUser
 {
     public bool IsActive { get; set; } = true;
 
+    // True after an administrator sets the password (new account or reset). The user must then choose
+    // their own password before using anything else, so only they know it.
+    public bool MustChangePassword { get; set; }
+
     public Employee? Employee { get; set; }
 }
 
@@ -25,6 +29,10 @@ public class Department
     public string? Description { get; set; }
 
     public bool IsActive { get; set; } = true;
+
+    // Assumption A26 (proposed): clinical staff (doctors, nurses, laboratory staff, pharmacists...) choose a clinical
+    // department. Non-clinical staff are placed in the default "Administration" department automatically.
+    public bool IsClinical { get; set; }
 
     public List<Employee> Employees { get; set; } = [];
 }

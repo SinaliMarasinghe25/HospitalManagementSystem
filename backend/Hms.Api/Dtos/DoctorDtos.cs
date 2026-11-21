@@ -6,34 +6,17 @@ namespace Hms.Api.Dtos;
 public record DepartmentRequest(
     [Required, MaxLength(100)] string Name,
     [MaxLength(500)] string? Description,
-    bool IsActive = true);
+    bool IsActive = true,
+    bool IsClinical = true);   // clinical staff choose from these; "Administration" is the only built-in non-clinical one
 
-public record DepartmentResponse(int Id, string Name, string? Description, bool IsActive, int DoctorCount);
+// StaffCount: active employees in the department (doctors included). DoctorCount: active doctors among them.
+// IsDefault: the common non-clinical department ("Administration") given automatically to non-clinical staff.
+public record DepartmentResponse(
+    int Id, string Name, string? Description, bool IsActive, bool IsClinical, bool IsDefault, int DoctorCount, int StaffCount);
 
 // ---------- Doctors ----------
-// PDF 3.3 "Add Doctor" / "Update Doctor Details" / "Department Assignment".
-public record DoctorRequest
-{
-    [Required, MaxLength(100)] public string FirstName { get; init; } = string.Empty;
-    [Required, MaxLength(100)] public string LastName { get; init; } = string.Empty;
-    [Required, RegularExpression(@"^\+?[0-9 \-]{7,20}$", ErrorMessage = "Enter a valid phone number.")]
-    public string Phone { get; init; } = string.Empty;
-    [EmailAddress, MaxLength(256)] public string? Email { get; init; }
-    [Required] public DateOnly? HireDate { get; init; }
-    [Required] public int? DepartmentId { get; init; }
-    [Required, MaxLength(100)] public string Specialization { get; init; } = string.Empty;
-    [Required, MaxLength(50)] public string LicenseNumber { get; init; } = string.Empty;
-    [Range(0, 1_000_000)] public decimal ConsultationFee { get; init; }
-    [Range(5, 120)] public int SlotMinutes { get; init; } = 15;
-    public bool IsActive { get; init; } = true;
-
-    // Only used when adding a doctor: optionally create their login account with the Doctor role.
-    [MinLength(3), MaxLength(50), RegularExpression("^[a-zA-Z0-9._-]+$",
-        ErrorMessage = "Use only letters, numbers, dot, dash or underscore.")]
-    public string? UserName { get; init; }
-    [MinLength(8), MaxLength(128)] public string? Password { get; init; }
-}
-
+// Doctors are added and edited on the Staff page (EmployeeRequest with a doctor profile, see StaffDtos.cs).
+// This file keeps what the Doctors page reads, and the weekly schedule.
 public record DoctorSummary(
     int Id,
     string EmployeeNumber,

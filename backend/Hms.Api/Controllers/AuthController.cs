@@ -92,7 +92,15 @@ public class AuthController(
             return ValidationProblem(ModelState);
         }
 
+        // The user has now chosen their own password.
+        if (user.MustChangePassword)
+        {
+            user.MustChangePassword = false;
+            await userManager.UpdateAsync(user);
+        }
+
         // Issue a fresh cookie, because changing the password changes the user's security stamp.
+        // The new cookie no longer carries the "must change password" claim.
         await signInManager.RefreshSignInAsync(user);
         await audit.LogAsync(AuditAction.Update, user.Id, user.UserName, "User", user.Id, "{\"field\":\"Password\"}");
         return NoContent();
@@ -101,6 +109,6 @@ public class AuthController(
     private async Task<CurrentUserResponse> BuildCurrentUser(AppUser user)
     {
         var roles = await userManager.GetRolesAsync(user);
-        return new CurrentUserResponse(user.Id, user.UserName!, user.Email, roles.ToList());
+        return new CurrentUserResponse(user.Id, user.UserName!, user.Email, roles.ToList(), user.MustChangePassword);
     }
 }

@@ -9,6 +9,7 @@ import { PrescriptionStatusBadge } from '../../components/pharmacy/PharmacyBadge
 import { inputClass, primaryButtonClass } from '../../components/ui/FormField'
 import type { DispenseView } from '../../types/pharmacy'
 import { formatDate, formatDateTime, formatMoney } from '../../utils/format'
+import { allErrors } from '../../utils/formErrors'
 
 // FR-PH-02 Prescription processing. The pharmacist enters how many of each medicine is handed over.
 // The API takes stock from the batch that expires first (never an expired one) and adds the charge to the bill.
@@ -55,7 +56,7 @@ export default function DispensePage() {
       show(await dispense(prescriptionId, items))
       setSaved(true)
     } catch (err) {
-      setError(err instanceof ApiError ? (Object.values(err.fieldErrors).flat().join(' ') || err.message) : 'Could not dispense.')
+      setError(allErrors(err, 'Could not dispense.').join(' '))
     } finally {
       setSaving(false)
     }

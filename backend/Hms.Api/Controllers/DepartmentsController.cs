@@ -1,19 +1,18 @@
-using System.Text.Json;
 using Hms.Api.Authorization;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
 using Hms.Api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hms.Api.Controllers;
 
-// PDF section 6: Departments. Everyone who works with doctors can read the list; only Admin changes it.
+// PDF section 6: Departments, for all staff (doctors, nurses, front office, finance...).
+// Everyone who works with doctors can read the list; only Admin changes it, from the Staff page.
 [ApiController]
 [Route("api/departments")]
 [Authorize(Policy = Policies.ViewDoctors)]
-public class DepartmentsController(DepartmentService departments, AuditService audit, UserManager<AppUser> userManager)
+public class DepartmentsController(DepartmentService departments, AuditService audit)
     : ControllerBase
 {
     // GET /api/departments?includeInactive=true
@@ -22,12 +21,12 @@ public class DepartmentsController(DepartmentService departments, AuditService a
 
     // POST /api/departments
     [HttpPost]
-    [Authorize(Policy = Policies.ManageDoctors)]
+    [Authorize(Policy = Policies.ManageStaff)]
     public Task<ActionResult<DepartmentResponse>> Create(DepartmentRequest request) => Save(null, request);
 
     // PUT /api/departments/3
     [HttpPut("{id:int}")]
-    [Authorize(Policy = Policies.ManageDoctors)]
+    [Authorize(Policy = Policies.ManageStaff)]
     public Task<ActionResult<DepartmentResponse>> Update(int id, DepartmentRequest request) => Save(id, request);
 
     private async Task<ActionResult<DepartmentResponse>> Save(int? id, DepartmentRequest request)
@@ -42,8 +41,7 @@ public class DepartmentsController(DepartmentService departments, AuditService a
             return this.ValidationErrors(result.Errors);
         }
 
-        await audit.LogAsync(id is null ? AuditAction.Create : AuditAction.Update, userManager.GetUserId(User),
-            User.Identity?.Name, "Department", result.Value!.Id.ToString(), JsonSerializer.Serialize(request));
+        await audit.LogChangeAsync(id is null ? AuditAction.Create : AuditAction.Update, "Department", result.Value!.Id, request);
         return result.Value!;
     }
 }

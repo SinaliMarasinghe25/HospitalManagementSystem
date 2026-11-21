@@ -7,7 +7,7 @@ import { DoctorPicker } from '../../components/appointments/DoctorPicker'
 import { PatientSearch, type ChosenPatient } from '../../components/patients/PatientSearch'
 import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { Ward } from '../../types/admission'
-import { errorsByField } from '../../utils/formErrors'
+import { errorsByField, firstError } from '../../utils/formErrors'
 import { formatMoney } from '../../utils/format'
 
 // Admit a patient: choose the patient, a free bed, the admitting doctor and the reason.
@@ -58,7 +58,7 @@ export default function AdmitPage() {
     } catch (err) {
       if (err instanceof ApiError) {
         setErrors(errorsByField(err.fieldErrors))
-        setFormError(Object.values(err.fieldErrors)[0]?.[0] ?? err.message)
+        setFormError(firstError(err, err.message))
         listWards().then(setWards).catch(() => undefined) // the bed may have just been taken
       } else {
         setFormError('Could not admit the patient.')

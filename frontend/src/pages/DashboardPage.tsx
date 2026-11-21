@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { listAppointments } from '../api/appointments'
 import { getRevenueSummary } from '../api/billing'
 import { openLabRequestCount } from '../api/lab'
+import { searchPatients } from '../api/patients'
 import { countPharmacyAlerts } from '../api/pharmacy'
 import { Permissions } from '../auth/permissions'
 import { hasAnyRole } from '../auth/roles'
@@ -13,11 +14,12 @@ import type { RevenueSummary } from '../types/billing'
 import type { PharmacyAlertCounts } from '../types/pharmacy'
 import { formatClock, formatMoney, todayInHospital } from '../utils/format'
 
-// PDF section 7, Dashboard. The five tiles get real numbers as each module is built.
-const placeholderTiles = ['Total Patients']
+// PDF section 7, Dashboard: five tiles (UI-DSH-01 to 05). Each tile shows -- to roles that may not see it.
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  const canSeePatients = hasAnyRole(user?.roles, Permissions.viewPatients)
+  const [patients, setPatients] = useState<number | null>(null)
   const canSeeAppointments = hasAnyRole(user?.roles, Permissions.viewAppointments)
   const [today, setToday] = useState<Appointment[] | null>(null)
   const canSeeLab = hasAnyRole(user?.roles, Permissions.viewLabRequests)
@@ -27,6 +29,14 @@ export default function DashboardPage() {
   const [pharmacy, setPharmacy] = useState<PharmacyAlertCounts | null>(null)
   const canSeeRevenue = hasAnyRole(user?.roles, Permissions.viewRevenue)
   const [revenue, setRevenue] = useState<RevenueSummary | null>(null)
+
+  // UI-DSH-01 Total Patients: the patient search already returns the total, so ask for one row only.
+  useEffect(() => {
+    if (!canSeePatients) return
+    searchPatients('', 1, 1)
+      .then((r) => setPatients(r.totalCount))
+      .catch(() => setPatients(null))
+  }, [canSeePatients])
 
   // UI-DSH-03 Revenue Summary: money received today and this month (Admin and Accountant only).
   useEffect(() => {
@@ -65,6 +75,16 @@ export default function DashboardPage() {
     <>
       <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <Link
+          to={canSeePatients ? '/patients' : '/'}
+          className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-blue-300"
+        >
+          <p className="text-sm text-slate-600">Total Patients</p>
+          <p className={`mt-2 text-2xl font-semibold ${patients !== null ? 'text-slate-900' : 'text-slate-400'}`}>
+            {patients ?? '--'}
+          </p>
+          {patients !== null && <p className="text-xs text-slate-500">registered</p>}
+        </Link>
         {/* UI-DSH-02 Today's Appointments (a doctor sees only their own) */}
         <Link
           to={canSeeAppointments ? '/appointments' : '/'}
@@ -113,12 +133,6 @@ export default function DashboardPage() {
             </p>
           )}
         </Link>
-        {placeholderTiles.map((tile) => (
-          <div key={tile} className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-            <p className="text-sm text-slate-600">{tile}</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-400">--</p>
-          </div>
-        ))}
       </div>
 
       {today && today.length > 0 && (

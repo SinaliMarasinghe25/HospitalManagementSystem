@@ -82,9 +82,6 @@ public class LabService(AppDbContext db)
     public Task<int> CountOpenAsync() =>
         db.LabRequests.CountAsync(r => r.Status == LabRequestStatus.Requested || r.Status == LabRequestStatus.SampleCollected);
 
-    public Task<int?> DoctorIdForUserAsync(string? userId) =>
-        db.Doctors.Where(d => d.Employee.UserId == userId).Select(d => (int?)d.Id).FirstOrDefaultAsync();
-
     // ---------- FR-LAB-01 Test requests (doctor) ----------
 
     public async Task<ServiceResult<List<int>>> CreateAsync(CreateLabRequests request, int? myDoctorId)

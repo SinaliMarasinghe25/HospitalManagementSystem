@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
-import { ApiError } from '../../api/client'
 import { reviewLeave } from '../../api/staff'
 import type { LeaveResponse } from '../../types/staff'
 import { formatDate, formatDateTime } from '../../utils/format'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../ui/FormField'
 import { LeaveStatusBadge } from './StaffBadges'
+import { firstError } from '../../utils/formErrors'
 
 // The leave list, on the Leave requests tab and the employee page.
 // With onReviewed, pending rows get Approve and Reject buttons.
@@ -104,8 +104,7 @@ function ReviewButtons({ leave, onReviewed }: { leave: LeaveResponse; onReviewed
       await reviewLeave(leave.id, mode === 'approve', note)
       onReviewed()
     } catch (err) {
-      const fieldMessage = err instanceof ApiError ? Object.values(err.fieldErrors).flat()[0] : undefined
-      setError(fieldMessage ?? (err instanceof ApiError ? err.message : 'Could not save. Please try again.'))
+      setError(firstError(err, 'Could not save. Please try again.'))
       setIsSaving(false)
     }
   }

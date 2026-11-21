@@ -10,6 +10,7 @@ import { inputClass, primaryButtonClass } from '../../components/ui/FormField'
 import type { Prescription } from '../../types/medicalRecord'
 import type { AlertBatch, MedicineStock, PharmacyAlerts } from '../../types/pharmacy'
 import { formatDate, formatDateTime, formatMoney } from '../../utils/format'
+import { Tabs } from '../../components/ui/Tabs'
 
 type Tab = 'queue' | 'dispensed' | 'stock' | 'alerts'
 
@@ -41,22 +42,7 @@ export default function PharmacyPage() {
         )}
       </div>
 
-      <div role="tablist" aria-label="Pharmacy views" className="flex flex-wrap gap-1 border-b border-slate-200">
-        {tabs.map((t) => (
-          <button
-            key={t}
-            type="button"
-            role="tab"
-            aria-selected={tab === t}
-            onClick={() => setParams({ tab: t })}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
-              tab === t ? 'border-blue-700 text-blue-700' : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            {tabLabels[t]}
-          </button>
-        ))}
-      </div>
+      <Tabs label="Pharmacy views" tabs={tabs} labels={tabLabels} value={tab} onChange={(t) => setParams({ tab: t })} />
 
       {(tab === 'queue' || tab === 'dispensed') && <PrescriptionList key={tab} dispensed={tab === 'dispensed'} />}
       {tab === 'stock' && <StockList />}

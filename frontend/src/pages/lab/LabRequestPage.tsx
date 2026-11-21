@@ -9,10 +9,7 @@ import { LabStatusBadge, ResultText } from '../../components/lab/LabStatusBadge'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { LabRequest } from '../../types/lab'
 import { ageFrom, formatDateTime } from '../../utils/format'
-
-function firstMessage(err: unknown, fallback: string) {
-  return err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : fallback
-}
+import { firstError } from '../../utils/formErrors'
 
 // One lab request: collect the sample (FR-LAB-02), enter the result (FR-LAB-03), print the report (FR-LAB-04).
 export default function LabRequestPage() {
@@ -38,7 +35,7 @@ export default function LabRequestPage() {
     try {
       setLab(await action())
     } catch (err) {
-      setError(firstMessage(err, 'Could not save.'))
+      setError(firstError(err, 'Could not save.'))
     }
   }
 

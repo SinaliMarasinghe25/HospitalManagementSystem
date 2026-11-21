@@ -1,3 +1,5 @@
+import type { Role } from '../auth/roles'
+
 // Mirrors Hms.Api/Dtos/StaffDtos.cs (PDF 3.9 Staff Management).
 
 export type AttendanceStatus = 'Present' | 'Absent' | 'Late' | 'OnLeave'
@@ -57,14 +59,24 @@ export type EmployeeDetail = {
   hireDate: string
   departmentId: number
   departmentName: string
+  isClinical: boolean
   isActive: boolean
-  doctorId: number | null
+  doctor: DoctorProfile | null
   userId: string | null
   userName: string | null
   leave: LeaveResponse[]
 }
 
-// Form values are strings, as typed in the inputs.
+// The extra details of an employee who is a doctor (FR-DM-01). Their weekly schedule is on the Doctors page.
+export type DoctorProfile = {
+  id: number
+  specialization: string
+  licenseNumber: string
+  consultationFee: number
+  slotMinutes: number
+}
+
+// Form values are strings, as typed in the inputs. One form for every member of staff, doctors included.
 export type EmployeeForm = {
   firstName: string
   lastName: string
@@ -74,7 +86,17 @@ export type EmployeeForm = {
   hireDate: string
   departmentId: string
   isActive: boolean
+  // Clinical staff choose a clinical department; everyone else goes to "Administration" automatically.
+  isClinical: boolean
+  isDoctor: boolean
+  specialization: string
+  licenseNumber: string
+  consultationFee: string
+  slotMinutes: string
 }
+
+// A new login account typed on the Staff page. The user must change the password at the first login.
+export type NewLogin = { userName: string; password: string; roles: Role[] }
 
 export type UnlinkedUser = { id: string; userName: string; roles: string[] }
 

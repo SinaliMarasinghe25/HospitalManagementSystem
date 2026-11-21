@@ -8,6 +8,7 @@ import { useAuth } from '../../auth/useAuth'
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import { daysOfWeek, type DayOfWeek, type DoctorDetail, type ScheduleItem } from '../../types/doctor'
 import { formatDate, formatMoney, formatTime } from '../../utils/format'
+import { allErrors } from '../../utils/formErrors'
 
 // One doctor's details and weekly schedule (PDF 3.3 "Schedule Management").
 export default function DoctorDetailPage() {
@@ -52,8 +53,9 @@ export default function DoctorDetailPage() {
           </h1>
         </div>
         {canManage && (
-          <Link to={`/doctors/${doctor.id}/edit`} className={secondaryButtonClass}>
-            Edit doctor
+          // Doctors are edited with every other member of staff, on the Staff page.
+          <Link to={`/staff/employees/${doctor.employeeId}`} className={secondaryButtonClass}>
+            Open staff record
           </Link>
         )}
       </div>
@@ -106,7 +108,7 @@ function ScheduleSection({
       onSaved(await saveSchedule(doctor.id, rows))
       setIsEditing(false)
     } catch (err) {
-      setErrors(err instanceof ApiError ? (Object.values(err.fieldErrors).flat().length ? Object.values(err.fieldErrors).flat() : [err.message]) : ['Could not save.'])
+      setErrors(allErrors(err, 'Could not save.'))
     } finally {
       setIsSaving(false)
     }

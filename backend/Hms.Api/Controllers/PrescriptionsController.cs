@@ -13,7 +13,7 @@ namespace Hms.Api.Controllers;
 [ApiController]
 [Route("api/prescriptions")]
 [Authorize(Policy = Policies.ViewPrescriptions)]
-public class PrescriptionsController(MedicalRecordService records, AuditService audit, UserManager<AppUser> userManager)
+public class PrescriptionsController(MedicalRecordService records, DoctorService doctors, AuditService audit, UserManager<AppUser> userManager)
     : ControllerBase
 {
     // GET /api/prescriptions?status=Dispensed     GET /api/prescriptions?open=true   (the pharmacy queue)
@@ -35,12 +35,11 @@ public class PrescriptionsController(MedicalRecordService records, AuditService 
     public async Task<ActionResult<PrescriptionResponse>> Cancel(int id)
     {
         var userId = userManager.GetUserId(User);
-        var result = await records.CancelPrescriptionAsync(id, await records.DoctorIdForUserAsync(userId));
+        var result = await records.CancelPrescriptionAsync(id, await doctors.DoctorIdForUserAsync(userId));
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
 
-        await audit.LogAsync(AuditAction.Update, userId, User.Identity?.Name, "Prescription", id.ToString(),
-            """{"Status":"Cancelled"}""");
+        await audit.LogChangeAsync(AuditAction.Update, "Prescription", id, new { Status = PrescriptionStatus.Cancelled });
         return result.Value!;
     }
 }

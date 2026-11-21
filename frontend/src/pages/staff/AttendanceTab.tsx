@@ -11,6 +11,7 @@ import {
   type AttendanceStatus,
 } from '../../types/staff'
 import { addDays, formatDate, formatTime, todayInHospital } from '../../utils/format'
+import { allErrors } from '../../utils/formErrors'
 
 // What the administrator is editing on one row. Status '' = nothing recorded yet.
 type Draft = { status: AttendanceStatus | ''; checkIn: string; checkOut: string }
@@ -120,7 +121,7 @@ export default function AttendanceTab() {
     } catch (err) {
       if (err instanceof ApiError && Object.keys(err.fieldErrors).length > 0) {
         setError('Nothing was saved. Please correct these:')
-        setErrorList(Object.values(err.fieldErrors).flat())
+        setErrorList(allErrors(err, ''))
       } else {
         setError(err instanceof ApiError ? err.message : 'Could not save. Please try again.')
       }

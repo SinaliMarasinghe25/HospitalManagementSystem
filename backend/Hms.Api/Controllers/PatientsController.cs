@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Hms.Api.Authorization;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -94,9 +93,7 @@ public class PatientsController(
             return ToError(result);
         }
 
-        await audit.LogAsync(AuditAction.Create, userManager.GetUserId(User), User.Identity?.Name,
-            "PatientDocument", result.Value!.Id.ToString(),
-            JsonSerializer.Serialize(new { patientId = id, result.Value.FileName }));
+        await audit.LogChangeAsync(AuditAction.Create, "PatientDocument", result.Value!.Id, new { patientId = id, result.Value.FileName });
         return result.Value;
     }
 
@@ -111,14 +108,12 @@ public class PatientsController(
             return NotFound();
         }
 
-        await audit.LogAsync(AuditAction.View, userManager.GetUserId(User), User.Identity?.Name,
-            "PatientDocument", documentId.ToString(), JsonSerializer.Serialize(new { patientId = id }));
+        await audit.LogChangeAsync(AuditAction.View, "PatientDocument", documentId, new { patientId = id });
         return File(opened.Value.Content, opened.Value.Document.ContentType, opened.Value.Document.FileName);
     }
 
     private Task Audit(AuditAction action, int patientId, PatientRequest? request, string entity = "Patient") =>
-        audit.LogAsync(action, userManager.GetUserId(User), User.Identity?.Name, entity, patientId.ToString(),
-            request is null ? null : JsonSerializer.Serialize(request));
+        audit.LogChangeAsync(action, entity, patientId, request);
 
     private ActionResult ToError<T>(ServiceResult<T> result)
     {

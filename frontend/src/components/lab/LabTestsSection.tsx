@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { ApiError } from '../../api/client'
 import { listLabRequests, listLabTests, requestLabTests } from '../../api/lab'
 import type { LabRequest, LabTest } from '../../types/lab'
 import { formatMoney } from '../../utils/format'
 import { primaryButtonClass, secondaryButtonClass } from '../ui/FormField'
 import { LabStatusBadge, ResultText } from './LabStatusBadge'
+import { firstError } from '../../utils/formErrors'
 
 // On a visit's medical record page: the tests ordered for this visit, and (for its doctor) a form to order more.
 export function LabTestsSection({ patientId, medicalRecordId, canRequest }: { patientId: number; medicalRecordId: number; canRequest: boolean }) {
@@ -32,7 +32,7 @@ export function LabTestsSection({ patientId, medicalRecordId, canRequest }: { pa
       setChosen([])
       setReloadKey((k) => k + 1)
     } catch (err) {
-      setError(err instanceof ApiError ? (Object.values(err.fieldErrors)[0]?.[0] ?? err.message) : 'Could not request tests.')
+      setError(firstError(err, 'Could not request tests.'))
     }
   }
 

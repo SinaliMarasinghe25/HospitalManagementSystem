@@ -1,22 +1,18 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ApiError } from '../../api/client'
-import { createUser, listUsers, resetUserPassword, setUserActive, updateUserRoles } from '../../api/users'
-import { AllRoles, type Role } from '../../auth/roles'
+import { Link } from 'react-router'
+import { listUsers, resetUserPassword, setUserActive, updateUserRoles } from '../../api/users'
+import { Roles, type Role } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
-import { FormField, inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
+import { RoleCheckboxes } from '../../components/users/RoleCheckboxes'
+import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import { roleLabels, type UserAccount } from '../../types/user'
+import { allErrors } from '../../utils/formErrors'
 
-// Identity reports problems like "PasswordRequiresDigit"; show every message in one line.
-function messages(err: unknown, fallback: string) {
-  if (!(err instanceof ApiError)) return fallback
-  const all = Object.values(err.fieldErrors).flat()
-  return all.length ? all.join(' ') : err.message
-}
-
-// PDF 3.1 User Management (Administrator only). Staff accounts are never deleted, only deactivated,
-// because the audit log and clinical records must keep who did what.
-// Doctors get their login from the Doctors page, which also creates their doctor profile (assumption A20).
-export default function UsersPage() {
+// PDF 3.1 User Management (Administrator only), as the "Logins" tab of the Staff page.
+// Logins are never deleted, only deactivated, because the audit log and clinical records must keep who did what.
+// New logins are created on the person's staff record (Employees tab → the person → Login account), so every
+// login belongs to someone. This tab only changes existing logins: roles, password reset, active or not.
+export default function LoginsTab() {
   const { user: me } = useAuth()
   const [users, setUsers] = useState<UserAccount[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -41,14 +37,13 @@ export default function UsersPage() {
       load()
       return true
     } catch (err) {
-      setError(messages(err, 'Could not save.'))
+      setError(allErrors(err, 'Could not save.').join(' '))
       return false
     }
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">Users</h1>
+    <div className="space-y-4">
 
       {error && (
         <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
@@ -61,7 +56,11 @@ export default function UsersPage() {
         </p>
       )}
 
-      <AddUserForm onCreated={(name) => act(async () => undefined, `User ${name} was created.`)} />
+      <p className="text-sm text-slate-600">
+        To give someone a new login, open them on the{' '}
+        <Link to="/staff" className="text-blue-700 hover:underline">Employees</Link> tab and use &ldquo;Login account&rdquo;.
+        A login marked &ldquo;Not linked&rdquo; was made before this; link it from the person&apos;s page. There must always be at least one active administrator, and you cannot remove your own Administrator role.
+      </p>
 
       <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
         <table className="min-w-full text-left text-sm">
@@ -69,6 +68,7 @@ export default function UsersPage() {
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Username</th>
               <th scope="col" className="px-4 py-3 font-medium">Roles</th>
+              <th scope="col" className="px-4 py-3 font-medium">Staff record</th>
               <th scope="col" className="px-4 py-3 font-medium">Status</th>
               <th scope="col" className="px-4 py-3 font-medium"><span className="sr-only">Actions</span></th>
             </tr>
@@ -100,115 +100,6 @@ export default function UsersPage() {
   )
 }
 
-function RoleCheckboxes({ idPrefix, value, onChange }: { idPrefix: string; value: Role[]; onChange: (roles: Role[]) => void }) {
-  return (
-    <fieldset>
-      <legend className="block text-sm font-medium text-slate-700">
-        Roles<span className="text-red-600"> *</span>
-      </legend>
-      <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
-        {AllRoles.map((role) => (
-          <label key={role} htmlFor={`${idPrefix}-${role}`} className="flex items-center gap-1.5 text-sm text-slate-700">
-            <input
-              id={`${idPrefix}-${role}`}
-              type="checkbox"
-              checked={value.includes(role)}
-              onChange={(e) => onChange(e.target.checked ? [...value, role] : value.filter((r) => r !== role))}
-            />
-            {roleLabels[role]}
-          </label>
-        ))}
-      </div>
-    </fieldset>
-  )
-}
-
-function AddUserForm({ onCreated }: { onCreated: (userName: string) => Promise<boolean> }) {
-  const [userName, setUserName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [roles, setRoles] = useState<Role[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
-
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-    setError(null)
-    if (password.length < 8) {
-      setError('The password must have at least 8 characters.')
-      return
-    }
-    if (roles.length === 0) {
-      setError('Choose at least one role.')
-      return
-    }
-    setSaving(true)
-    try {
-      await createUser({ userName: userName.trim(), email: email.trim() || null, password, roles })
-      await onCreated(userName.trim())
-      setUserName('')
-      setEmail('')
-      setPassword('')
-      setRoles([])
-    } catch (err) {
-      setError(messages(err, 'Could not create the user.'))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-      <h2 className="font-semibold text-slate-900">Add user</h2>
-      <p className="text-sm text-slate-600">For doctors, use Doctors &rarr; Add doctor instead: it also creates the doctor profile.</p>
-      {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
-          {error}
-        </p>
-      )}
-      <div className="grid gap-3 sm:grid-cols-3">
-        <FormField id="new-userName" label="Username" required>
-          <input
-            id="new-userName"
-            autoComplete="off"
-            maxLength={50}
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            className={inputClass}
-          />
-        </FormField>
-        <FormField id="new-email" label="Email">
-          <input
-            id="new-email"
-            type="email"
-            autoComplete="off"
-            maxLength={256}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={inputClass}
-          />
-        </FormField>
-        <FormField id="new-password" label="Temporary password" required>
-          <input
-            id="new-password"
-            type="password"
-            autoComplete="new-password"
-            maxLength={128}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={inputClass}
-          />
-        </FormField>
-      </div>
-      <p className="text-xs text-slate-500">At least 8 characters, with an upper-case letter, a lower-case letter and a number.</p>
-      <RoleCheckboxes idPrefix="new-role" value={roles} onChange={setRoles} />
-      <button type="submit" disabled={saving} className={primaryButtonClass}>
-        {saving ? 'Saving...' : 'Add user'}
-      </button>
-    </form>
-  )
-}
-
 function UserRow({
   account,
   isMe,
@@ -229,9 +120,12 @@ function UserRow({
   const [roles, setRoles] = useState<Role[]>(account.roles)
   const [password, setPassword] = useState('')
 
+  // The Doctor role follows the doctor profile (assumption A25): kept for a doctor, never added by hand.
+  const otherRoles = roles.filter((r) => r !== Roles.Doctor)
+
   function submitRoles(event: FormEvent) {
     event.preventDefault()
-    void onRoles(roles)
+    void onRoles(account.isDoctor ? [...otherRoles, Roles.Doctor] : otherRoles)
   }
 
   async function submitPassword(event: FormEvent) {
@@ -250,8 +144,18 @@ function UserRow({
         </td>
         <td className="px-4 py-3">{account.roles.map((r) => roleLabels[r] ?? r).join(', ')}</td>
         <td className="px-4 py-3">
+          {account.employeeId !== null ? (
+            <Link to={`/staff/employees/${account.employeeId}`} className={link}>
+              {account.employeeName}
+            </Link>
+          ) : (
+            <span className="text-slate-400">Not linked</span>
+          )}
+        </td>
+        <td className="px-4 py-3">
           {account.isActive ? 'Active' : 'Deactivated'}
           {account.isLockedOut && <span className="block text-xs text-red-700">Locked after failed logins</span>}
+          {account.mustChangePassword && <span className="block text-xs text-amber-700">Temporary password</span>}
         </td>
         <td className="space-x-3 px-4 py-3 text-right whitespace-nowrap">
           <button
@@ -281,11 +185,20 @@ function UserRow({
       </tr>
       {editing === 'roles' && (
         <tr>
-          <td colSpan={4} className="px-4 pb-4">
+          <td colSpan={5} className="px-4 pb-4">
             <form onSubmit={submitRoles} className="space-y-3 rounded-md bg-slate-50 p-3">
-              <RoleCheckboxes idPrefix={`roles-${account.id}`} value={roles} onChange={setRoles} />
+              <RoleCheckboxes
+                idPrefix={`roles-${account.id}`}
+                value={roles}
+                onChange={setRoles}
+                isDoctor={account.isDoctor}
+              />
               <div className="flex gap-2">
-                <button type="submit" disabled={roles.length === 0} className={primaryButtonClass}>
+                <button
+                  type="submit"
+                  disabled={otherRoles.length === 0 && !account.isDoctor}
+                  className={primaryButtonClass}
+                >
                   Save roles
                 </button>
                 <button type="button" onClick={() => onEdit(null)} className={secondaryButtonClass}>
@@ -299,7 +212,7 @@ function UserRow({
       )}
       {editing === 'password' && (
         <tr>
-          <td colSpan={4} className="px-4 pb-4">
+          <td colSpan={5} className="px-4 pb-4">
             <form onSubmit={submitPassword} className="flex flex-wrap items-end gap-2 rounded-md bg-slate-50 p-3">
               <div>
                 <label htmlFor={`pw-${account.id}`} className="block text-sm font-medium text-slate-700">
@@ -319,7 +232,7 @@ function UserRow({
               <button type="submit" className={primaryButtonClass}>
                 Reset password
               </button>
-              <p className="w-full text-xs text-slate-500">This also unlocks an account locked after failed logins.</p>
+              <p className="w-full text-xs text-slate-500">This also unlocks a locked account. The user must change it at their next login.</p>
             </form>
           </td>
         </tr>

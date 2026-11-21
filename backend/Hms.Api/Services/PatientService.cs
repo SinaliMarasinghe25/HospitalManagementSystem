@@ -22,7 +22,7 @@ public class PatientService(AppDbContext db)
         var words = (search ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         foreach (var word in words.Take(5))
         {
-            var pattern = $"%{EscapeLike(word)}%";
+            var pattern = SearchText.Contains(word);
             query = query.Where(p =>
                 EF.Functions.ILike(p.FirstName, pattern, "\\") ||
                 EF.Functions.ILike(p.LastName, pattern, "\\") ||
@@ -173,9 +173,6 @@ public class PatientService(AppDbContext db)
 
     // Empty text boxes are stored as NULL, not as "".
     private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-
-    private static string EscapeLike(string value) =>
-        value.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
 
     private static PatientDetail ToDetail(Patient p) => new(
         p.Id, p.PatientNumber, p.FirstName, p.LastName, p.DateOfBirth, p.Gender, p.NationalId,

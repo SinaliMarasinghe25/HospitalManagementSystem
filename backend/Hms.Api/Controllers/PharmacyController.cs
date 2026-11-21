@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Hms.Api.Authorization;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -18,8 +16,6 @@ namespace Hms.Api.Controllers;
 [Authorize(Policy = Policies.ViewPharmacyStock)]
 public class PharmacyController(PharmacyService pharmacy, AuditService audit, UserManager<AppUser> userManager) : ControllerBase
 {
-    private static readonly JsonSerializerOptions AuditJson = new() { Converters = { new JsonStringEnumConverter() } };
-
     // Doctors see stock levels only ("View (stock only)" in the role table), not what the hospital paid.
     private bool ShowCost =>
         User.IsInRole(Roles.Administrator) || User.IsInRole(Roles.Pharmacist) || User.IsInRole(Roles.Accountant);
@@ -53,7 +49,7 @@ public class PharmacyController(PharmacyService pharmacy, AuditService audit, Us
         var result = await pharmacy.SaveMedicineAsync(id, request);
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
-        await Audit(id is null ? AuditAction.Create : AuditAction.Update, "Medicine", result.Value, request);
+        await audit.LogChangeAsync(id is null ? AuditAction.Create : AuditAction.Update, "Medicine", result.Value, request);
         return id is null ? StatusCode(StatusCodes.Status201Created, new { id = result.Value }) : NoContent();
     }
 
@@ -64,7 +60,7 @@ public class PharmacyController(PharmacyService pharmacy, AuditService audit, Us
     {
         var result = await pharmacy.SetPriceAsync(id, request.UnitPrice);
         if (result.IsNotFound) return NotFound();
-        await Audit(AuditAction.Update, "Medicine", id, request);
+        await audit.LogChangeAsync(AuditAction.Update, "Medicine", id, request);
         return NoContent();
     }
 
@@ -78,7 +74,7 @@ public class PharmacyController(PharmacyService pharmacy, AuditService audit, Us
         var result = await pharmacy.StockInAsync(id, request, userManager.GetUserId(User));
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
-        await Audit(AuditAction.Create, "StockIn", result.Value, new { MedicineId = id, request.BatchNumber, request.Quantity });
+        await audit.LogChangeAsync(AuditAction.Create, "StockIn", result.Value, new { MedicineId = id, request.BatchNumber, request.Quantity });
         return (await pharmacy.GetMedicineAsync(id, ShowCost))!;
     }
 
@@ -104,7 +100,7 @@ public class PharmacyController(PharmacyService pharmacy, AuditService audit, Us
     {
         if (result.IsNotFound) return NotFound();
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
-        await Audit(AuditAction.Update, "MedicineBatch", batchId, changes);
+        await audit.LogChangeAsync(AuditAction.Update, "MedicineBatch", batchId, changes);
         return (await pharmacy.GetMedicineAsync(result.Value, ShowCost))!;
     }
 
@@ -139,11 +135,7 @@ public class PharmacyController(PharmacyService pharmacy, AuditService audit, Us
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
 
         var view = (await pharmacy.GetDispenseViewAsync(id))!;
-        await Audit(AuditAction.Update, "Prescription", id, new { view.Prescription.Status, request.Items });
+        await audit.LogChangeAsync(AuditAction.Update, "Prescription", id, new { view.Prescription.Status, request.Items });
         return view;
     }
-
-    private Task Audit(AuditAction action, string entity, int id, object? changes) =>
-        audit.LogAsync(action, userManager.GetUserId(User), User.Identity?.Name, entity, id.ToString(),
-            changes is null ? null : JsonSerializer.Serialize(changes, AuditJson));
 }

@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Hms.Api.Authorization;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -19,8 +17,6 @@ namespace Hms.Api.Controllers;
 [Authorize(Policy = Policies.ViewInvoiceBalances)]
 public class BillingController(BillingService billing, AuditService audit, UserManager<AppUser> userManager) : ControllerBase
 {
-    private static readonly JsonSerializerOptions AuditJson = new() { Converters = { new JsonStringEnumConverter() } };
-
     // ---------- Unbilled charges ----------
 
     // GET /api/billing/unbilled   (patients with charges not on an invoice yet)
@@ -67,7 +63,7 @@ public class BillingController(BillingService billing, AuditService audit, UserM
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
 
         var invoice = (await billing.GetInvoiceAsync(result.Value))!;
-        await Audit(AuditAction.Create, "Invoice", invoice.Id, new
+        await audit.LogChangeAsync(AuditAction.Create, "Invoice", invoice.Id, new
         {
             invoice.InvoiceNumber, invoice.PatientId, request.ChargeIds, invoice.Subtotal, invoice.Discount, invoice.Total,
         });
@@ -85,7 +81,7 @@ public class BillingController(BillingService billing, AuditService audit, UserM
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
 
         // The audit log keeps which charges were on the cancelled invoice.
-        await Audit(AuditAction.Update, "Invoice", id, new
+        await audit.LogChangeAsync(AuditAction.Update, "Invoice", id, new
         {
             Status = InvoiceStatus.Cancelled, ReleasedChargeIds = before!.Lines.Select(l => l.Id), before.Total,
         });
@@ -104,7 +100,7 @@ public class BillingController(BillingService billing, AuditService audit, UserM
         if (!result.Succeeded) return this.ValidationErrors(result.Errors);
 
         var receipt = (await billing.GetReceiptAsync(result.Value))!;
-        await Audit(AuditAction.Create, "Payment", result.Value, new
+        await audit.LogChangeAsync(AuditAction.Create, "Payment", result.Value, new
         {
             InvoiceId = id, receipt.Payment.ReceiptNumber, receipt.Payment.Amount, receipt.Payment.Method,
         });
@@ -126,8 +122,4 @@ public class BillingController(BillingService billing, AuditService audit, UserM
     [HttpGet("revenue-summary")]
     [Authorize(Policy = Policies.ViewRevenue)]
     public Task<RevenueSummary> RevenueSummary() => billing.GetRevenueSummaryAsync();
-
-    private Task Audit(AuditAction action, string entity, int id, object changes) =>
-        audit.LogAsync(action, userManager.GetUserId(User), User.Identity?.Name, entity, id.ToString(),
-            JsonSerializer.Serialize(changes, AuditJson));
 }

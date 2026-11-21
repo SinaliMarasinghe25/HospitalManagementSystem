@@ -134,7 +134,7 @@ public class BillingService(AppDbContext db)
         if (patientId is not null) query = query.Where(i => i.PatientId == patientId);
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var pattern = $"%{search.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_")}%";
+            var pattern = SearchText.Contains(search);
             query = query.Where(i =>
                 EF.Functions.ILike(i.InvoiceNumber, pattern, "\\") ||
                 EF.Functions.ILike(i.Patient.PatientNumber, pattern, "\\") ||

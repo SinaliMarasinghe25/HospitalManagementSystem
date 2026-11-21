@@ -1,13 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { createInvoice, getUnbilledCharges } from '../../api/billing'
-import { ApiError } from '../../api/client'
 import { Permissions } from '../../auth/permissions'
 import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
 import { inputClass, primaryButtonClass } from '../../components/ui/FormField'
 import { chargeTypeLabels, type UnbilledCharges } from '../../types/billing'
 import { formatDateTime, formatMoney } from '../../utils/format'
+import { allErrors } from '../../utils/formErrors'
 
 // UI-BIL-01 Generate Bill: the accountant picks the patient's unbilled charges and issues an invoice.
 // The totals shown here are a preview; the API works them out again from the charges, so they always match.
@@ -62,7 +62,7 @@ export default function GenerateBillPage() {
       const invoice = await createInvoice(data!.patientId, selected, discountValue)
       navigate(`/billing/invoices/${invoice.id}`)
     } catch (err) {
-      setError(err instanceof ApiError ? Object.values(err.fieldErrors).flat().join(' ') || err.message : 'Could not create the invoice.')
+      setError(allErrors(err, 'Could not create the invoice.').join(' '))
       setSaving(false)
     }
   }

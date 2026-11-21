@@ -25,7 +25,7 @@ public class PharmacyService(AppDbContext db, MedicalRecordService records)
         var query = db.Medicines.AsNoTracking().Where(m => includeInactive || m.IsActive);
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var pattern = $"%{search.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_")}%";
+            var pattern = SearchText.Contains(search);
             query = query.Where(m => EF.Functions.ILike(m.Name, pattern, "\\") ||
                                      (m.GenericName != null && EF.Functions.ILike(m.GenericName, pattern, "\\")));
         }
