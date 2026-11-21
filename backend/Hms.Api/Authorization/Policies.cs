@@ -38,6 +38,10 @@ public static class Policies
     public const string ManageBilling = nameof(ManageBilling);
     public const string ViewRevenue = nameof(ViewRevenue);
     public const string ManageStaff = nameof(ManageStaff);
+    public const string ViewPatientReport = nameof(ViewPatientReport);
+    public const string ViewAppointmentReport = nameof(ViewAppointmentReport);
+    public const string ViewPharmacyReport = nameof(ViewPharmacyReport);
+    public const string ViewLabReport = nameof(ViewLabReport);
 
     public static AuthorizationBuilder AddHmsPolicies(this AuthorizationBuilder builder) => builder
         .AddPolicy(ViewPatients, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.Nurse, Roles.Receptionist))
@@ -81,5 +85,11 @@ public static class Policies
         // Dashboard tile "Revenue Summary": Admin and Accountant only (UI-DSH-03).
         .AddPolicy(ViewRevenue, p => p.RequireRole(Roles.Administrator, Roles.Accountant))
         // Staff, attendance, leave: Admin full. Every role manages its own leave, which needs only a login.
-        .AddPolicy(ManageStaff, p => p.RequireRole(Roles.Administrator));
+        .AddPolicy(ManageStaff, p => p.RequireRole(Roles.Administrator))
+        // Reports row of the role table. The revenue report uses ViewRevenue (Admin, Accountant)
+        // and the staff report uses ManageStaff (Admin), because those rows have exactly the same roles.
+        .AddPolicy(ViewPatientReport, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.Nurse))
+        .AddPolicy(ViewAppointmentReport, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.Receptionist))
+        .AddPolicy(ViewPharmacyReport, p => p.RequireRole(Roles.Administrator, Roles.Pharmacist))
+        .AddPolicy(ViewLabReport, p => p.RequireRole(Roles.Administrator, Roles.Doctor, Roles.LaboratoryStaff));
 }

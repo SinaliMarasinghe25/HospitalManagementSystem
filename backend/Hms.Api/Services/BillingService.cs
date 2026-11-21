@@ -264,11 +264,14 @@ public class BillingService(AppDbContext db)
 
         var todayTotal = await db.Payments.Where(p => p.PaidAt >= todayUtc).SumAsync(p => p.Amount);
         var monthTotal = await db.Payments.Where(p => p.PaidAt >= monthUtc).SumAsync(p => p.Amount);
-        var outstanding = await db.Invoices
+        return new RevenueSummary(todayTotal, monthTotal, await GetOutstandingAsync());
+    }
+
+    // Money still owed on every issued invoice, whatever its date (also used by the revenue report).
+    public Task<decimal> GetOutstandingAsync() =>
+        db.Invoices
             .Where(i => i.Status == InvoiceStatus.Issued || i.Status == InvoiceStatus.PartiallyPaid)
             .SumAsync(i => i.Total - i.AmountPaid);
-        return new RevenueSummary(todayTotal, monthTotal, outstanding);
-    }
 
     // ---------- Helpers ----------
 

@@ -14,6 +14,10 @@ public static class HospitalTime
     public static DateTime ToUtc(DateOnly date, TimeOnly time) =>
         TimeZoneInfo.ConvertTimeToUtc(date.ToDateTime(time, DateTimeKind.Unspecified), Zone);
 
+    // Hospital days "from" to "to", both inclusive, as a UTC range [FromUtc, ToUtc) for database queries.
+    public static (DateTime FromUtc, DateTime ToUtc) DaysToUtc(DateOnly from, DateOnly to) =>
+        (ToUtc(from, TimeOnly.MinValue), ToUtc(to.AddDays(1), TimeOnly.MinValue));
+
     public static DateOnly Today => DateOnly.FromDateTime(ToLocal(DateTime.UtcNow));
 
     // A time sent with "Z" is UTC. A time sent without a zone ("2026-11-20T10:00") is read as hospital time.
