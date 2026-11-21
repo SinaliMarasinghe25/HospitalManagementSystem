@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="Hms.Api/Hms.Api.csproj" />
+  <Project Path="../tests/Hms.Api.Tests/Hms.Api.Tests.csproj" />
 </Solution>
