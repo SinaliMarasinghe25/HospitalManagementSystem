@@ -1,6 +1,6 @@
 import type {
   InvoiceDetail,
-  InvoiceSummary,
+  InvoicePage,
   PaymentMethod,
   Receipt,
   UnbilledCharges,
@@ -18,13 +18,15 @@ export function getUnbilledCharges(patientId: number) {
   return apiFetch<UnbilledCharges>(`/billing/unbilled/${patientId}`)
 }
 
-export function listInvoices(filter: { due?: boolean; search?: string; fromDate?: string; toDate?: string }) {
+// One page of invoices, newest first, with the money still due on all of them (totalBalance).
+export function listInvoices(filter: { due?: boolean; search?: string; fromDate?: string; toDate?: string; page?: number }) {
   const params = new URLSearchParams()
   if (filter.due) params.set('due', 'true')
   if (filter.search?.trim()) params.set('search', filter.search.trim())
   if (filter.fromDate) params.set('fromDate', filter.fromDate)
   if (filter.toDate) params.set('toDate', filter.toDate)
-  return apiFetch<InvoiceSummary[]>(`/billing/invoices?${params}`)
+  if (filter.page) params.set('page', String(filter.page))
+  return apiFetch<InvoicePage>(`/billing/invoices?${params}`)
 }
 
 export function getInvoice(id: number) {

@@ -1,5 +1,6 @@
 import type { AdmissionDetail, AdmissionSummary, VitalSign, VitalSignForm, Ward } from '../types/admission'
-import { apiFetch } from './client'
+import type { PagedResult } from '../types/paged'
+import { apiFetch, queryString } from './client'
 
 // One function per endpoint in WardsController.cs and AdmissionsController.cs.
 
@@ -26,12 +27,9 @@ export function setBedActive(bedId: number, isActive: boolean) {
 
 // ---------- Admissions ----------
 
-export function listAdmissions(filter: { status?: string; fromDate?: string; toDate?: string; patientId?: string }) {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(filter)) {
-    if (value) params.set(key, value)
-  }
-  return apiFetch<AdmissionSummary[]>(`/admissions?${params}`)
+// One page of admissions, newest first.
+export function listAdmissions(filter: { status?: string; fromDate?: string; toDate?: string; patientId?: string; page?: string }) {
+  return apiFetch<PagedResult<AdmissionSummary>>(`/admissions?${queryString(filter)}`)
 }
 
 export function getAdmission(id: number) {

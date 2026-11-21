@@ -17,9 +17,12 @@ public class PrescriptionsController(MedicalRecordService records, DoctorService
     : ControllerBase
 {
     // GET /api/prescriptions?status=Dispensed     GET /api/prescriptions?open=true   (the pharmacy queue)
+    // One page at a time: add &page=2 (20 rows unless pageSize says otherwise, at most 100).
     [HttpGet]
-    public Task<List<PrescriptionResponse>> List(PrescriptionStatus? status, int? patientId, bool open = false) =>
-        records.ListPrescriptionsAsync(status, patientId, open);
+    public Task<PagedResult<PrescriptionResponse>> List(
+        PrescriptionStatus? status, int? patientId, bool open = false,
+        int page = 1, int pageSize = Paging.DefaultPageSize) =>
+        records.ListPrescriptionsAsync(status, patientId, open, page, pageSize);
 
     // GET /api/prescriptions/3
     [HttpGet("{id:int}")]

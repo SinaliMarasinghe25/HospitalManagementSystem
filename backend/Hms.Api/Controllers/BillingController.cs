@@ -36,12 +36,14 @@ public class BillingController(BillingService billing, AuditService audit, UserM
     // ---------- Invoices ----------
 
     // GET /api/billing/invoices?due=true          (everything still to be paid)
-    // GET /api/billing/invoices?search=P-000001&fromDate=...&toDate=...&status=Paid
+    // GET /api/billing/invoices?search=P-000001&fromDate=...&toDate=...&status=Paid&page=2
+    // One page at a time (page 1 if left out, 20 rows unless pageSize says otherwise, at most 100).
     [HttpGet("invoices")]
-    public async Task<ActionResult<List<InvoiceSummary>>> Invoices(
-        InvoiceStatus? status, bool due, int? patientId, string? search, DateOnly? fromDate, DateOnly? toDate)
+    public async Task<ActionResult<InvoicePage>> Invoices(
+        InvoiceStatus? status, bool due, int? patientId, string? search, DateOnly? fromDate, DateOnly? toDate,
+        int page = 1, int pageSize = Paging.DefaultPageSize)
     {
-        var result = await billing.ListInvoicesAsync(status, due, patientId, search, fromDate, toDate);
+        var result = await billing.ListInvoicesAsync(status, due, patientId, search, fromDate, toDate, page, pageSize);
         return result.Succeeded ? result.Value! : this.ValidationErrors(result.Errors);
     }
 

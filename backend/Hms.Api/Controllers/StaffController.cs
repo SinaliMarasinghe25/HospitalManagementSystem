@@ -132,10 +132,11 @@ public class StaffController(EmployeeService employees, StaffService staff, Audi
 
     // ---------- Leave (Admin) ----------
 
-    // GET /api/staff/leave?status=Pending
+    // GET /api/staff/leave?status=Pending&page=2   (20 rows a page unless pageSize says otherwise, at most 100)
     [HttpGet("leave")]
     [Authorize(Policy = Policies.ManageStaff)]
-    public Task<List<LeaveResponse>> Leave(LeaveStatus? status) => staff.ListLeaveAsync(status);
+    public Task<PagedResult<LeaveResponse>> Leave(LeaveStatus? status, int page = 1, int pageSize = Paging.DefaultPageSize) =>
+        staff.ListLeaveAsync(status, page, pageSize);
 
     // POST /api/staff/leave   (record leave for an employee, for example one without a login)
     [HttpPost("leave")]

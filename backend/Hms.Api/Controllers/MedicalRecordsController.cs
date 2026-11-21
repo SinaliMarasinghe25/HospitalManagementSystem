@@ -17,12 +17,14 @@ namespace Hms.Api.Controllers;
 public class MedicalRecordsController(MedicalRecordService records, DoctorService doctors, AuditService audit, UserManager<AppUser> userManager)
     : ControllerBase
 {
-    // GET /api/medical-records?fromDate=2026-11-13&toDate=2026-11-19&patientId=1&doctorId=1
+    // GET /api/medical-records?fromDate=2026-11-13&toDate=2026-11-19&patientId=1&doctorId=1&page=2
+    // One page at a time (page 1 if left out, 20 rows unless pageSize says otherwise, at most 100).
     [HttpGet]
-    public async Task<ActionResult<List<MedicalRecordSummary>>> List(
-        DateOnly? fromDate, DateOnly? toDate, int? patientId, int? doctorId)
+    public async Task<ActionResult<PagedResult<MedicalRecordSummary>>> List(
+        DateOnly? fromDate, DateOnly? toDate, int? patientId, int? doctorId,
+        int page = 1, int pageSize = Paging.DefaultPageSize)
     {
-        var result = await records.ListAsync(fromDate, toDate, patientId, doctorId);
+        var result = await records.ListAsync(fromDate, toDate, patientId, doctorId, page, pageSize);
         return result.Succeeded ? result.Value! : this.ValidationErrors(result.Errors);
     }
 

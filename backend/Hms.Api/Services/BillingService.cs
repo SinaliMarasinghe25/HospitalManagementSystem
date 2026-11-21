@@ -125,8 +125,10 @@ public class BillingService(AppDbContext db)
     // Without a patient or search text, a date range (hospital days) keeps the list small.
     // Invoices with money still due are always shown, whatever their date.
     // due = true: every invoice with money still to pay (Issued or PartiallyPaid).
-    public async Task<ServiceResult<List<InvoiceSummary>>> ListInvoicesAsync(
-        InvoiceStatus? status, bool due, int? patientId, string? search, DateOnly? fromDate, DateOnly? toDate)
+    // Newest first, one page at a time. TotalBalance adds up what is still due on every page, not just this one.
+    public async Task<ServiceResult<InvoicePage>> ListInvoicesAsync(
+        InvoiceStatus? status, bool due, int? patientId, string? search, DateOnly? fromDate, DateOnly? toDate,
+        int page, int pageSize)
     {
         var query = db.Invoices.AsNoTracking();
         if (status is not null) query = query.Where(i => i.Status == status);
@@ -148,7 +150,7 @@ public class BillingService(AppDbContext db)
             var from = fromDate ?? to.AddDays(-29);
             if (to < from || to.DayNumber - from.DayNumber > MaxRangeDays)
             {
-                return ServiceResult<List<InvoiceSummary>>.Invalid(new()
+                return ServiceResult<InvoicePage>.Invalid(new()
                 {
                     ["ToDate"] = [$"The end date must be on or after the start date, and at most {MaxRangeDays} days later."]
                 });
@@ -158,12 +160,15 @@ public class BillingService(AppDbContext db)
             query = query.Where(i => i.IssuedAt >= fromUtc && i.IssuedAt < toUtc);
         }
 
-        var list = await query.OrderByDescending(i => i.IssuedAt).Take(500)
+        var totalBalance = await query.Where(i => i.Status != InvoiceStatus.Cancelled)
+            .SumAsync(i => i.Total - i.AmountPaid);
+        var result = await query.OrderByDescending(i => i.IssuedAt).ThenByDescending(i => i.Id)
             .Select(i => new InvoiceSummary(i.Id, i.InvoiceNumber, i.PatientId, i.Patient.PatientNumber,
                 i.Patient.FirstName + " " + i.Patient.LastName, i.IssuedAt!.Value, i.Status, i.Total, i.AmountPaid,
                 i.Status == InvoiceStatus.Cancelled ? 0 : i.Total - i.AmountPaid))
-            .ToListAsync();
-        return ServiceResult<List<InvoiceSummary>>.Ok(list);
+            .ToPagedResultAsync(page, pageSize);
+        return ServiceResult<InvoicePage>.Ok(
+            new InvoicePage(result.Items, result.Page, result.PageSize, result.TotalCount, totalBalance));
     }
 
     public async Task<InvoiceDetail?> GetInvoiceAsync(int id)

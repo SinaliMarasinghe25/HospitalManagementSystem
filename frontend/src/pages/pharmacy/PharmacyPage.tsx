@@ -7,7 +7,9 @@ import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
 import { LowStockBadge, PrescriptionStatusBadge } from '../../components/pharmacy/PharmacyBadges'
 import { inputClass, primaryButtonClass } from '../../components/ui/FormField'
+import { Pagination } from '../../components/ui/Pagination'
 import type { Prescription } from '../../types/medicalRecord'
+import type { PagedResult } from '../../types/paged'
 import type { AlertBatch, MedicineStock, PharmacyAlerts } from '../../types/pharmacy'
 import { formatDate, formatDateTime, formatMoney } from '../../utils/format'
 import { Tabs } from '../../components/ui/Tabs'
@@ -63,18 +65,21 @@ const card = 'overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-20
 const th = 'px-4 py-3 font-medium'
 
 function PrescriptionList({ dispensed }: { dispensed: boolean }) {
-  const [rows, setRows] = useState<Prescription[] | null>(null)
+  const [page, setPage] = useState(1)
+  const [data, setData] = useState<PagedResult<Prescription> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let ignore = false
-    ;(dispensed ? listDispensedPrescriptions() : listOpenPrescriptions())
-      .then((data) => !ignore && setRows(data))
+    ;(dispensed ? listDispensedPrescriptions(page) : listOpenPrescriptions(page))
+      .then((result) => !ignore && (setData(result), setError(null)))
       .catch((err: unknown) => !ignore && setError(err instanceof ApiError ? err.message : 'Could not load prescriptions.'))
     return () => {
       ignore = true
     }
-  }, [dispensed])
+  }, [dispensed, page])
+
+  const rows = data?.items
 
   return (
     <>
@@ -131,6 +136,15 @@ function PrescriptionList({ dispensed }: { dispensed: boolean }) {
           </tbody>
         </table>
       </div>
+      {data && (
+        <Pagination
+          totalCount={data.totalCount}
+          page={data.page}
+          pageSize={data.pageSize}
+          noun="prescription"
+          onPageChange={setPage}
+        />
+      )}
     </>
   )
 }

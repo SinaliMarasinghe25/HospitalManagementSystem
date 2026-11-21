@@ -48,6 +48,14 @@ public record InvoiceSummary(
     decimal AmountPaid,
     decimal Balance);
 
+// One page of invoices, plus the money still due on all the matching invoices (every page, not only this one).
+public record InvoicePage(
+    IReadOnlyList<InvoiceSummary> Items,
+    int Page,
+    int PageSize,
+    int TotalCount,
+    decimal TotalBalance);
+
 public record PaymentResponse(
     int Id,
     string ReceiptNumber,

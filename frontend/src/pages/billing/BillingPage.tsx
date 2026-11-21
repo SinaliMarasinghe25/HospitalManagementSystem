@@ -7,7 +7,8 @@ import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
 import { InvoiceStatusBadge } from '../../components/billing/InvoiceStatusBadge'
 import { inputClass } from '../../components/ui/FormField'
-import type { InvoiceSummary, UnbilledPatient } from '../../types/billing'
+import { Pagination } from '../../components/ui/Pagination'
+import type { InvoicePage, UnbilledPatient } from '../../types/billing'
 import { addDays, formatDateTime, formatMoney, todayInHospital } from '../../utils/format'
 import { Tabs } from '../../components/ui/Tabs'
 
@@ -110,7 +111,8 @@ function UnbilledList() {
 function InvoiceList({ due, linkToDetails }: { due: boolean; linkToDetails: boolean }) {
   const [search, setSearch] = useState('')
   const [toDate, setToDate] = useState(() => todayInHospital())
-  const [rows, setRows] = useState<InvoiceSummary[] | null>(null)
+  const [page, setPage] = useState(1)
+  const [data, setData] = useState<InvoicePage | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -118,10 +120,10 @@ function InvoiceList({ due, linkToDetails }: { due: boolean; linkToDetails: bool
     // A short pause so typing a name makes one request, not one per letter.
     const timer = setTimeout(() => {
       const filter = due ? { due: true, search } : search.trim() ? { search } : { fromDate: addDays(toDate, -29), toDate }
-      listInvoices(filter)
-        .then((data) => {
+      listInvoices({ ...filter, page })
+        .then((result) => {
           if (ignore) return
-          setRows(data)
+          setData(result)
           setError(null)
         })
         .catch((err: unknown) => !ignore && setError(err instanceof ApiError ? err.message : 'Could not load invoices.'))
@@ -130,9 +132,9 @@ function InvoiceList({ due, linkToDetails }: { due: boolean; linkToDetails: bool
       ignore = true
       clearTimeout(timer)
     }
-  }, [due, search, toDate])
+  }, [due, search, toDate, page])
 
-  const totalDue = rows?.reduce((sum, i) => sum + i.balance, 0) ?? 0
+  const rows = data?.items
 
   return (
     <>
@@ -145,7 +147,10 @@ function InvoiceList({ due, linkToDetails }: { due: boolean; linkToDetails: bool
           type="search"
           placeholder="Patient name, patient no. or invoice no."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setPage(1) // new search words start on page 1
+          }}
           className={`${inputClass} max-w-xs`}
         />
         {!due && !search.trim() && (
@@ -155,14 +160,19 @@ function InvoiceList({ due, linkToDetails }: { due: boolean; linkToDetails: bool
               id="invoice-to"
               type="date"
               value={toDate}
-              onChange={(e) => e.target.value && setToDate(e.target.value)}
+              onChange={(e) => {
+                if (!e.target.value) return
+                setToDate(e.target.value)
+                setPage(1) // a new date range starts on page 1
+              }}
               className={`${inputClass} w-auto`}
             />
           </>
         )}
-        {due && rows && (
+        {due && data && (
           <p className="ml-auto">
-            Total still due: <strong>{formatMoney(totalDue)}</strong>
+            {/* Added up by the API over every page, not only the rows shown here. */}
+            Total still due: <strong>{formatMoney(data.totalBalance)}</strong>
           </p>
         )}
       </div>
@@ -215,6 +225,15 @@ function InvoiceList({ due, linkToDetails }: { due: boolean; linkToDetails: bool
           </tbody>
         </table>
       </div>
+      {data && (
+        <Pagination
+          totalCount={data.totalCount}
+          page={data.page}
+          pageSize={data.pageSize}
+          noun="invoice"
+          onPageChange={setPage}
+        />
+      )}
     </>
   )
 }

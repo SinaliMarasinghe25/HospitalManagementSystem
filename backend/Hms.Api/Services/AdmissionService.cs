@@ -17,8 +17,9 @@ public class AdmissionService(AppDbContext db, NotificationService notifications
     // ---------- Reading ----------
 
     // Current inpatients, or discharges in a date range (hospital days, inclusive).
-    public async Task<ServiceResult<List<AdmissionSummary>>> ListAsync(
-        AdmissionStatus? status, DateOnly? fromDate, DateOnly? toDate, int? wardId, int? patientId)
+    // Newest admission first, one page at a time.
+    public async Task<ServiceResult<PagedResult<AdmissionSummary>>> ListAsync(
+        AdmissionStatus? status, DateOnly? fromDate, DateOnly? toDate, int? wardId, int? patientId, int page, int pageSize)
     {
         var query = db.Admissions.AsNoTracking();
         if (patientId is not null)
@@ -31,7 +32,7 @@ public class AdmissionService(AppDbContext db, NotificationService notifications
             var from = fromDate ?? to.AddDays(-6);
             if (to < from || to.DayNumber - from.DayNumber > MaxRangeDays)
             {
-                return ServiceResult<List<AdmissionSummary>>.Invalid(new()
+                return ServiceResult<PagedResult<AdmissionSummary>>.Invalid(new()
                 {
                     ["ToDate"] = [$"The end date must be on or after the start date, and at most {MaxRangeDays} days later."]
                 });
@@ -46,15 +47,15 @@ public class AdmissionService(AppDbContext db, NotificationService notifications
         }
         if (wardId is not null) query = query.Where(a => a.Bed.WardId == wardId);
 
-        var list = await query
-            .OrderByDescending(a => a.AdmittedAt)
+        var result = await query
+            .OrderByDescending(a => a.AdmittedAt).ThenByDescending(a => a.Id)
             .Select(a => new AdmissionSummary(
                 a.Id, a.AdmissionNumber, a.PatientId, a.Patient.PatientNumber,
                 a.Patient.FirstName + " " + a.Patient.LastName, a.Bed.Ward.Name, a.Bed.BedNumber,
                 a.AdmittingDoctor.Employee.FirstName + " " + a.AdmittingDoctor.Employee.LastName,
                 a.AdmittedAt, a.DischargedAt, a.Status))
-            .ToListAsync();
-        return ServiceResult<List<AdmissionSummary>>.Ok(list);
+            .ToPagedResultAsync(page, pageSize);
+        return ServiceResult<PagedResult<AdmissionSummary>>.Ok(result);
     }
 
     public async Task<AdmissionDetail?> GetAsync(int id, bool includeClinical)

@@ -1,5 +1,7 @@
 // These match Hms.Api/Dtos/BillingDtos.cs.
 
+import type { PagedResult } from './paged'
+
 export type ChargeType = 'Consultation' | 'Laboratory' | 'Pharmacy' | 'Admission'
 
 export const chargeTypeLabels: Record<ChargeType, string> = {
@@ -44,6 +46,9 @@ export type InvoiceSummary = {
   amountPaid: number
   balance: number
 }
+
+// One page of invoices. totalBalance is the money still due on every matching invoice, not only this page.
+export type InvoicePage = PagedResult<InvoiceSummary> & { totalBalance: number }
 
 export type PaymentMethod = 'Cash' | 'Card' | 'BankTransfer'
 
