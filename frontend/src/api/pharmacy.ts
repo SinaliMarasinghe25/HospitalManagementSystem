@@ -4,7 +4,6 @@ import type {
   MedicineDetail,
   MedicineRequest,
   MedicineStock,
-  PharmacyAlertCounts,
   PharmacyAlerts,
 } from '../types/pharmacy'
 import { apiFetch } from './client'
@@ -52,10 +51,6 @@ export function writeOffExpired(batchId: number) {
 
 export function getPharmacyAlerts() {
   return apiFetch<PharmacyAlerts>('/pharmacy/alerts')
-}
-
-export function countPharmacyAlerts() {
-  return apiFetch<PharmacyAlertCounts>('/pharmacy/alerts/count')
 }
 
 // The pharmacy queue: Pending and PartiallyDispensed, oldest first.

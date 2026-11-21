@@ -3,7 +3,6 @@ import type {
   InvoiceSummary,
   PaymentMethod,
   Receipt,
-  RevenueSummary,
   UnbilledCharges,
   UnbilledPatient,
 } from '../types/billing'
@@ -52,8 +51,4 @@ export function addPayment(invoiceId: number, body: { amount: number; method: Pa
 
 export function getReceipt(paymentId: number) {
   return apiFetch<Receipt>(`/billing/payments/${paymentId}/receipt`)
-}
-
-export function getRevenueSummary() {
-  return apiFetch<RevenueSummary>('/billing/revenue-summary')
 }
