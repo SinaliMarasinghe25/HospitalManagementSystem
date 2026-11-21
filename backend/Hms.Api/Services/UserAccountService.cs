@@ -16,7 +16,7 @@ namespace Hms.Api.Services;
 // - Assumption A25 (proposed): the Doctor role belongs exactly to logins linked to an employee with a doctor
 //   profile, because doctor screens find "my appointments" through that link. It is set automatically.
 // - There is always at least one active Administrator, and nobody can remove their own Administrator role.
-public class UserAccountService(UserManager<AppUser> userManager)
+public class UserAccountService(UserManager<AppUser> userManager, NotificationService notifications)
 {
     // ---------- Reading ----------
 
@@ -119,6 +119,23 @@ public class UserAccountService(UserManager<AppUser> userManager)
         await userManager.UpdateAsync(user);
         await userManager.UpdateSecurityStampAsync(user);
         return ServiceResult<UserResponse>.Ok(await ToResponseAsync(user));
+    }
+
+    // ---------- Forgot password (assumption A28, proposed) ----------
+
+    // Someone on the login page says they forgot their password. The administrators get a notification
+    // and reset it on Staff > Logins with a temporary password, which the person must change at the next login.
+    // PDF section 12 makes email a future enhancement, so nothing is emailed.
+    // The controller always gives the same answer, so nobody can find out which usernames exist.
+    public async Task RequestPasswordResetAsync(string userName)
+    {
+        var user = await userManager.FindByNameAsync(userName.Trim());
+        if (user is null || !user.IsActive) return;
+
+        await notifications.SendToRoleAsync(Roles.Administrator, "Password reset requested",
+            $"{user.UserName} used \"Forgot password\" on the login page. Check it is really them, " +
+            "then set a temporary password on Staff > Logins.",
+            "/staff?tab=logins");
     }
 
     // ---------- Shared with EmployeeService ----------

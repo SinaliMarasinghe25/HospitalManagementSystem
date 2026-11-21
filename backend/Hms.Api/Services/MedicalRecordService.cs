@@ -1,3 +1,4 @@
+using Hms.Api.Authorization;
 using Hms.Api.Data;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -8,7 +9,7 @@ namespace Hms.Api.Services;
 // Business logic for PDF 3.5 Electronic Medical Records.
 // A medical record is one visit: the doctor's notes, diagnoses, treatments and prescriptions.
 // Only the doctor who saw the patient writes or changes it. Admins, nurses and other doctors read it.
-public class MedicalRecordService(AppDbContext db)
+public class MedicalRecordService(AppDbContext db, NotificationService notifications)
 {
     private const int MaxRangeDays = 62;
 
@@ -209,6 +210,10 @@ public class MedicalRecordService(AppDbContext db)
         await db.SaveChangesAsync();
 
         var doctorName = $"{record.Doctor.Employee.FirstName} {record.Doctor.Employee.LastName}";
+        await notifications.SendToRoleAsync(Roles.Pharmacist, "New prescription",
+            $"{record.Patient.FirstName} {record.Patient.LastName} ({record.Patient.PatientNumber}), " +
+            $"{prescription.Items.Count} medicine(s), from Dr {doctorName}.",
+            $"/pharmacy/prescriptions/{prescription.Id}");
         return ServiceResult<PrescriptionResponse>.Ok(ToResponse(prescription, record.Patient, doctorName));
     }
 

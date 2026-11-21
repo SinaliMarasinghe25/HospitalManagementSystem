@@ -1,3 +1,4 @@
+using Hms.Api.Authorization;
 using Hms.Api.Data;
 using Hms.Api.Dtos;
 using Hms.Api.Entities;
@@ -14,7 +15,7 @@ namespace Hms.Api.Services;
 // Assumption A22 (proposed): a batch counts as expired ON its expiry date, so it can be dispensed
 // only while ExpiryDate is after today (hospital time). Assumption A12: near expiry = within 90 days;
 // low stock = usable stock below the medicine's reorder level.
-public class PharmacyService(AppDbContext db, MedicalRecordService records)
+public class PharmacyService(AppDbContext db, MedicalRecordService records, NotificationService notifications)
 {
     public const int NearExpiryDays = 90;
 
@@ -317,6 +318,7 @@ public class PharmacyService(AppDbContext db, MedicalRecordService records)
 
         var errors = new List<string>();
         var items = new List<(PrescriptionItem Item, int Quantity)>();
+        var nowLow = new List<(Medicine Medicine, int Left)>();
         foreach (var line in lines)
         {
             var item = prescription.Items.FirstOrDefault(i => i.Id == line.PrescriptionItemId);
@@ -386,6 +388,10 @@ public class PharmacyService(AppDbContext db, MedicalRecordService records)
                 });
             }
             item.QuantityDispensed += quantity;
+
+            // This dispense takes the medicine below its reorder level (it was not low before).
+            var level = item.Medicine.ReorderLevel;
+            if (item.Medicine.IsActive && available >= level && available - quantity < level) nowLow.Add((item.Medicine, available - quantity));
         }
         if (errors.Count > 0) return ServiceResult<int>.Invalid(new() { ["Items"] = errors.ToArray() });
 
@@ -395,6 +401,13 @@ public class PharmacyService(AppDbContext db, MedicalRecordService records)
 
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
+
+        foreach (var (medicine, left) in nowLow)
+        {
+            await notifications.SendToRoleAsync(Roles.Pharmacist, "Low stock",
+                $"{medicine.Name} {medicine.Strength}: {left} left after dispensing, below the reorder level of {medicine.ReorderLevel}.",
+                $"/pharmacy/medicines/{medicine.Id}", includeMe: true);
+        }
         return ServiceResult<int>.Ok(prescriptionId);
     }
 

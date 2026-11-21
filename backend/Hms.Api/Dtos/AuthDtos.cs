@@ -19,3 +19,6 @@ public record CurrentUserResponse(
     string? Email,
     IReadOnlyList<string> Roles,
     bool MustChangePassword);
+
+// "Forgot password" on the login page (assumption A28).
+public record ForgotPasswordRequest([Required, MaxLength(256)] string UserName);

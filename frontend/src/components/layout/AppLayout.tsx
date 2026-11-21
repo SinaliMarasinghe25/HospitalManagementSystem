@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Outlet } from 'react-router'
 import { useAuth } from '../../auth/useAuth'
+import { NotificationBell } from './NotificationBell'
 import { Sidebar } from './Sidebar'
 
 // The frame around every page after login: header, sidebar, and the page itself (<Outlet />).
@@ -34,6 +35,7 @@ export function AppLayout() {
           <span className="font-semibold text-slate-900">Hospital Management System</span>
         </div>
         <div className="flex items-center gap-3">
+          <NotificationBell />
           <span className="hidden text-sm text-slate-600 sm:inline">
             {user?.userName} ({user?.roles.join(', ')})
           </span>

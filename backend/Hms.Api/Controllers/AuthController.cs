@@ -4,6 +4,7 @@ using Hms.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Hms.Api.Controllers;
 
@@ -13,8 +14,12 @@ namespace Hms.Api.Controllers;
 public class AuthController(
     UserManager<AppUser> userManager,
     SignInManager<AppUser> signInManager,
+    UserAccountService accounts,
     AuditService audit) : ControllerBase
 {
+    // The name of the rate limit in Program.cs: a few requests per computer, then a pause.
+    public const string PasswordResetRateLimit = "password-reset";
+
     // POST /api/auth/login
     [HttpPost("login")]
     [AllowAnonymous]
@@ -103,6 +108,17 @@ public class AuthController(
         // The new cookie no longer carries the "must change password" claim.
         await signInManager.RefreshSignInAsync(user);
         await audit.LogAsync(AuditAction.Update, user.Id, user.UserName, "User", user.Id, "{\"field\":\"Password\"}");
+        return NoContent();
+    }
+
+    // POST /api/auth/forgot-password   (assumption A28)
+    // Always 204, whether or not the username exists, so nobody can find out which usernames exist.
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting(PasswordResetRateLimit)]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
+    {
+        await accounts.RequestPasswordResetAsync(request.UserName);
         return NoContent();
     }
 

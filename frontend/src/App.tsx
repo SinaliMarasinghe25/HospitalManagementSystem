@@ -8,6 +8,7 @@ import ComingSoonPage from './pages/ComingSoonPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import DoctorDetailPage from './pages/doctors/DoctorDetailPage'
 import DoctorListPage from './pages/doctors/DoctorListPage'
 import PatientDetailPage from './pages/patients/PatientDetailPage'
@@ -62,6 +63,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      {/* Forgot password: open to everyone, because the person cannot log in. */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route
         path="/change-password"
         element={
