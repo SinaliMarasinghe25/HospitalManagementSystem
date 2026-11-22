@@ -77,7 +77,6 @@ export default function StaffReportView() {
           </StatGrid>
           <ReportTable
             title="By employee"
-            csvName={`staff-attendance-${filter.month}`}
             rows={data.employees}
             rowKey={(e) => e.employeeId}
             empty="No employees."
@@ -108,7 +107,6 @@ export default function StaffReportView() {
           />
           <ReportTable
             title="Leave requests in this month"
-            csvName={`staff-leave-${filter.month}`}
             rows={data.leave}
             rowKey={(l) => l.id}
             empty="No leave requests in this month."

@@ -23,7 +23,7 @@ How hospital staff use the HMS, role by role. Every screen works in Chrome, Edge
 - The **bell** at the top right shows notifications meant for you: a new prescription, a lab result, a leave decision and so on. Click one to open the page it is about. **Mark all as read** clears the count.
 - Long lists show 20 rows at a time with **Previous** and **Next** under the table.
 - Every role can request leave under **Staff → My leave**: choose the leave type, first and last day, and a reason. You can withdraw a request while it is still pending. You are notified when it is approved or rejected.
-- **Reports** shows the reports your role may use. Pick the dates, then **Print report** or **Download CSV** (opens in Excel).
+- **Reports** shows the reports your role may use. Pick the dates, then **Print report** (or save it as a PDF from the print window).
 
 If a button you expect is missing, your role is not allowed to do that action. See [Roles and permissions](../architecture/roles-and-permissions.md).
 

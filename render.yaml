@@ -1,6 +1,6 @@
 # Render "Blueprint": tells Render how to run the HMS (https://render.com/docs/blueprint-spec).
 # Render builds the Dockerfile in this repository and gives the app an https://....onrender.com address.
-# The database is NOT here: it lives on Neon (see docs/guides/deployment-guide.md).
+# The database is NOT here: it lives on Neon (its connection URL is pasted into Render's dashboard).
 # Secrets (sync: false) are typed into Render's dashboard once and never stored in this file.
 services:
   - type: web

@@ -4,7 +4,7 @@ A web-based Hospital Management System for one hospital. It keeps patients, doct
 
 > This is an academic demonstration project. It uses fictitious data only and must never store real patient information.
 
-**Status:** all modules are built, redesigned and covered by automated tests, which GitHub runs on every pull request. The app ships as one Docker image and runs as a public demo on Render with a Neon database (see the [deployment guide](docs/guides/deployment-guide.md)).
+**Status:** all modules are built, redesigned and covered by automated tests, which GitHub runs on every pull request. The app ships as one Docker image and runs as a public demo on Render (the app, `render.yaml`) with a Neon PostgreSQL database.
 
 ## Features
 
@@ -21,7 +21,7 @@ A web-based Hospital Management System for one hospital. It keeps patients, doct
 | Pharmacy | Medicines with batches and expiry, stock in, adjustments, write-offs, dispensing, low-stock and expiry alerts |
 | Billing | Charges collected automatically, invoices with discount, part and full payments, printable invoice and receipt |
 | Staff | Employees, departments, logins and roles, daily attendance, leave requests |
-| Reports | Patient, appointment, revenue, pharmacy, laboratory and staff reports with CSV export and print |
+| Reports | Patient, appointment, revenue, pharmacy, laboratory and staff reports, printable or saved as PDF |
 | Notifications | In-app bell for new prescriptions, lab results, admissions, leave decisions and more |
 | Audit log | Every login, change and sensitive view, read-only, searchable by the administrator |
 
@@ -66,7 +66,15 @@ Copy-Item .env.example .env    # then choose your own passwords in .env
 docker compose up -d --build
 ```
 
-Open http://localhost:8080 and log in as `admin` with `ADMIN_PASSWORD` from `.env`. Details, the public deployment and backups are in the [deployment guide](docs/guides/deployment-guide.md).
+Open http://localhost:8080 and log in as `admin` with `ADMIN_PASSWORD` from `.env`. `docker compose down` stops it; the data stays in Docker volumes.
+
+Backups (they go to the `backups` folder, which Git ignores):
+
+```powershell
+.\scripts\backup-db.ps1                                            # the Docker database
+.\scripts\backup-db.ps1 -DatabaseUrl "postgresql://..."            # a hosted database such as Neon
+.\scripts\restore-db.ps1 -BackupFile .\backups\hms-<date>.dump     # add -DatabaseUrl for a hosted one
+```
 
 ## Running the tests
 
@@ -75,7 +83,7 @@ cd backend
 dotnet test        # 366 backend tests; needs PostgreSQL and a login that may create databases
 
 cd ..\frontend
-npm test           # 61 frontend tests
+npm test           # 56 frontend tests
 ```
 
 See the [testing guide](docs/testing/testing-guide.md) for what is tested and how the test database works.
@@ -85,7 +93,6 @@ See the [testing guide](docs/testing/testing-guide.md) for what is tested and ho
 | Document | For |
 | --- | --- |
 | [Setup guide](docs/guides/setup-guide.md) | Installing the tools, the database, secrets, running the app, troubleshooting |
-| [Deployment guide](docs/guides/deployment-guide.md) | Docker, the live demo on Render + Neon, CI, backup and restore, disaster recovery |
 | [User manual](docs/guides/user-manual.md) | How each of the seven roles uses the system |
 | [Architecture](docs/architecture/architecture.md) | Layers, folders, how a request flows, security design |
 | [Roles and permissions](docs/architecture/roles-and-permissions.md) | Exactly what each role may see and do |

@@ -19,7 +19,7 @@ The HMS is a **single-page web application** with a separate API, as the PDF's f
  PostgreSQL  database "hms"
 ```
 
-Because the browser only ever talks to one address, the login cookie works as a normal same-site cookie and CORS stays closed. In production there is no Vite server: the API serves the built React app itself from one Docker image, so the same holds. See the [deployment guide](../guides/deployment-guide.md).
+Because the browser only ever talks to one address, the login cookie works as a normal same-site cookie and CORS stays closed. In production there is no Vite server: the API serves the built React app itself from one Docker image, so the same holds. Render's HTTPS reverse proxy sits in front of Kestrel (plan item C2), and `/health` reports whether the API can reach the database.
 
 ## The four layers
 
@@ -72,7 +72,7 @@ Services return a `ServiceResult` (OK, Invalid with field errors, or NotFound), 
 | `pages/` | One folder per module, one file per screen |
 | `components/` | Shared pieces: `layout/` (sidebar, header, bell), `ui/` (form fields, tabs, pagination), and module parts |
 | `types/` | TypeScript shapes of the API's DTOs |
-| `utils/` | Date formatting in hospital time, CSV export, form error helpers |
+| `utils/` | Date formatting in hospital time, form error helpers |
 | `test/` | Test set-up for Vitest |
 
 - **Routing:** React Router. Every page except login, forgot-password and change-password sits inside `ProtectedRoute` (must be logged in) and `RequireRole` (must have a role that may open it).
@@ -93,7 +93,6 @@ Services return a `ServiceResult` (OK, Invalid with field errors, or NotFound), 
 | Changed roles or deactivated users | The security stamp is checked every minute, so changes apply within a minute. |
 | SQL injection | All queries go through EF Core, which sends parameters. Search text is escaped (`SearchText`) so `%` and `_` are matched literally. |
 | Malicious uploads | Only PDF, JPG, PNG up to 5 MB, checked by extension **and** by the file's first bytes. Files are stored under random names outside the web root, never under the uploaded name. |
-| Spreadsheet formula injection | CSV export prefixes cells starting with `=`, `+`, `-`, `@` so Excel does not run them. |
 | Password-reset flooding | "Forgot password" is limited to 5 requests per 15 minutes per address. |
 | Secrets in Git | Connection string and admin password live in User Secrets (development) or environment variables (production), never in `appsettings.json`. |
 | Error details | Errors are ProblemDetails JSON without stack traces; production uses the exception handler and HSTS. |

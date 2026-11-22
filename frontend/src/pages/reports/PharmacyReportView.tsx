@@ -51,7 +51,6 @@ export default function PharmacyReportView() {
           </StatGrid>
           <ReportTable
             title="Dispensed in this period"
-            csvName={`dispensed-${data.period.from}-to-${data.period.to}`}
             rows={data.dispensed}
             rowKey={(d) => d.medicineId}
             footer={['Total', data.dispensedQuantity, data.dispensedAmount]}
@@ -67,7 +66,6 @@ export default function PharmacyReportView() {
           />
           <ReportTable
             title="Low stock"
-            csvName="low-stock"
             rows={data.lowStock}
             rowKey={(m) => m.id}
             empty="No medicine is below its reorder level."
@@ -80,7 +78,6 @@ export default function PharmacyReportView() {
           <div className="grid gap-4 lg:grid-cols-2 print:grid-cols-1">
             <ReportTable
               title={`Expiring within ${data.nearExpiryDays} days`}
-              csvName="near-expiry"
               rows={data.nearExpiry}
               rowKey={(b) => b.batchId}
               empty="No batch expires soon."
@@ -88,7 +85,6 @@ export default function PharmacyReportView() {
             />
             <ReportTable
               title="Expired, still on the shelf"
-              csvName="expired"
               rows={data.expired}
               rowKey={(b) => b.batchId}
               empty="No expired stock."
@@ -97,7 +93,6 @@ export default function PharmacyReportView() {
           </div>
           <ReportTable
             title="Stock levels"
-            csvName="stock-levels"
             rows={data.stock}
             rowKey={(m) => m.id}
             empty="No medicines yet."
