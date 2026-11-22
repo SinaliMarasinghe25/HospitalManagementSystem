@@ -38,8 +38,8 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthCard title="Hospital Management System">
-      <p className="mt-1 text-sm text-slate-600">Sign in with your staff account.</p>
+    <AuthCard title="Sign in">
+      <p className="mt-1.5 text-sm text-slate-500">Use your staff username and password.</p>
 
       {sessionExpired && !error && <AuthNotice>Your session expired. Please sign in again.</AuthNotice>}
       {error && <AuthAlert>{error}</AuthAlert>}
@@ -71,13 +71,13 @@ export default function LoginPage() {
           />
         </FormField>
 
-        <button type="submit" disabled={isSubmitting} className={`${primaryButtonClass} w-full`}>
+        <button type="submit" disabled={isSubmitting} className={`${primaryButtonClass} w-full py-2.5`}>
           {isSubmitting ? 'Signing in...' : 'Login'}
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm">
-        <Link to="/forgot-password" className="text-blue-700 hover:underline">
+      <p className="mt-6 text-center text-sm">
+        <Link to="/forgot-password" className="font-medium text-brand-700 hover:text-brand-800 hover:underline">
           Forgot password?
         </Link>
       </p>

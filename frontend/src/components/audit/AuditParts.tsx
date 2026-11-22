@@ -8,7 +8,7 @@ const actionStyles: Record<AuditAction, string> = {
   Logout: 'bg-slate-100 text-slate-700 ring-slate-200',
   LoginFailed: 'bg-red-50 text-red-800 ring-red-200',
   Create: 'bg-green-50 text-green-800 ring-green-200',
-  Update: 'bg-blue-50 text-blue-800 ring-blue-200',
+  Update: 'bg-sky-50 text-sky-800 ring-sky-200',
   Delete: 'bg-red-50 text-red-800 ring-red-200',
   View: 'bg-amber-50 text-amber-800 ring-amber-200',
 }
@@ -16,7 +16,7 @@ const actionStyles: Record<AuditAction, string> = {
 export function AuditActionBadge({ action }: { action: AuditAction }) {
   return (
     <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ring-1 ${actionStyles[action]}`}
+      className={`badge whitespace-nowrap ring-1 ${actionStyles[action]}`}
     >
       {auditActionLabels[action]}
     </span>
@@ -44,7 +44,7 @@ export function RecordLink({ entityName, entityId }: { entityName: string; entit
   const page = /^\d+$/.test(entityId) ? recordPages[entityName] : undefined
   if (!page) return null
   return (
-    <Link to={page(entityId)} className="text-sm font-medium text-blue-700 hover:underline">
+    <Link to={page(entityId)} className="text-sm font-medium text-brand-700 hover:underline">
       Open {recordLabel(entityName, entityId).toLowerCase()}
     </Link>
   )

@@ -80,14 +80,14 @@ export function LeaveRequestForm({
   })
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {saved && (
-        <p className="rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">
+        <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800" role="status">
           {sentMessage}
         </p>
       )}

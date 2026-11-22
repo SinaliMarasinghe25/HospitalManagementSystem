@@ -44,13 +44,13 @@ export default function LabTestsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       <div>
-        <Link to="/laboratory" className="text-sm text-blue-700 hover:underline">
+        <Link to="/laboratory" className="text-sm text-brand-700 hover:underline">
           &larr; Laboratory
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-slate-900">Test catalogue and prices</h1>
+        <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">Test catalogue and prices</h1>
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <h2 className="font-semibold text-slate-900">{editingId ? 'Edit test' : 'Add test'}</h2>
         <div className="grid gap-3 sm:grid-cols-5">
           <FormField id="code" label="Code" required error={errors.code}>
@@ -96,9 +96,9 @@ export default function LabTestsPage() {
         </div>
       </form>
 
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Code</th>
               <th scope="col" className="px-4 py-3 font-medium">Name</th>
@@ -133,7 +133,7 @@ export default function LabTestsPage() {
                       })
                       window.scrollTo({ top: 0 })
                     }}
-                    className="text-blue-700 hover:underline"
+                    className="text-brand-700 hover:underline"
                   >
                     Edit<span className="sr-only"> {t.name}</span>
                   </button>

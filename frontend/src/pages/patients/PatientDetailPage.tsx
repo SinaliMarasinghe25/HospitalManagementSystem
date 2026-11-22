@@ -27,7 +27,7 @@ export default function PatientDetailPage() {
       .catch((err: unknown) => setError(err instanceof ApiError && err.status === 404 ? 'Patient not found.' : 'Could not load patient.'))
   }, [patientId])
 
-  if (error) return <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</p>
+  if (error) return <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">{error}</p>
   if (!patient) return <p role="status">Loading...</p>
 
   const details: [string, string | null][] = [
@@ -47,10 +47,10 @@ export default function PatientDetailPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link to="/patients" className="text-sm text-blue-700 hover:underline">
+          <Link to="/patients" className="text-sm text-brand-700 hover:underline">
             &larr; All patients
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">
             {patient.firstName} {patient.lastName}
           </h1>
           <p className="font-mono text-sm text-slate-600">{patient.patientNumber}</p>
@@ -74,7 +74,7 @@ export default function PatientDetailPage() {
         </div>
       </div>
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="details-heading">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="details-heading">
         <h2 id="details-heading" className="font-semibold text-slate-900">Details</h2>
         <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
           {details.map(([label, value]) => (
@@ -106,7 +106,7 @@ function HistorySection({ patientId }: { patientId: number }) {
   const isEmpty = history && !history.visits.length && !history.labResults.length && !history.admissions.length
 
   return (
-    <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="history-heading">
+    <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="history-heading">
       <h2 id="history-heading" className="font-semibold text-slate-900">Medical history</h2>
       {error && <p className="mt-2 text-sm text-red-700" role="alert">{error}</p>}
       {!history && !error && <p className="mt-2 text-sm text-slate-500" role="status">Loading...</p>}
@@ -117,7 +117,7 @@ function HistorySection({ patientId }: { patientId: number }) {
           {history.visits.map((v) => (
             <li key={v.id} className="rounded-lg border border-slate-200 p-3">
               <p className="font-medium text-slate-900">
-                <Link to={`/medical-records/${v.id}`} className="text-blue-700 hover:underline">
+                <Link to={`/medical-records/${v.id}`} className="text-brand-700 hover:underline">
                   {formatDateTime(v.visitDate)}
                 </Link>{' '}
                 &middot; Dr {v.doctorName}
@@ -137,7 +137,7 @@ function HistorySection({ patientId }: { patientId: number }) {
           <ul className="mt-2 space-y-1 text-sm text-slate-700">
             {history.labResults.map((l) => (
               <li key={l.id}>
-                <Link to={`/laboratory/requests/${l.id}`} className="text-blue-700 hover:underline">
+                <Link to={`/laboratory/requests/${l.id}`} className="text-brand-700 hover:underline">
                   {formatDateTime(l.requestedAt)}
                 </Link>
                 : {l.testName} - {l.resultValue ?? l.status}
@@ -156,7 +156,7 @@ function HistorySection({ patientId }: { patientId: number }) {
           <ul className="mt-2 space-y-1 text-sm text-slate-700">
             {history.admissions.map((a) => (
               <li key={a.id}>
-                <Link to={`/admissions/${a.id}`} className="text-blue-700 hover:underline">
+                <Link to={`/admissions/${a.id}`} className="text-brand-700 hover:underline">
                   {a.admissionNumber}
                 </Link>
                 : {a.ward}, bed {a.bed}, {formatDateTime(a.admittedAt)}
@@ -205,9 +205,9 @@ function DocumentsSection({ patientId, canUpload }: { patientId: number; canUplo
   }
 
   return (
-    <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="documents-heading">
+    <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="documents-heading">
       <h2 id="documents-heading" className="font-semibold text-slate-900">Documents</h2>
-      {error && <p className="mt-2 rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</p>}
+      {error && <p className="mt-2 border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">{error}</p>}
 
       {documents.length === 0 ? (
         <p className="mt-2 text-sm text-slate-500">No documents uploaded.</p>
@@ -216,7 +216,7 @@ function DocumentsSection({ patientId, canUpload }: { patientId: number; canUplo
           {documents.map((d) => (
             <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
               <div>
-                <a href={documentDownloadUrl(patientId, d.id)} className="font-medium text-blue-700 hover:underline">
+                <a href={documentDownloadUrl(patientId, d.id)} className="font-medium text-brand-700 hover:underline">
                   {d.fileName}
                 </a>
                 {d.description && <span className="text-slate-600"> - {d.description}</span>}
@@ -239,7 +239,7 @@ function DocumentsSection({ patientId, canUpload }: { patientId: number; canUplo
               accept=".pdf,.jpg,.jpeg,.png"
               required
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="block w-full text-sm text-slate-700 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2"
+              className="block w-full text-sm text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2"
             />
           </FormField>
           <FormField id="document-description" label="Description">

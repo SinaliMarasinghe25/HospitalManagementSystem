@@ -14,7 +14,7 @@ export function Tabs<T extends string>({
   onChange: (tab: T) => void
 }) {
   return (
-    <div role="tablist" aria-label={label} className="flex flex-wrap gap-1 border-b border-slate-200">
+    <div role="tablist" aria-label={label} className="scroll-slim flex gap-6 overflow-x-auto border-b border-slate-200">
       {tabs.map((t) => (
         <button
           key={t}
@@ -22,8 +22,10 @@ export function Tabs<T extends string>({
           role="tab"
           aria-selected={value === t}
           onClick={() => onChange(t)}
-          className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
-            value === t ? 'border-blue-700 text-blue-700' : 'border-transparent text-slate-600 hover:text-slate-900'
+          className={`-mb-px shrink-0 border-b-2 py-2.5 text-sm font-medium whitespace-nowrap transition-colors ${
+            value === t
+              ? 'border-brand-700 text-slate-900'
+              : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-900'
           }`}
         >
           {labels[t]}

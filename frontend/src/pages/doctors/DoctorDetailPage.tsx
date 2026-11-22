@@ -24,7 +24,7 @@ export default function DoctorDetailPage() {
       .catch((err: unknown) => setError(err instanceof ApiError && err.status === 404 ? 'Doctor not found.' : 'Could not load doctor.'))
   }, [id])
 
-  if (error) return <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</p>
+  if (error) return <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">{error}</p>
   if (!doctor) return <p role="status">Loading...</p>
 
   const details: [string, string | null][] = [
@@ -45,10 +45,10 @@ export default function DoctorDetailPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link to="/doctors" className="text-sm text-blue-700 hover:underline">
+          <Link to="/doctors" className="text-sm text-brand-700 hover:underline">
             &larr; All doctors
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">
             Dr {doctor.firstName} {doctor.lastName}
           </h1>
         </div>
@@ -60,7 +60,7 @@ export default function DoctorDetailPage() {
         )}
       </div>
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="details-heading">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="details-heading">
         <h2 id="details-heading" className="font-semibold text-slate-900">Details</h2>
         <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
           {details.map(([label, value]) => (
@@ -115,7 +115,7 @@ function ScheduleSection({
   }
 
   return (
-    <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="schedule-heading">
+    <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="schedule-heading">
       <div className="flex items-center justify-between">
         <h2 id="schedule-heading" className="font-semibold text-slate-900">Weekly schedule</h2>
         {canEdit && !isEditing && (
@@ -146,7 +146,7 @@ function ScheduleSection({
       {isEditing && (
         <div className="mt-3 space-y-3">
           {errors.length > 0 && (
-            <ul className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+            <ul className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
               {errors.map((e) => (
                 <li key={e}>{e}</li>
               ))}
@@ -178,7 +178,7 @@ function ScheduleSection({
               </button>
             </div>
           ))}
-          <button type="button" className="text-sm font-medium text-blue-700 hover:underline"
+          <button type="button" className="text-sm font-medium text-brand-700 hover:underline"
             onClick={() => setRows((current) => [...current, { dayOfWeek: 'Monday', startTime: '08:00', endTime: '12:00' }])}>
             + Add time block
           </button>

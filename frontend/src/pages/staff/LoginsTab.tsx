@@ -46,25 +46,25 @@ export default function LoginsTab() {
     <div className="space-y-4">
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {notice && (
-        <p className="rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">
+        <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800" role="status">
           {notice}
         </p>
       )}
 
       <p className="text-sm text-slate-600">
         To give someone a new login, open them on the{' '}
-        <Link to="/staff" className="text-blue-700 hover:underline">Employees</Link> tab and use &ldquo;Login account&rdquo;.
+        <Link to="/staff" className="text-brand-700 hover:underline">Employees</Link> tab and use &ldquo;Login account&rdquo;.
         A login marked &ldquo;Not linked&rdquo; was made before this; link it from the person&apos;s page. There must always be at least one active administrator, and you cannot remove your own Administrator role.
       </p>
 
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Username</th>
               <th scope="col" className="px-4 py-3 font-medium">Roles</th>
@@ -133,7 +133,7 @@ function UserRow({
     if (await onPassword(password)) setPassword('')
   }
 
-  const link = 'text-blue-700 hover:underline'
+  const link = 'text-brand-700 hover:underline'
   return (
     <>
       <tr className={account.isActive ? '' : 'text-slate-400'}>
@@ -186,7 +186,7 @@ function UserRow({
       {editing === 'roles' && (
         <tr>
           <td colSpan={5} className="px-4 pb-4">
-            <form onSubmit={submitRoles} className="space-y-3 rounded-md bg-slate-50 p-3">
+            <form onSubmit={submitRoles} className="space-y-3 rounded-lg bg-slate-50 p-3">
               <RoleCheckboxes
                 idPrefix={`roles-${account.id}`}
                 value={roles}
@@ -213,7 +213,7 @@ function UserRow({
       {editing === 'password' && (
         <tr>
           <td colSpan={5} className="px-4 pb-4">
-            <form onSubmit={submitPassword} className="flex flex-wrap items-end gap-2 rounded-md bg-slate-50 p-3">
+            <form onSubmit={submitPassword} className="flex flex-wrap items-end gap-2 rounded-lg bg-slate-50 p-3">
               <div>
                 <label htmlFor={`pw-${account.id}`} className="block text-sm font-medium text-slate-700">
                   New temporary password

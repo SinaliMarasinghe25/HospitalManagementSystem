@@ -122,7 +122,7 @@ export default function AppointmentReportView() {
                 header: 'Date and time',
                 value: (a) => a.startTime,
                 show: (a) => (
-                  <Link to={`/appointments/${a.id}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/appointments/${a.id}`} className="font-medium text-brand-700 hover:underline">
                     {formatDateTime(a.startTime)}
                   </Link>
                 ),

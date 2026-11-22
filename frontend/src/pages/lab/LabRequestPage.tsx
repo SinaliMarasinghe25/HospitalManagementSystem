@@ -41,7 +41,7 @@ export default function LabRequestPage() {
 
   if (!lab) {
     return error ? (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     ) : (
@@ -53,10 +53,10 @@ export default function LabRequestPage() {
     <div className="mx-auto max-w-3xl space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link to="/laboratory" className="text-sm text-blue-700 hover:underline">
+          <Link to="/laboratory" className="text-sm text-brand-700 hover:underline">
             &larr; Laboratory
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">
             {lab.testName} <span className="font-mono text-base text-slate-500">{lab.requestNumber}</span>
           </h1>
         </div>
@@ -64,12 +64,12 @@ export default function LabRequestPage() {
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <dl className="grid gap-4 sm:grid-cols-2">
           <Item label="Patient">
             {lab.patientName}{' '}
@@ -107,7 +107,7 @@ export default function LabRequestPage() {
           {lab.resultNotes && <Item label="Notes">{lab.resultNotes}</Item>}
           {lab.medicalRecordId && hasAnyRole(user?.roles, Permissions.viewMedicalHistory) && (
             <Item label="Visit">
-              <Link to={`/medical-records/${lab.medicalRecordId}`} className="text-blue-700 hover:underline">
+              <Link to={`/medical-records/${lab.medicalRecordId}`} className="text-brand-700 hover:underline">
                 Medical record #{lab.medicalRecordId}
               </Link>
             </Item>
@@ -154,7 +154,7 @@ function SampleForm({ onSave }: { onSave: (sampleId: string) => Promise<void> })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
       <h2 className="font-semibold text-slate-900">Record sample collection</h2>
       <div className="max-w-xs">
         <label htmlFor="sampleId" className="block text-sm font-medium text-slate-700">
@@ -196,7 +196,7 @@ function ResultForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
       <h2 className="font-semibold text-slate-900">{isCorrection ? 'Correct the result' : 'Enter result'}</h2>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>

@@ -40,7 +40,7 @@ export function LabTestsSection({ patientId, medicalRecordId, canRequest }: { pa
   }
 
   return (
-    <section className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="lab-heading">
+    <section className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="lab-heading">
       <div className="flex items-center justify-between">
         <h2 id="lab-heading" className="font-semibold text-slate-900">Laboratory tests</h2>
         {canRequest && !ordering && (
@@ -50,7 +50,7 @@ export function LabTestsSection({ patientId, medicalRecordId, canRequest }: { pa
         )}
       </div>
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
@@ -86,7 +86,7 @@ export function LabTestsSection({ patientId, medicalRecordId, canRequest }: { pa
         <ul className="divide-y divide-slate-100">
           {requests.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-              <Link to={`/laboratory/requests/${r.id}`} className="font-mono text-blue-700 hover:underline">
+              <Link to={`/laboratory/requests/${r.id}`} className="font-mono text-brand-700 hover:underline">
                 {r.requestNumber}
               </Link>
               <span className="flex-1 text-slate-800">{r.testName}</span>

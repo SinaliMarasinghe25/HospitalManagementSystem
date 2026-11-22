@@ -71,7 +71,7 @@ export default function AppointmentDetailPage() {
 
   if (!appointment) {
     return error ? (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     ) : (
@@ -85,19 +85,19 @@ export default function AppointmentDetailPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Appointment #{appointment.id}</h1>
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Appointment #{appointment.id}</h1>
         <Link to="/appointments" className={secondaryButtonClass}>
           Back to calendar
         </Link>
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <dl className="grid gap-4 sm:grid-cols-2">
           <Item label="Status">
             <StatusBadge status={appointment.status} />
@@ -107,7 +107,7 @@ export default function AppointmentDetailPage() {
           </Item>
           <Item label="Patient">
             {canSeePatient ? (
-              <Link to={`/patients/${appointment.patientId}`} className="text-blue-700 hover:underline">
+              <Link to={`/patients/${appointment.patientId}`} className="text-brand-700 hover:underline">
                 {appointment.patientName}
               </Link>
             ) : (
@@ -123,14 +123,14 @@ export default function AppointmentDetailPage() {
           {appointment.cancellationReason && <Item label="Cancellation reason">{appointment.cancellationReason}</Item>}
           {appointment.rescheduledFromId && (
             <Item label="Rescheduled from">
-              <Link to={`/appointments/${appointment.rescheduledFromId}`} className="text-blue-700 hover:underline">
+              <Link to={`/appointments/${appointment.rescheduledFromId}`} className="text-brand-700 hover:underline">
                 Appointment #{appointment.rescheduledFromId}
               </Link>
             </Item>
           )}
           {appointment.rescheduledToId && (
             <Item label="Moved to">
-              <Link to={`/appointments/${appointment.rescheduledToId}`} className="text-blue-700 hover:underline">
+              <Link to={`/appointments/${appointment.rescheduledToId}`} className="text-brand-700 hover:underline">
                 Appointment #{appointment.rescheduledToId}
               </Link>
             </Item>
@@ -153,7 +153,7 @@ export default function AppointmentDetailPage() {
       )}
 
       {(actions.length > 0 || canChange) && (
-        <section className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <section className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
           <h2 className="text-base font-medium text-slate-900">Actions</h2>
           <div className="flex flex-wrap gap-2">
             {actions.map((action) => (
@@ -198,7 +198,7 @@ export default function AppointmentDetailPage() {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-60"
+                  className="rounded-lg bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-60"
                 >
                   Confirm cancellation
                 </button>

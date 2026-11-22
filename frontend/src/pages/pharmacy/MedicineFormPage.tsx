@@ -82,19 +82,19 @@ export default function MedicineFormPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <div>
-        <Link to={editingId ? `/pharmacy/medicines/${editingId}` : '/pharmacy?tab=stock'} className="text-sm text-blue-700 hover:underline">
+        <Link to={editingId ? `/pharmacy/medicines/${editingId}` : '/pharmacy?tab=stock'} className="text-sm text-brand-700 hover:underline">
           &larr; Back
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-slate-900">{editingId ? 'Edit medicine' : 'Add medicine'}</h1>
+        <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">{editingId ? 'Edit medicine' : 'Add medicine'}</h1>
       </div>
 
       {formError && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {formError}
         </p>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField id="name" label="Name" required error={errors.name}>
             <input id="name" maxLength={150} value={form.name} onChange={set('name')} className={inputClass} />

@@ -15,7 +15,7 @@ export default function PharmacyReportView() {
   const { data, error, loading } = useReport(getPharmacyReport, filter)
 
   const medicineLink = (id: number, text: string) => (
-    <Link to={`/pharmacy/medicines/${id}`} className="font-medium text-blue-700 hover:underline">
+    <Link to={`/pharmacy/medicines/${id}`} className="font-medium text-brand-700 hover:underline">
       {text}
     </Link>
   )

@@ -171,7 +171,7 @@ export default function AttendanceTab() {
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <div className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           <p>{error}</p>
           {errorList.length > 0 && (
             <ul className="mt-1 list-disc pl-5">
@@ -183,14 +183,14 @@ export default function AttendanceTab() {
         </div>
       )}
       {message && (
-        <p className="rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">
+        <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800" role="status">
           {message}
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Employee</th>
               <th scope="col" className="px-4 py-3 font-medium">Status</th>
@@ -208,14 +208,14 @@ export default function AttendanceTab() {
               return (
                 <tr key={r.employeeId} className={isChanged ? 'bg-amber-50/60' : undefined}>
                   <td className="px-4 py-3">
-                    <Link to={`/staff/employees/${r.employeeId}`} className="font-medium text-blue-700 hover:underline">
+                    <Link to={`/staff/employees/${r.employeeId}`} className="font-medium text-brand-700 hover:underline">
                       {r.fullName}
                     </Link>
                     <span className="block text-xs text-slate-500">
                       {r.jobTitle}, {r.departmentName}
                     </span>
                     {r.approvedLeave && (
-                      <span className="mt-1 inline-block rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-800 ring-1 ring-blue-200">
+                      <span className="mt-1 inline-block rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-800 ring-1 ring-brand-200">
                         Approved {r.approvedLeave.toLowerCase()} leave
                       </span>
                     )}

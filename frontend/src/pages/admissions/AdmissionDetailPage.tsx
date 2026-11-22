@@ -30,7 +30,7 @@ export default function AdmissionDetailPage() {
 
   if (!admission) {
     return error ? (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     ) : (
@@ -44,10 +44,10 @@ export default function AdmissionDetailPage() {
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link to="/admissions?tab=current" className="text-sm text-blue-700 hover:underline">
+          <Link to="/admissions?tab=current" className="text-sm text-brand-700 hover:underline">
             &larr; Admissions
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">
             {admission.patientName} <span className="font-mono text-base text-slate-500">{admission.admissionNumber}</span>
           </h1>
         </div>
@@ -60,12 +60,12 @@ export default function AdmissionDetailPage() {
         </span>
       </div>
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         {admission.allergies && <p className="mb-3 text-sm font-medium text-red-800">Allergies: {admission.allergies}</p>}
         <dl className="grid gap-4 sm:grid-cols-2">
           <Item label="Patient">
             {can(Permissions.viewPatients) ? (
-              <Link to={`/patients/${admission.patientId}`} className="text-blue-700 hover:underline">
+              <Link to={`/patients/${admission.patientId}`} className="text-brand-700 hover:underline">
                 {admission.patientName}
               </Link>
             ) : (
@@ -164,7 +164,7 @@ function TransferSection({ admission, onDone }: { admission: AdmissionDetail; on
   }
 
   return (
-    <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="transfer-heading">
+    <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="transfer-heading">
       <div className="flex items-center justify-between">
         <h2 id="transfer-heading" className="font-semibold text-slate-900">Transfer bed</h2>
         {!open && (
@@ -176,7 +176,7 @@ function TransferSection({ admission, onDone }: { admission: AdmissionDetail; on
       {open && (
         <form onSubmit={handleSubmit} className="mt-3 space-y-3">
           {error && (
-            <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+            <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
               {error}
             </p>
           )}
@@ -272,13 +272,13 @@ function VitalsSection({ admissionId, canRecord }: { admissionId: number; canRec
   const show = (value: number | null) => (value === null ? '-' : value)
 
   return (
-    <section className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="vitals-heading">
+    <section className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="vitals-heading">
       <h2 id="vitals-heading" className="font-semibold text-slate-900">Vital signs and nursing notes</h2>
 
       {canRecord && (
         <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-lg bg-slate-50 p-4 ring-1 ring-slate-200">
           {error && (
-            <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+            <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
               {error}
             </p>
           )}
@@ -380,7 +380,7 @@ function DischargeSection({ admissionId, onDone }: { admissionId: number; onDone
   }
 
   return (
-    <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="discharge-heading">
+    <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="discharge-heading">
       <div className="flex items-center justify-between">
         <h2 id="discharge-heading" className="font-semibold text-slate-900">Discharge</h2>
         {!open && (
@@ -392,7 +392,7 @@ function DischargeSection({ admissionId, onDone }: { admissionId: number; onDone
       {open && (
         <form onSubmit={handleSubmit} className="mt-3 space-y-3">
           {error && (
-            <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+            <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
               {error}
             </p>
           )}

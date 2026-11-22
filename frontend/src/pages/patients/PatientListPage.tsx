@@ -42,7 +42,7 @@ export default function PatientListPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Patients</h1>
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Patients</h1>
         {hasAnyRole(user?.roles, Permissions.editPatients) && (
           <Link to="/patients/new" className={primaryButtonClass}>
             Add patient
@@ -68,14 +68,14 @@ export default function PatientListPage() {
       </form>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Patient no.</th>
               <th scope="col" className="px-4 py-3 font-medium">Name</th>
@@ -86,10 +86,10 @@ export default function PatientListPage() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {result?.items.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50">
+              <tr key={p.id} className="hover:bg-brand-50/40">
                 <td className="px-4 py-3 font-mono text-slate-700">{p.patientNumber}</td>
                 <td className="px-4 py-3">
-                  <Link to={`/patients/${p.id}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/patients/${p.id}`} className="font-medium text-brand-700 hover:underline">
                     {p.firstName} {p.lastName}
                   </Link>
                 </td>

@@ -45,9 +45,9 @@ export default function MedicalRecordsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold text-slate-900">Medical Records</h1>
+      <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Medical Records</h1>
 
-      <section className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-labelledby="waiting-heading">
+      <section className="rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/70" aria-labelledby="waiting-heading">
         <h2 id="waiting-heading" className="font-semibold text-slate-900">Patients waiting today</h2>
         {waiting && waiting.length === 0 && <p className="mt-2 text-sm text-slate-500">No checked-in patients right now.</p>}
         <ul className="mt-2 divide-y divide-slate-100">
@@ -60,7 +60,7 @@ export default function MedicalRecordsPage() {
               </span>
               <StatusBadge status={a.status} />
               {a.medicalRecordId ? (
-                <Link to={`/medical-records/${a.medicalRecordId}`} className="text-blue-700 hover:underline">
+                <Link to={`/medical-records/${a.medicalRecordId}`} className="text-brand-700 hover:underline">
                   Open record<span className="sr-only"> for {a.patientName}</span>
                 </Link>
               ) : (
@@ -96,13 +96,13 @@ export default function MedicalRecordsPage() {
           </div>
         </div>
         {error && (
-          <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+          <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
             {error}
           </p>
         )}
-        <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+            <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
               <tr>
                 <th scope="col" className="px-4 py-3 font-medium">Visit</th>
                 <th scope="col" className="px-4 py-3 font-medium">Patient</th>
@@ -113,9 +113,9 @@ export default function MedicalRecordsPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {records?.items.map((r) => (
-                <tr key={r.id} className="hover:bg-slate-50">
+                <tr key={r.id} className="hover:bg-brand-50/40">
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <Link to={`/medical-records/${r.id}`} className="font-medium text-blue-700 hover:underline">
+                    <Link to={`/medical-records/${r.id}`} className="font-medium text-brand-700 hover:underline">
                       {formatDateTime(r.visitDate)}
                     </Link>
                   </td>

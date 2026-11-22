@@ -49,9 +49,9 @@ export default function DepartmentsTab() {
         Everyone else, such as accountants and receptionists, goes to <strong>Administration</strong> automatically.
       </p>
 
-      <form onSubmit={handleSubmit} className="grid gap-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:grid-cols-2">
+      <form onSubmit={handleSubmit} className="grid gap-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70 sm:grid-cols-2">
         <h2 className="font-medium text-slate-900 sm:col-span-2">{draft.id === null ? 'Add department' : 'Edit department'}</h2>
-        {error && <p className="rounded-md bg-red-50 p-3 text-sm text-red-700 sm:col-span-2" role="alert">{error}</p>}
+        {error && <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800 sm:col-span-2" role="alert">{error}</p>}
         <FormField id="dept-name" label="Name" required>
           <input id="dept-name" value={draft.name} required maxLength={100} className={inputClass} disabled={draft.isDefault}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
@@ -80,9 +80,9 @@ export default function DepartmentsTab() {
         </div>
       </form>
 
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Name</th>
               <th scope="col" className="px-4 py-3 font-medium">Type</th>
@@ -106,7 +106,7 @@ export default function DepartmentsTab() {
                 <td className="px-4 py-3 text-slate-700">{d.doctorCount}</td>
                 <td className="px-4 py-3 text-slate-700">{d.isActive ? 'Active' : 'Inactive'}</td>
                 <td className="px-4 py-3 text-right">
-                  <button type="button" className="text-blue-700 hover:underline"
+                  <button type="button" className="text-brand-700 hover:underline"
                     onClick={() => setDraft({ id: d.id, name: d.name, description: d.description ?? '', isActive: d.isActive,
                       isClinical: d.isClinical, isDefault: d.isDefault })}>
                     Edit<span className="sr-only"> {d.name}</span>

@@ -52,7 +52,7 @@ export default function LabPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Laboratory</h1>
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Laboratory</h1>
         {canManageTests && (
           <Link to="/laboratory/tests" className={secondaryButtonClass}>
             Test catalogue and prices
@@ -89,14 +89,14 @@ export default function LabPage() {
       )}
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Request</th>
               <th scope="col" className="px-4 py-3 font-medium">Patient</th>
@@ -109,9 +109,9 @@ export default function LabPage() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {rows?.map((r) => (
-              <tr key={r.id} className="hover:bg-slate-50">
+              <tr key={r.id} className="hover:bg-brand-50/40">
                 <td className="px-4 py-3">
-                  <Link to={`/laboratory/requests/${r.id}`} className="font-mono font-medium text-blue-700 hover:underline">
+                  <Link to={`/laboratory/requests/${r.id}`} className="font-mono font-medium text-brand-700 hover:underline">
                     {r.requestNumber}
                   </Link>
                 </td>

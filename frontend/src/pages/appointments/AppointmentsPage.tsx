@@ -80,7 +80,7 @@ export default function AppointmentsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Appointments</h1>
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Appointments</h1>
         {canBook && (
           <Link to="/appointments/new" className={primaryButtonClass}>
             Book appointment
@@ -89,9 +89,9 @@ export default function AppointmentsPage() {
       </div>
 
       {/* Toolbar: view, date navigation, filters */}
-      <div className="space-y-3 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <div className="space-y-3 rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/70">
         <div className="flex flex-wrap items-end gap-2">
-          <div className="inline-flex rounded-md shadow-sm" role="group" aria-label="Calendar view">
+          <div className="inline-flex rounded-lg shadow-sm" role="group" aria-label="Calendar view">
             {(['day', 'week'] as const).map((v) => (
               <button
                 key={v}
@@ -99,7 +99,7 @@ export default function AppointmentsPage() {
                 aria-pressed={view === v}
                 onClick={() => update({ view: v })}
                 className={`border border-slate-300 px-3 py-2 text-sm font-medium first:rounded-l-md last:rounded-r-md ${
-                  view === v ? 'bg-blue-700 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'
+                  view === v ? 'bg-brand-700 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 {v === 'day' ? 'Day' : 'Week'}
@@ -159,7 +159,7 @@ export default function AppointmentsPage() {
       </h2>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
@@ -180,7 +180,7 @@ export default function AppointmentsPage() {
               <section
                 key={day}
                 aria-label={formatDayHeading(day)}
-                className={`min-h-32 rounded-xl bg-white p-2 shadow-sm ring-1 ${isToday ? 'ring-blue-400' : 'ring-slate-200'}`}
+                className={`min-h-32 rounded-2xl bg-white p-2 shadow-sm ring-1 ${isToday ? 'ring-brand-400' : 'ring-slate-200'}`}
               >
                 <h3 className="mb-2 text-sm font-semibold text-slate-700">
                   <button type="button" className="hover:underline" onClick={() => update({ view: 'day', date: day })}>
@@ -192,7 +192,7 @@ export default function AppointmentsPage() {
                     <li key={a.id}>
                       <Link
                         to={`/appointments/${a.id}`}
-                        className={`block rounded-md border border-slate-200 p-2 text-xs hover:bg-slate-50 ${
+                        className={`block rounded-lg border border-slate-200 p-2 text-xs hover:bg-slate-50 ${
                           a.status === 'Cancelled' || a.status === 'Rescheduled' ? 'opacity-60' : ''
                         }`}
                       >
@@ -228,9 +228,9 @@ function DayTable({
   showDoctor: boolean
 }) {
   return (
-    <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+    <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
       <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+        <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
           <tr>
             <th scope="col" className="px-4 py-3 font-medium">Time</th>
             <th scope="col" className="px-4 py-3 font-medium">Patient</th>
@@ -244,9 +244,9 @@ function DayTable({
         </thead>
         <tbody className="divide-y divide-slate-100">
           {appointments?.map((a) => (
-            <tr key={a.id} className="hover:bg-slate-50">
+            <tr key={a.id} className="hover:bg-brand-50/40">
               <td className="px-4 py-3 whitespace-nowrap">
-                <Link to={`/appointments/${a.id}`} className="font-medium text-blue-700 hover:underline">
+                <Link to={`/appointments/${a.id}`} className="font-medium text-brand-700 hover:underline">
                   {formatClock(a.startTime)} to {formatClock(a.endTime)}
                 </Link>
               </td>
@@ -271,7 +271,7 @@ function DayTable({
                       key={action.status}
                       type="button"
                       onClick={() => onStatus(a, action.status)}
-                      className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
                     >
                       {action.label}
                       <span className="sr-only"> for {a.patientName}</span>
@@ -280,7 +280,7 @@ function DayTable({
                   {canChangeBooking(a, roles) && (
                     <Link
                       to={`/appointments/${a.id}/reschedule`}
-                      className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
                     >
                       Reschedule<span className="sr-only"> for {a.patientName}</span>
                     </Link>

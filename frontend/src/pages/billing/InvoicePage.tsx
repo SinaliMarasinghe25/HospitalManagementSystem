@@ -42,7 +42,7 @@ export default function InvoicePage() {
 
   if (!invoice) {
     return error ? (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     ) : (
@@ -56,10 +56,10 @@ export default function InvoicePage() {
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link to="/billing?tab=due" className="text-sm text-blue-700 hover:underline">
+          <Link to="/billing?tab=due" className="text-sm text-brand-700 hover:underline">
             &larr; Billing
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">
             Invoice <span className="font-mono">{invoice.invoiceNumber}</span>
           </h1>
           <p className="text-sm text-slate-600">
@@ -71,12 +71,12 @@ export default function InvoicePage() {
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {lastReceiptId && (
-        <p className="rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">
+        <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800" role="status">
           Payment recorded.{' '}
           <Link to={`/billing/payments/${lastReceiptId}/receipt`} target="_blank" className="font-medium underline">
             Print the receipt
@@ -84,7 +84,7 @@ export default function InvoicePage() {
         </p>
       )}
 
-      <section className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <section className="space-y-4 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         {invoice.status === 'Cancelled' ? (
           <p className="text-sm text-slate-600">
             This invoice was cancelled. Its charges went back to &quot;Ready to bill&quot;; the audit log keeps what was on it.
@@ -141,7 +141,7 @@ export default function InvoicePage() {
         />
       )}
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="payments-heading">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="payments-heading">
         <h2 id="payments-heading" className="font-semibold text-slate-900">Payments</h2>
         <div className="mt-2 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
@@ -158,7 +158,7 @@ export default function InvoicePage() {
               {invoice.payments.map((p) => (
                 <tr key={p.id}>
                   <td className="py-1 pr-3 font-mono">
-                    <Link to={`/billing/payments/${p.id}/receipt`} target="_blank" className="text-blue-700 hover:underline">
+                    <Link to={`/billing/payments/${p.id}/receipt`} target="_blank" className="text-brand-700 hover:underline">
                       {p.receiptNumber}
                     </Link>
                   </td>
@@ -243,7 +243,7 @@ function PaymentForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+    <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
       <h2 className="font-semibold text-slate-900">Receive payment</h2>
       <div className="grid gap-3 sm:grid-cols-3">
         <FormField id="amount" label="Amount (LKR)" required error={errors.amount}>

@@ -10,8 +10,8 @@ export function RequireRole({ roles, children }: { roles: readonly Role[]; child
 
   if (!hasAnyRole(user?.roles, roles)) {
     return (
-      <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <h1 className="text-xl font-semibold text-slate-900">Not authorised</h1>
+      <div className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Not authorised</h1>
         <p className="mt-2 text-slate-600">Your role does not have access to this page.</p>
       </div>
     )

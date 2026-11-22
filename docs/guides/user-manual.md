@@ -9,18 +9,18 @@ How hospital staff use the HMS, role by role. Every screen works in Chrome, Edge
 1. Open the HMS address (in development, http://localhost:5173).
 2. Enter your **username** and **password** and click **Login**.
 3. If an administrator just created your account or reset your password, you must **choose a new password** before you can continue. It needs at least 8 characters, with an upper-case letter, a lower-case letter, a number and a symbol.
-4. Click **Logout** in the header when you leave the computer.
+4. When you leave the computer, click your **name** at the top right and choose **Logout**.
 
 - After **20 minutes without activity** you are logged out automatically and see a "session expired" note. Just log in again.
 - **5 wrong passwords** lock your account for 15 minutes.
 - **Forgot your password?** Click **Forgot password** on the login page and enter your username. An administrator gets a message and will give you a temporary password.
-- **Change your password** at any time with **Change password** in the header.
+- **Change your password** at any time: click your **name** at the top right, then **Change password**.
 
 ### Finding your way
 
-- The **sidebar** shows only the modules your role can use. On a phone, open it with the menu button.
+- The **sidebar** on the left shows only the modules your role can use, grouped under Overview, Clinical and Administration. Your name and roles are at the bottom. On a phone or tablet, open it with the menu button (three lines) at the top left.
 - The **Dashboard** shows the numbers that matter for your role and refreshes itself every 30 seconds.
-- The **bell** in the header shows notifications meant for you: a new prescription, a lab result, a leave decision and so on. Click one to open the page it is about. **Mark all as read** clears the count.
+- The **bell** at the top right shows notifications meant for you: a new prescription, a lab result, a leave decision and so on. Click one to open the page it is about. **Mark all as read** clears the count.
 - Long lists show 20 rows at a time with **Previous** and **Next** under the table.
 - Every role can request leave under **Staff → My leave**: choose the leave type, first and last day, and a reason. You can withdraw a request while it is still pending. You are notified when it is approved or rejected.
 - **Reports** shows the reports your role may use. Pick the dates, then **Print report** or **Download CSV** (opens in Excel).

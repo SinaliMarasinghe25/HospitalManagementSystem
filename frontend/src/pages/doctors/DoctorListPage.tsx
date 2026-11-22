@@ -46,12 +46,12 @@ export default function DoctorListPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Doctors</h1>
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Doctors</h1>
         {canManage && (
           // People are added in one place only: Staff → Add employee, with "This person is a doctor" ticked.
           <p className="text-sm text-slate-600">
             To add a doctor, use{' '}
-            <Link to="/staff" className="text-blue-700 hover:underline">
+            <Link to="/staff" className="text-brand-700 hover:underline">
               Staff &rarr; Add employee
             </Link>{' '}
             and tick &ldquo;This person is a doctor&rdquo;.
@@ -102,14 +102,14 @@ export default function DoctorListPage() {
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Name</th>
               <th scope="col" className="px-4 py-3 font-medium">Specialisation</th>
@@ -120,9 +120,9 @@ export default function DoctorListPage() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {doctors?.map((d) => (
-              <tr key={d.id} className="hover:bg-slate-50">
+              <tr key={d.id} className="hover:bg-brand-50/40">
                 <td className="px-4 py-3">
-                  <Link to={`/doctors/${d.id}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/doctors/${d.id}`} className="font-medium text-brand-700 hover:underline">
                     Dr {d.fullName}
                   </Link>
                 </td>
@@ -131,7 +131,7 @@ export default function DoctorListPage() {
                 <td className="px-4 py-3 text-slate-700">{formatMoney(d.consultationFee)}</td>
                 <td className="px-4 py-3">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    className={`badge ${
                       d.isActive ? 'bg-green-50 text-green-800' : 'bg-slate-100 text-slate-600'
                     }`}
                   >

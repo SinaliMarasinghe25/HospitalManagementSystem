@@ -118,33 +118,33 @@ export default function AppointmentFormPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">{rescheduleId ? 'Reschedule appointment' : 'Book appointment'}</h1>
+      <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">{rescheduleId ? 'Reschedule appointment' : 'Book appointment'}</h1>
 
       {original && (
-        <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-700 ring-1 ring-slate-200">
+        <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700 ring-1 ring-slate-200">
           Current time: <strong>{formatDateTime(original.startTime)}</strong> with Dr {original.doctorName}. The old
           appointment is kept in the history with the status Rescheduled.
         </p>
       )}
 
       {formError && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {formError}
           {errors.startTime && <span className="block">{errors.startTime}</span>}
         </p>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         {/* 1. Patient */}
         <fieldset className="space-y-2">
           <legend className="text-base font-medium text-slate-900">1. Patient</legend>
           {patient ? (
-            <div className="flex items-center justify-between rounded-md bg-blue-50 px-3 py-2 text-sm">
+            <div className="flex items-center justify-between rounded-lg bg-brand-50 px-3 py-2 text-sm">
               <span>
                 <strong>{patient.name}</strong> ({patient.patientNumber})
               </span>
               {!rescheduleId && (
-                <button type="button" className="text-blue-700 hover:underline" onClick={() => setPatient(null)}>
+                <button type="button" className="text-brand-700 hover:underline" onClick={() => setPatient(null)}>
                   Change
                 </button>
               )}
@@ -208,11 +208,11 @@ export default function AppointmentFormPage() {
                         setStartTime(slot.startTime)
                         clearError('startTime')
                       }}
-                      className={`rounded-md border px-2 py-2 text-sm font-medium ${
+                      className={`rounded-lg border px-2 py-2 text-sm font-medium ${
                         selected
-                          ? 'border-blue-700 bg-blue-700 text-white'
+                          ? 'border-brand-700 bg-brand-700 text-white'
                           : slot.isAvailable
-                            ? 'border-slate-300 bg-white text-slate-800 hover:bg-blue-50'
+                            ? 'border-slate-300 bg-white text-slate-800 hover:bg-brand-50'
                             : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 line-through'
                       }`}
                     >

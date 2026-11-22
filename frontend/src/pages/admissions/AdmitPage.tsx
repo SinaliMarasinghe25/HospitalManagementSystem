@@ -70,23 +70,23 @@ export default function AdmitPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">Admit patient</h1>
+      <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Admit patient</h1>
 
       {formError && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {formError}
         </p>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <fieldset className="space-y-2">
           <legend className="text-base font-medium text-slate-900">1. Patient</legend>
           {patient ? (
-            <div className="flex items-center justify-between rounded-md bg-blue-50 px-3 py-2 text-sm">
+            <div className="flex items-center justify-between rounded-lg bg-brand-50 px-3 py-2 text-sm">
               <span>
                 <strong>{patient.name}</strong> ({patient.patientNumber})
               </span>
-              <button type="button" className="text-blue-700 hover:underline" onClick={() => setPatient(null)}>
+              <button type="button" className="text-brand-700 hover:underline" onClick={() => setPatient(null)}>
                 Change
               </button>
             </div>

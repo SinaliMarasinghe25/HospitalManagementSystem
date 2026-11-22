@@ -1,6 +1,6 @@
 import { attendanceLabels, type AttendanceStatus, type LeaveStatus } from '../../types/staff'
 
-const badge = 'inline-block rounded-full px-2 py-0.5 text-xs font-medium ring-1'
+const badge = 'badge ring-1'
 
 const leaveStyles: Record<LeaveStatus, string> = {
   Pending: 'bg-amber-50 text-amber-800 ring-amber-200',
@@ -17,7 +17,7 @@ const attendanceStyles: Record<AttendanceStatus, string> = {
   Present: 'bg-green-50 text-green-800 ring-green-200',
   Late: 'bg-amber-50 text-amber-800 ring-amber-200',
   Absent: 'bg-red-50 text-red-700 ring-red-200',
-  OnLeave: 'bg-blue-50 text-blue-800 ring-blue-200',
+  OnLeave: 'bg-sky-50 text-sky-800 ring-sky-200',
 }
 
 export function AttendanceBadge({ status }: { status: AttendanceStatus }) {

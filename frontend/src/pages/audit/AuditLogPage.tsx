@@ -42,7 +42,7 @@ export default function AuditLogPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Audit log</h1>
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Audit log</h1>
         <p className="text-sm text-slate-600">
           Every login, failed login and logout, every change to patient, clinical, financial and staff records, and
           every time someone opened a medical record. Newest first. Entries cannot be changed or deleted.
@@ -68,9 +68,9 @@ export default function AuditLogPage() {
       <ReportMessage error={error} loading={loading && !data} />
 
       {data && (
-        <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+            <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
               <tr>
                 <th scope="col" className="px-4 py-3 font-medium">
                   When
@@ -112,7 +112,7 @@ export default function AuditLogPage() {
                               e.stopPropagation()
                               show({ entityName: entry.entityName!, entityId: entry.entityId! })
                             }}
-                            className="mr-3 text-blue-700 hover:underline"
+                            className="mr-3 text-brand-700 hover:underline"
                           >
                             History
                           </button>
@@ -125,7 +125,7 @@ export default function AuditLogPage() {
                             e.stopPropagation()
                             toggle(entry.id)
                           }}
-                          className="text-blue-700 hover:underline"
+                          className="text-brand-700 hover:underline"
                         >
                           {isOpen ? 'Hide details' : 'Details'}
                         </button>
@@ -209,7 +209,7 @@ function FilterForm({
       onSubmit={handleSubmit}
       role="search"
       aria-label="Filter the audit log"
-      className="flex flex-wrap items-end gap-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200"
+      className="flex flex-wrap items-end gap-4 rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/70"
     >
       <FormField id="audit-from" label="From">
         <input

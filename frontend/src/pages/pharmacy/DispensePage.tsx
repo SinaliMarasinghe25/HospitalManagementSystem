@@ -64,7 +64,7 @@ export default function DispensePage() {
 
   if (!view) {
     return error ? (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     ) : (
@@ -80,10 +80,10 @@ export default function DispensePage() {
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link to="/pharmacy" className="text-sm text-blue-700 hover:underline">
+          <Link to="/pharmacy" className="text-sm text-brand-700 hover:underline">
             &larr; Pharmacy
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">Prescription #{p.id}</h1>
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">Prescription #{p.id}</h1>
           <p className="text-sm text-slate-600">
             {p.patientName} ({p.patientNumber}) &middot; Dr {p.doctorName} &middot; {formatDateTime(p.prescribedAt)}
           </p>
@@ -92,17 +92,17 @@ export default function DispensePage() {
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {saved && (
-        <p className="rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">
+        <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800" role="status">
           Dispensed. Stock and the patient&apos;s bill have been updated.
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="text-slate-500">
@@ -178,7 +178,7 @@ export default function DispensePage() {
       </form>
 
       {view.history.length > 0 && (
-        <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="given-heading">
+        <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="given-heading">
           <h2 id="given-heading" className="font-semibold text-slate-900">Handed over</h2>
           <div className="mt-2 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
