@@ -38,7 +38,6 @@ export default function RevenueReportView() {
           <div className="grid gap-4 lg:grid-cols-2 print:grid-cols-2">
             <ReportTable
               title="Billed by source"
-              csvName={`revenue-by-source-${data.period.from}-to-${data.period.to}`}
               rows={[
                 ...data.bySource.map((s) => ({ key: s.source, label: chargeTypeLabels[s.source], count: s.charges, amount: s.amount })),
                 { key: 'discount', label: 'Less discounts', count: null, amount: -data.discounts },
@@ -53,7 +52,6 @@ export default function RevenueReportView() {
             />
             <ReportTable
               title="Collected by payment method"
-              csvName={`revenue-by-method-${data.period.from}-to-${data.period.to}`}
               rows={data.byMethod}
               rowKey={(m) => m.method}
               footer={['Collected total', sumBy(data.byMethod, (m) => m.payments), data.collected]}
@@ -66,7 +64,6 @@ export default function RevenueReportView() {
           </div>
           <ReportTable
             title="By day"
-            csvName={`revenue-by-day-${data.period.from}-to-${data.period.to}`}
             rows={data.byDay}
             rowKey={(d) => d.date}
             footer={['Total', data.billedTotal, data.collected]}
@@ -79,7 +76,6 @@ export default function RevenueReportView() {
           {data.detailTruncated && <TruncatedNote shown={data.payments.length} total={sumBy(data.byMethod, (m) => m.payments)} />}
           <ReportTable
             title="Payments received"
-            csvName={`payments-${data.period.from}-to-${data.period.to}`}
             rows={data.payments}
             rowKey={(p) => p.id}
             footer={['Total', '', '', '', '', data.collected]}

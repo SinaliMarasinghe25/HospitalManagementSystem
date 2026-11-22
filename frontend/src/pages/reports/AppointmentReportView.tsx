@@ -78,7 +78,6 @@ export default function AppointmentReportView() {
           </StatGrid>
           <ReportTable
             title="By doctor"
-            csvName={`appointments-by-doctor-${data.period.from}-to-${data.period.to}`}
             rows={data.byDoctor}
             rowKey={(d) => d.doctorId}
             footer={[
@@ -102,7 +101,6 @@ export default function AppointmentReportView() {
           />
           <ReportTable
             title="By status"
-            csvName={`appointments-by-status-${data.period.from}-to-${data.period.to}`}
             rows={data.byStatus}
             rowKey={(s) => s.label}
             footer={['Total', data.total]}
@@ -114,7 +112,6 @@ export default function AppointmentReportView() {
           {data.detailTruncated && <TruncatedNote shown={data.appointments.length} total={data.total} />}
           <ReportTable
             title="Appointment list"
-            csvName={`appointments-${data.period.from}-to-${data.period.to}`}
             rows={data.appointments}
             rowKey={(a) => a.id}
             columns={[

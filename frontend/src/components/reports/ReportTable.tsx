@@ -1,22 +1,23 @@
 import type { ReactNode } from 'react'
-import { downloadCsv, type CsvValue } from '../../utils/csv'
 import { formatMoney } from '../../utils/format'
 
-// One table definition drives both the table on screen and its CSV file, so the two always match.
+// A plain value in a report table cell.
+export type CellValue = string | number | boolean | null | undefined
+
+// One table definition per report table: its columns and how each cell is shown.
 export type Column<T> = {
   header: string
-  // The plain value: written to the CSV file, and shown when there is no "show".
-  value: (row: T) => CsvValue
+  // The plain value, shown when there is no "show".
+  value: (row: T) => CellValue
   // Optional richer display, such as a link or a badge.
   show?: (row: T) => ReactNode
-  // Money columns are shown as "LKR 1,500.00" and written to CSV as plain numbers.
+  // Money columns are shown as "LKR 1,500.00".
   money?: boolean
   numeric?: boolean
 }
 
 export function ReportTable<T>({
   title,
-  csvName,
   columns,
   rows,
   rowKey,
@@ -24,35 +25,20 @@ export function ReportTable<T>({
   empty = 'Nothing in this period.',
 }: {
   title: string
-  csvName: string // file name without ".csv"
   columns: Column<T>[]
   rows: T[]
   rowKey: (row: T) => string | number
-  footer?: CsvValue[] // one value per column, e.g. ['Total', 12, 3400]
+  footer?: CellValue[] // one value per column, e.g. ['Total', 12, 3400]
   empty?: string
 }) {
-  const display = (column: Column<T>, value: CsvValue) =>
+  const display = (column: Column<T>, value: CellValue) =>
     column.money && typeof value === 'number' ? formatMoney(value) : value
   const align = (column: Column<T>) => (column.money || column.numeric ? 'text-right' : '')
 
-  const exportCsv = () => {
-    const header = columns.map((c) => c.header)
-    const body = rows.map((row) => columns.map((c) => c.value(row)))
-    downloadCsv(`${csvName}.csv`, footer ? [header, ...body, footer] : [header, ...body])
-  }
-
   return (
     <section className="rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70 print:break-inside-avoid-page print:shadow-none print:ring-0">
-      <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 print:px-0">
+      <div className="border-b border-slate-200 px-4 py-3 print:px-0">
         <h2 className="font-semibold text-slate-900">{title}</h2>
-        <button
-          type="button"
-          onClick={exportCsv}
-          disabled={rows.length === 0}
-          className="text-sm font-medium text-brand-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline print:hidden"
-        >
-          Download CSV
-        </button>
       </div>
       <div className="overflow-x-auto print:overflow-visible">
         <table className="min-w-full text-left text-sm">

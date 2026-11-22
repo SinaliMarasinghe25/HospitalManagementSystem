@@ -3,7 +3,7 @@ using Hms.Api.Entities;
 namespace Hms.Api.Dtos;
 
 // PDF 3.10 Reports (FR-RP-01 to 06). Every report has summary tables, worked out by the database over the
-// whole period, and a detail list for printing and CSV export. The detail list stops at
+// whole period, and a detail list for printing. The detail list stops at
 // ReportService.MaxDetailRows rows; DetailTruncated then says so. The summary totals are always complete.
 
 // The period a report covers: hospital days, both inclusive.

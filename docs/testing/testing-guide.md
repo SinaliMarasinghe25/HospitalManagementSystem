@@ -2,10 +2,10 @@
 
 The HMS has two sets of automated tests. Run both before every pull request; both must pass.
 
-| Set | Tool | Where | Command | Count (step 27) |
+| Set | Tool | Where | Command | Count (step 31) |
 | --- | --- | --- | --- | --- |
 | Backend | xUnit v3 | `tests/Hms.Api.Tests` | `dotnet test` in `backend` | 366 |
-| Frontend | Vitest + React Testing Library | next to the code in `frontend/src` (`*.test.ts(x)`) | `npm test` in `frontend` | 61 |
+| Frontend | Vitest + React Testing Library | next to the code in `frontend/src` (`*.test.ts(x)`) | `npm test` in `frontend` | 56 |
 
 ```powershell
 cd C:\dev\HospitalManagementSystem\backend
@@ -14,7 +14,7 @@ dotnet test
 
 cd ..\frontend
 npm test
-# Test Files 6 passed (6)   Tests 61 passed (61)
+# Test Files 5 passed (5)   Tests 56 passed (56)
 ```
 
 Also run `npm run lint` and `npm run build` in `frontend`: no lint problems and no TypeScript errors.
@@ -65,7 +65,6 @@ Helpers live in `Infrastructure/`: `HmsApiFactory` (starts the API on the throwa
 | `pages/LoginPage.test.tsx` | Fields and button present; username trimmed; API error shown and password cleared; "Signing in..." while waiting; session-expired note. |
 | `components/ui/Pagination.test.tsx` | "47 requests, page 1 of 3", Previous and Next. |
 | `auth/permissions.test.ts` | Reads the API's `Policies.cs` and checks every permission has the same roles in `permissions.ts`. |
-| `utils/csv.test.ts` | CSV export, including protection against Excel formulas. |
 | `utils/formErrors.test.ts` | API field errors mapped to form fields. |
 
 Shared set-up is in `frontend/src/test/` (`setup.ts`, and `renderWithAuth.tsx` to render a page as a given role).
@@ -93,4 +92,4 @@ Some things are checked by hand before a release: printing (invoice, receipt, la
 
 ## Tests on GitHub (CI)
 
-The workflow `.github/workflows/ci.yml` runs both test suites, the linter and the production builds on every pull request, with a throw-away PostgreSQL. See the [deployment guide](../guides/deployment-guide.md#4-automatic-tests-on-github-ci).
+The workflow `.github/workflows/ci.yml` runs both test suites, the linter and the production builds on every pull request, with a throw-away PostgreSQL. On a pull request, the checks show at the bottom: a green tick per job means it passed; on a red cross, click **Details** to read the error.

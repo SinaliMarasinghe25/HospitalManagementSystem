@@ -36,8 +36,7 @@ export default function ReportsPage() {
       <div className="print:hidden">
         <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Reports</h1>
         <p className="text-sm text-slate-600">
-          Choose a report and a period. Every table can be downloaded as a CSV file, and the whole report can be printed
-          or saved as a PDF.
+          Choose a report and a period. The whole report can be printed or saved as a PDF.
         </p>
       </div>
       {mine.length === 0 ? (

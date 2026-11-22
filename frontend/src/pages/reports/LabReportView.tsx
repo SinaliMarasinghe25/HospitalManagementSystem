@@ -87,7 +87,6 @@ export default function LabReportView() {
           </StatGrid>
           <ReportTable
             title="By test"
-            csvName={`lab-by-test-${data.period.from}-to-${data.period.to}`}
             rows={data.byTest}
             rowKey={(t) => t.labTestId}
             footer={[
@@ -109,7 +108,6 @@ export default function LabReportView() {
           />
           <ReportTable
             title="By status"
-            csvName={`lab-by-status-${data.period.from}-to-${data.period.to}`}
             rows={data.byStatus}
             rowKey={(s) => s.label}
             footer={['Total', data.total]}
@@ -121,7 +119,6 @@ export default function LabReportView() {
           {data.detailTruncated && <TruncatedNote shown={data.requests.length} total={data.total} />}
           <ReportTable
             title="Test list"
-            csvName={`lab-tests-${data.period.from}-to-${data.period.to}`}
             rows={data.requests}
             rowKey={(r) => r.id}
             columns={[

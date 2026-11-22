@@ -3,7 +3,6 @@
 | Folder | Document | What it covers |
 | --- | --- | --- |
 | `guides/` | [setup-guide.md](guides/setup-guide.md) | Install the tools, create the database login (with `CREATEDB`), secrets, run the API and frontend, troubleshooting |
-| `guides/` | [deployment-guide.md](guides/deployment-guide.md) | Docker, the public demo on Render + Neon, CI, backup and restore, disaster recovery |
 | `guides/` | [user-manual.md](guides/user-manual.md) | How each of the seven roles uses the system |
 | `architecture/` | [architecture.md](architecture/architecture.md) | Four layers, folders, request flow, security design, decisions |
 | `architecture/` | [roles-and-permissions.md](architecture/roles-and-permissions.md) | The 36 permissions × 7 roles, record-level rules, menus and dashboard tiles per role |

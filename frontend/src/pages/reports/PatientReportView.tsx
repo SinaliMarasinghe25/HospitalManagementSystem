@@ -29,14 +29,13 @@ export default function PatientReportView() {
             ))}
           </StatGrid>
           <div className="grid gap-4 lg:grid-cols-3 print:grid-cols-3">
-            <CountTable title="By day" csvName="patients-by-day" header="Date" rows={data.byDay} date />
-            <CountTable title="By gender" csvName="patients-by-gender" header="Gender" rows={data.byGender} />
-            <CountTable title="By age today" csvName="patients-by-age" header="Age" rows={data.byAgeGroup} />
+            <CountTable title="By day" header="Date" rows={data.byDay} date />
+            <CountTable title="By gender" header="Gender" rows={data.byGender} />
+            <CountTable title="By age today" header="Age" rows={data.byAgeGroup} />
           </div>
           {data.detailTruncated && <TruncatedNote shown={data.patients.length} total={data.totalRegistered} />}
           <ReportTable
             title="Patients registered"
-            csvName={`patients-${data.period.from}-to-${data.period.to}`}
             rows={data.patients}
             rowKey={(p) => p.id}
             columns={[
@@ -64,13 +63,11 @@ export default function PatientReportView() {
 
 function CountTable({
   title,
-  csvName,
   header,
   rows,
   date = false,
 }: {
   title: string
-  csvName: string
   header: string
   rows: CountRow[]
   date?: boolean
@@ -78,7 +75,6 @@ function CountTable({
   return (
     <ReportTable
       title={title}
-      csvName={csvName}
       rows={rows}
       rowKey={(r) => r.label}
       footer={['Total', sumBy(rows, (r) => r.count)]}
