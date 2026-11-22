@@ -96,22 +96,22 @@ export default function ConsultationFormPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">{recordId ? 'Edit medical record' : 'Consultation'}</h1>
+      <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">{recordId ? 'Edit medical record' : 'Consultation'}</h1>
 
       {header && (
-        <div className="rounded-md bg-blue-50 p-3 text-sm text-slate-800 ring-1 ring-blue-100">
+        <div className="rounded-lg bg-brand-50 p-3 text-sm text-slate-800 ring-1 ring-brand-100">
           <strong>{header.patientName}</strong> ({header.patientNumber}) &middot; Visit {header.visit}
           {header.allergies && <p className="mt-1 font-medium text-red-800">Allergies: {header.allergies}</p>}
         </div>
       )}
 
       {formError && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {formError}
         </p>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <FormField id="chiefComplaint" label="Chief complaint" error={errors.chiefComplaint}>
           <input
             id="chiefComplaint"

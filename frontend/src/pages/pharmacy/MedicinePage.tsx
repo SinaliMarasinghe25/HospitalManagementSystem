@@ -45,7 +45,7 @@ export default function MedicinePage() {
 
   if (!detail) {
     return error ? (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     ) : (
@@ -60,10 +60,10 @@ export default function MedicinePage() {
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link to="/pharmacy?tab=stock" className="text-sm text-blue-700 hover:underline">
+          <Link to="/pharmacy?tab=stock" className="text-sm text-brand-700 hover:underline">
             &larr; Pharmacy stock
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">
             {m.name} {m.strength} <span className="text-base font-normal text-slate-500">{m.form}</span>
           </h1>
           {m.genericName && m.genericName !== m.name && <p className="text-sm text-slate-600">{m.genericName}</p>}
@@ -76,12 +76,12 @@ export default function MedicinePage() {
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <dl className="grid gap-4 sm:grid-cols-4">
           <div>
             <dt className="text-sm text-slate-500">Usable stock</dt>
@@ -108,7 +108,7 @@ export default function MedicinePage() {
         {canPrice && !canManage && <PriceForm price={m.unitPrice} onSave={(price) => setMedicinePrice(m.id, price).then(() => setReloadKey((k) => k + 1))} />}
       </section>
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="batches-heading">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="batches-heading">
         <h2 id="batches-heading" className="font-semibold text-slate-900">Batches in stock</h2>
         <div className="mt-2 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
@@ -147,7 +147,7 @@ export default function MedicinePage() {
 
       {canManage && <StockInForm medicineId={m.id} onSaved={setDetail} />}
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="moves-heading">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="moves-heading">
         <h2 id="moves-heading" className="font-semibold text-slate-900">Stock history</h2>
         <p className="text-xs text-slate-500">The latest 50 changes. Every change to stock is recorded here.</p>
         <div className="mt-2 overflow-x-auto">
@@ -173,7 +173,7 @@ export default function MedicinePage() {
                   </td>
                   <td className="py-1 pr-3">
                     {s.prescriptionId ? (
-                      <Link to={`/pharmacy/prescriptions/${s.prescriptionId}`} className="text-blue-700 hover:underline">
+                      <Link to={`/pharmacy/prescriptions/${s.prescriptionId}`} className="text-brand-700 hover:underline">
                         Prescription #{s.prescriptionId} ({s.patientNumber})
                       </Link>
                     ) : (
@@ -241,7 +241,7 @@ function BatchRow({
                 Remove expired stock<span className="sr-only"> of batch {batch.batchNumber}</span>
               </button>
             ) : (
-              <button type="button" onClick={() => setCorrecting(!correcting)} className="text-blue-700 hover:underline">
+              <button type="button" onClick={() => setCorrecting(!correcting)} className="text-brand-700 hover:underline">
                 Correct count<span className="sr-only"> of batch {batch.batchNumber}</span>
               </button>
             )}
@@ -251,7 +251,7 @@ function BatchRow({
       {correcting && (
         <tr>
           <td colSpan={6} className="pb-3">
-            <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2 rounded-md bg-slate-50 p-3">
+            <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2 rounded-lg bg-slate-50 p-3">
               <div>
                 <label htmlFor={`change-${batch.id}`} className="block text-xs font-medium text-slate-700">
                   Add (+) or remove (-)
@@ -319,7 +319,7 @@ function StockInForm({ medicineId, onSaved }: { medicineId: number; onSaved: (de
   const set = (key: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [key]: e.target.value })
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+    <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
       <h2 className="font-semibold text-slate-900">Stock in (receive a delivery)</h2>
       <div className="grid gap-3 sm:grid-cols-4">
         <FormField id="batchNumber" label="Batch number" required error={errors.batchNumber}>

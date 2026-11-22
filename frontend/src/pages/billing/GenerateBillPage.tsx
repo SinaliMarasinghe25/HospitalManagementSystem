@@ -34,7 +34,7 @@ export default function GenerateBillPage() {
 
   if (!data) {
     return error ? (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     ) : (
@@ -70,22 +70,22 @@ export default function GenerateBillPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       <div>
-        <Link to="/billing" className="text-sm text-blue-700 hover:underline">
+        <Link to="/billing" className="text-sm text-brand-700 hover:underline">
           &larr; Billing
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-slate-900">Generate bill</h1>
+        <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">Generate bill</h1>
         <p className="text-sm text-slate-600">
           {data.patientName} ({data.patientNumber})
         </p>
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="text-slate-500">

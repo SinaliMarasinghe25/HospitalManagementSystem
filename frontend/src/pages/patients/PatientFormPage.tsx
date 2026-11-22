@@ -101,15 +101,15 @@ export default function PatientFormPage() {
 
   return (
     <div className="max-w-3xl space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">{isEdit ? 'Edit patient' : 'Register patient'}</h1>
+      <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">{isEdit ? 'Edit patient' : 'Register patient'}</h1>
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={handleSubmit} className="space-y-6 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <fieldset className="grid gap-4 sm:grid-cols-2">
           <legend className="mb-2 font-medium text-slate-900">Personal details</legend>
           <FormField id="firstName" label="First name" required error={fieldErrors.firstName}>

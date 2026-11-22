@@ -1,10 +1,10 @@
 import type { PrescriptionStatus } from '../../types/medicalRecord'
 import type { ExpiryState } from '../../types/pharmacy'
 
-const badge = 'inline-block rounded-full px-2 py-0.5 text-xs font-medium ring-1'
+const badge = 'badge ring-1'
 
 const prescriptionStyles: Record<PrescriptionStatus, string> = {
-  Pending: 'bg-blue-50 text-blue-800 ring-blue-200',
+  Pending: 'bg-sky-50 text-sky-800 ring-sky-200',
   PartiallyDispensed: 'bg-amber-50 text-amber-800 ring-amber-200',
   Dispensed: 'bg-green-50 text-green-800 ring-green-200',
   Cancelled: 'bg-slate-100 text-slate-600 ring-slate-200',

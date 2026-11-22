@@ -34,7 +34,7 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">Billing</h1>
+      <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Billing</h1>
       <Tabs label="Billing views" tabs={tabs} labels={tabLabels} value={tab} onChange={(t) => setParams({ tab: t })} />
       {tab === 'unbilled' && <UnbilledList />}
       {tab !== 'unbilled' && <InvoiceList key={tab} due={tab === 'due'} linkToDetails={seesDetails} />}
@@ -42,12 +42,12 @@ export default function BillingPage() {
   )
 }
 
-const card = 'overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200'
+const card = 'overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70'
 const th = 'px-4 py-3 font-medium'
 
 function ErrorText({ error }: { error: string | null }) {
   return error ? (
-    <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+    <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
       {error}
     </p>
   ) : null
@@ -72,7 +72,7 @@ function UnbilledList() {
       <ErrorText error={error} />
       <div className={card}>
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className={th}>Patient</th>
               <th scope="col" className={th}>Charges</th>
@@ -82,9 +82,9 @@ function UnbilledList() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {rows?.map((p) => (
-              <tr key={p.patientId} className="hover:bg-slate-50">
+              <tr key={p.patientId} className="hover:bg-brand-50/40">
                 <td className="px-4 py-3">
-                  <Link to={`/billing/patients/${p.patientId}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/billing/patients/${p.patientId}`} className="font-medium text-brand-700 hover:underline">
                     {p.patientName}
                   </Link>
                   <span className="block text-xs text-slate-500">{p.patientNumber}</span>
@@ -179,7 +179,7 @@ function InvoiceList({ due, linkToDetails }: { due: boolean; linkToDetails: bool
       <ErrorText error={error} />
       <div className={card}>
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className={th}>Invoice</th>
               <th scope="col" className={th}>Patient</th>
@@ -192,10 +192,10 @@ function InvoiceList({ due, linkToDetails }: { due: boolean; linkToDetails: bool
           </thead>
           <tbody className="divide-y divide-slate-100">
             {rows?.map((i) => (
-              <tr key={i.id} className={i.status === 'Cancelled' ? 'text-slate-400' : 'hover:bg-slate-50'}>
+              <tr key={i.id} className={i.status === 'Cancelled' ? 'text-slate-400' : 'hover:bg-brand-50/40'}>
                 <td className="px-4 py-3 font-mono">
                   {linkToDetails ? (
-                    <Link to={`/billing/invoices/${i.id}`} className="font-medium text-blue-700 hover:underline">
+                    <Link to={`/billing/invoices/${i.id}`} className="font-medium text-brand-700 hover:underline">
                       {i.invoiceNumber}
                     </Link>
                   ) : (

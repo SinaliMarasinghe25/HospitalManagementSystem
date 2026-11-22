@@ -27,7 +27,7 @@ export default function MedicalRecordPage() {
 
   if (!record) {
     return error ? (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     ) : (
@@ -39,10 +39,10 @@ export default function MedicalRecordPage() {
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link to={`/patients/${record.patientId}`} className="text-sm text-blue-700 hover:underline">
+          <Link to={`/patients/${record.patientId}`} className="text-sm text-brand-700 hover:underline">
             &larr; {record.patientName}
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">Medical record #{record.id}</h1>
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">Medical record #{record.id}</h1>
           <p className="text-sm text-slate-600">
             Visit {formatDateTime(record.visitDate)} &middot; Dr {record.doctorName} ({record.departmentName})
           </p>
@@ -60,7 +60,7 @@ export default function MedicalRecordPage() {
         </div>
       </div>
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <p className="text-sm text-slate-700">
           <strong>{record.patientName}</strong> ({record.patientNumber}) &middot; {record.gender} &middot; Age{' '}
           {ageFrom(record.dateOfBirth)} (born {formatDate(record.dateOfBirth)})
@@ -82,7 +82,7 @@ export default function MedicalRecordPage() {
                     <li key={i}>
                       {d.code && <span className="font-mono">{d.code} </span>}
                       {d.description}
-                      {d.isPrimary && <span className="ml-2 rounded bg-blue-50 px-1.5 text-xs text-blue-800">main</span>}
+                      {d.isPrimary && <span className="ml-2 rounded bg-brand-50 px-1.5 text-xs text-brand-800">main</span>}
                     </li>
                   ))}
                 </ul>
@@ -139,7 +139,7 @@ function PrescriptionsSection({ record, onChanged }: { record: MedicalRecord; on
   }
 
   return (
-    <section className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="rx-heading">
+    <section className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="rx-heading">
       <div className="flex items-center justify-between">
         <h2 id="rx-heading" className="font-semibold text-slate-900">Prescriptions</h2>
         {record.canEdit && !adding && (
@@ -149,7 +149,7 @@ function PrescriptionsSection({ record, onChanged }: { record: MedicalRecord; on
         )}
       </div>
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
@@ -278,12 +278,12 @@ function PrescriptionForm({
       <h3 className="font-medium text-slate-900">New prescription</h3>
       {allergies && <p className="text-sm font-medium text-red-800">Check allergies: {allergies}</p>}
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {lines.map((line, i) => (
-        <fieldset key={i} className="grid gap-2 rounded-md bg-white p-3 ring-1 ring-slate-200 sm:grid-cols-6">
+        <fieldset key={i} className="grid gap-2 rounded-lg bg-white p-3 ring-1 ring-slate-200 sm:grid-cols-6">
           <legend className="sr-only">Medicine {i + 1}</legend>
           <div className="sm:col-span-2">
             <label htmlFor={`rx-med-${i}`} className="block text-xs font-medium text-slate-600">

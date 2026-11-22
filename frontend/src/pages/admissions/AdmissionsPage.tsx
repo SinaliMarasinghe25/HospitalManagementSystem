@@ -54,7 +54,7 @@ export default function AdmissionsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Admissions</h1>
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Admissions</h1>
         <div className="flex gap-2">
           {canManageWards && (
             <Link to="/admissions/wards" className={secondaryButtonClass}>
@@ -81,7 +81,7 @@ export default function AdmissionsPage() {
       />
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
@@ -94,7 +94,7 @@ export default function AdmissionsPage() {
             </p>
           )}
           {wards?.map((w) => (
-            <section key={w.id} className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-label={w.name}>
+            <section key={w.id} className="rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/70" aria-label={w.name}>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="font-semibold text-slate-900">
                   {w.name} <span className="text-sm font-normal text-slate-500">({w.wardType})</span>
@@ -109,7 +109,7 @@ export default function AdmissionsPage() {
                     {b.admissionId ? (
                       <Link
                         to={`/admissions/${b.admissionId}`}
-                        className="block rounded-md border border-amber-300 bg-amber-50 p-2 text-sm hover:bg-amber-100"
+                        className="block rounded-lg border border-amber-300 bg-amber-50 p-2 text-sm hover:bg-amber-100"
                       >
                         <span className="font-semibold text-slate-900">{b.bedNumber}</span>
                         <span className="block truncate text-slate-700">{b.patientName}</span>
@@ -118,14 +118,14 @@ export default function AdmissionsPage() {
                     ) : canAdmit ? (
                       <Link
                         to={`/admissions/new?bedId=${b.id}`}
-                        className="block rounded-md border border-green-300 bg-green-50 p-2 text-sm hover:bg-green-100"
+                        className="block rounded-lg border border-green-300 bg-green-50 p-2 text-sm hover:bg-green-100"
                       >
                         <span className="font-semibold text-slate-900">{b.bedNumber}</span>
                         <span className="block text-slate-500">&nbsp;</span>
                         <span className="text-xs text-green-800">Free: admit here</span>
                       </Link>
                     ) : (
-                      <div className="rounded-md border border-green-300 bg-green-50 p-2 text-sm">
+                      <div className="rounded-lg border border-green-300 bg-green-50 p-2 text-sm">
                         <span className="font-semibold text-slate-900">{b.bedNumber}</span>
                         <span className="block text-slate-500">&nbsp;</span>
                         <span className="text-xs text-green-800">Free</span>
@@ -157,9 +157,9 @@ export default function AdmissionsPage() {
               />
             </div>
           )}
-          <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+              <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium">Admission</th>
                   <th scope="col" className="px-4 py-3 font-medium">Patient</th>
@@ -171,9 +171,9 @@ export default function AdmissionsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {admissions?.items.map((a) => (
-                  <tr key={a.id} className="hover:bg-slate-50">
+                  <tr key={a.id} className="hover:bg-brand-50/40">
                     <td className="px-4 py-3">
-                      <Link to={`/admissions/${a.id}`} className="font-mono font-medium text-blue-700 hover:underline">
+                      <Link to={`/admissions/${a.id}`} className="font-mono font-medium text-brand-700 hover:underline">
                         {a.admissionNumber}
                       </Link>
                     </td>

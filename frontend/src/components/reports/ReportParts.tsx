@@ -50,7 +50,7 @@ export function PeriodFields({ value, onChange }: { value: PeriodFilter; onChang
 
 // The bar of filters above a report.
 export function FilterBar({ children }: { children: ReactNode }) {
-  return <div className="flex flex-wrap items-start gap-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 print:hidden">{children}</div>
+  return <div className="flex flex-wrap items-start gap-4 rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/70 print:hidden">{children}</div>
 }
 
 // The report's title, what it covers, and the Print button. When printed it also says who printed it and when.
@@ -71,7 +71,7 @@ export function ReportHeader({ title, covers, children }: { title: string; cover
       <button
         type="button"
         onClick={() => window.print()}
-        className="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 print:hidden"
+        className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 print:hidden"
       >
         Print / Save as PDF
       </button>
@@ -85,9 +85,9 @@ export function StatGrid({ children }: { children: ReactNode }) {
 
 export function Stat({ label, value, note }: { label: string; value: ReactNode; note?: string }) {
   return (
-    <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 print:p-2 print:shadow-none">
-      <p className="text-sm text-slate-600">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-slate-900">{value}</p>
+    <div className="rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/70 print:p-2 print:shadow-none">
+      <p className="eyebrow">{label}</p>
+      <p className="mt-1 font-display text-3xl font-medium text-slate-900">{value}</p>
       {note && <p className="text-xs text-slate-500">{note}</p>}
     </div>
   )
@@ -97,7 +97,7 @@ export function Stat({ label, value, note }: { label: string; value: ReactNode; 
 export function ReportMessage({ error, loading }: { error: string | null; loading: boolean }) {
   if (error) {
     return (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     )
@@ -107,7 +107,7 @@ export function ReportMessage({ error, loading }: { error: string | null; loadin
 
 export function TruncatedNote({ shown, total }: { shown: number; total: number }) {
   return (
-    <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-800">
+    <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
       The list below shows the first {shown.toLocaleString()} of {total.toLocaleString()} rows. The totals above count
       all of them. Choose a shorter period to see every row.
     </p>

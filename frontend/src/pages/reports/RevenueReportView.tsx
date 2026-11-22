@@ -90,7 +90,7 @@ export default function RevenueReportView() {
                 header: 'Invoice',
                 value: (p) => p.invoiceNumber,
                 show: (p) => (
-                  <Link to={`/billing/invoices/${p.invoiceId}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/billing/invoices/${p.invoiceId}`} className="font-medium text-brand-700 hover:underline">
                     {p.invoiceNumber}
                   </Link>
                 ),

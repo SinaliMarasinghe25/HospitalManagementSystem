@@ -42,21 +42,21 @@ export function ReportTable<T>({
   }
 
   return (
-    <section className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 print:break-inside-avoid-page print:shadow-none print:ring-0">
+    <section className="rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70 print:break-inside-avoid-page print:shadow-none print:ring-0">
       <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 print:px-0">
         <h2 className="font-semibold text-slate-900">{title}</h2>
         <button
           type="button"
           onClick={exportCsv}
           disabled={rows.length === 0}
-          className="text-sm font-medium text-blue-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline print:hidden"
+          className="text-sm font-medium text-brand-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline print:hidden"
         >
           Download CSV
         </button>
       </div>
       <div className="overflow-x-auto print:overflow-visible">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600 print:bg-white">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500 print:bg-white">
             <tr>
               {columns.map((c) => (
                 <th key={c.header} scope="col" className={`px-4 py-2 font-medium print:px-2 ${align(c)}`}>

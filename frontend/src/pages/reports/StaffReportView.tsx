@@ -26,7 +26,7 @@ export default function StaffReportView() {
     : ''
   const departmentName = departments.find((d) => String(d.id) === filter.departmentId)?.name
   const employeeLink = (id: number, text: string) => (
-    <Link to={`/staff/employees/${id}`} className="font-medium text-blue-700 hover:underline">
+    <Link to={`/staff/employees/${id}`} className="font-medium text-brand-700 hover:underline">
       {text}
     </Link>
   )

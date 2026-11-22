@@ -39,7 +39,7 @@ export default function MyLeavePanel() {
 
   if (error && !data) {
     return (
-      <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
         {error}
       </p>
     )
@@ -48,7 +48,7 @@ export default function MyLeavePanel() {
 
   if (!data.linked) {
     return (
-      <p className="rounded-md bg-amber-50 p-4 text-sm text-amber-900">
+      <p className="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
         Your login is not linked to an employee record yet, so you cannot request leave here. Ask an administrator to
         link it on the Staff page.
       </p>
@@ -81,11 +81,11 @@ export default function MyLeavePanel() {
           </p>
         </div>
         {error && (
-          <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+          <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
             {error}
           </p>
         )}
-        <ul className="divide-y divide-slate-100 rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+        <ul className="divide-y divide-slate-100 rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
           {data.requests.map((r) => (
             <li key={r.id} className="flex flex-wrap items-start justify-between gap-3 px-4 py-3 text-sm">
               <div>

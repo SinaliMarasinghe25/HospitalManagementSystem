@@ -33,7 +33,7 @@ export default function EmployeePage() {
       )
   }, [id])
 
-  if (error) return <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</p>
+  if (error) return <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">{error}</p>
   if (!employee) return <p role="status">Loading...</p>
 
   const details: [string, string | null][] = [
@@ -58,10 +58,10 @@ export default function EmployeePage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link to="/staff" className="text-sm text-blue-700 hover:underline">
+          <Link to="/staff" className="text-sm text-brand-700 hover:underline">
             &larr; All staff
           </Link>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">
+          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">
             {employee.firstName} {employee.lastName}
           </h1>
         </div>
@@ -77,7 +77,7 @@ export default function EmployeePage() {
         </div>
       </div>
 
-      <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="details-heading">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="details-heading">
         <h2 id="details-heading" className="font-semibold text-slate-900">Details</h2>
         <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
           {details.map(([label, value]) => (
@@ -96,7 +96,7 @@ export default function EmployeePage() {
         <h2 id="leave-heading" className="font-semibold text-slate-900">Leave</h2>
         <p className="text-sm text-slate-600">
           Review pending requests on the{' '}
-          <Link to="/staff?tab=leave" className="text-blue-700 hover:underline">Leave requests</Link> tab.
+          <Link to="/staff?tab=leave" className="text-brand-700 hover:underline">Leave requests</Link> tab.
         </p>
         <LeaveTable rows={employee.leave} />
       </section>
@@ -164,15 +164,15 @@ function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved
   )
 
   return (
-    <section className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200" aria-labelledby="login-heading">
+    <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="login-heading">
       <h2 id="login-heading" className="font-semibold text-slate-900">Login account</h2>
       {error && (
-        <p className="mt-2 rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="mt-2 border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {notice && (
-        <p className="mt-2 rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">
+        <p className="mt-2 rounded-lg bg-green-50 p-3 text-sm text-green-800" role="status">
           {notice}
         </p>
       )}
@@ -180,7 +180,7 @@ function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
           <p>
             Linked to <strong>{employee.userName}</strong>. They can request their own leave. Reset the password or change
-            roles on the <Link to="/staff?tab=logins" className="text-blue-700 hover:underline">Logins</Link> tab.
+            roles on the <Link to="/staff?tab=logins" className="text-brand-700 hover:underline">Logins</Link> tab.
           </p>
           <button
             type="button"
@@ -281,7 +281,7 @@ function AttendanceSection({ employeeId }: { employeeId: number }) {
         />
       </div>
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
@@ -294,9 +294,9 @@ function AttendanceSection({ employeeId }: { employeeId: number }) {
               </span>
             ))}
           </p>
-          <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+              <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium">Date</th>
                   <th scope="col" className="px-4 py-3 font-medium">Status</th>

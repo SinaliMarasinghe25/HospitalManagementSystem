@@ -21,7 +21,10 @@ export function Pagination({
   if (totalCount === 0) return null
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
   return (
-    <nav className="flex items-center justify-between text-sm text-slate-600 print:hidden" aria-label="Pagination">
+    <nav
+      className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500 print:hidden"
+      aria-label="Pagination"
+    >
       <span>
         {totalCount.toLocaleString()} {totalCount === 1 ? noun : nounPlural}, page {page} of {totalPages}
       </span>

@@ -98,11 +98,11 @@ export default function ChangePasswordPage() {
 
       <div className="mt-4 text-center text-sm">
         {forced ? (
-          <button type="button" onClick={() => void logout()} className="text-blue-700 hover:underline">
+          <button type="button" onClick={() => void logout()} className="text-brand-700 hover:underline">
             Log out
           </button>
         ) : (
-          <Link to="/" className="text-blue-700 hover:underline">
+          <Link to="/" className="text-brand-700 hover:underline">
             Back to the dashboard
           </Link>
         )}

@@ -38,7 +38,7 @@ export default function StaffPage() {
   if (!isAdmin) {
     return (
       <div className="space-y-4">
-        <h1 className="text-xl font-semibold text-slate-900">My leave</h1>
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">My leave</h1>
         <MyLeavePanel />
       </div>
     )
@@ -50,7 +50,7 @@ export default function StaffPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">Staff</h1>
+      <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Staff</h1>
       <Tabs label="Staff views" tabs={tabs} labels={tabLabels} value={tab} onChange={(t) => setParams({ tab: t })} />
       {tab === 'employees' && <EmployeesTab />}
       {tab === 'departments' && <DepartmentsTab />}
@@ -133,13 +133,13 @@ function EmployeesTab() {
         </div>
       </div>
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Employee</th>
               <th scope="col" className="px-4 py-3 font-medium">Job title</th>
@@ -151,9 +151,9 @@ function EmployeesTab() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {rows?.map((e) => (
-              <tr key={e.id} className={e.isActive ? 'hover:bg-slate-50' : 'text-slate-400'}>
+              <tr key={e.id} className={e.isActive ? 'hover:bg-brand-50/40' : 'text-slate-400'}>
                 <td className="px-4 py-3">
-                  <Link to={`/staff/employees/${e.id}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/staff/employees/${e.id}`} className="font-medium text-brand-700 hover:underline">
                     {e.fullName}
                   </Link>
                   <span className="block text-xs text-slate-500">{e.employeeNumber}</span>

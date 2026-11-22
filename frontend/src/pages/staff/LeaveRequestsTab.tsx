@@ -64,7 +64,7 @@ export default function LeaveRequestsTab() {
                 setPage(1) // another status starts on page 1
               }}
               className={`rounded-full px-3 py-1 font-medium ring-1 ${
-                status === f.value ? 'bg-blue-700 text-white ring-blue-700' : 'bg-white text-slate-700 ring-slate-300 hover:bg-slate-50'
+                status === f.value ? 'bg-brand-700 text-white ring-brand-700' : 'bg-white text-slate-700 ring-slate-300 hover:bg-slate-50'
               }`}
             >
               {f.label}
@@ -84,7 +84,7 @@ export default function LeaveRequestsTab() {
             <h2 id="record-leave-heading" className="font-semibold text-slate-900">
               Record leave for an employee
             </h2>
-            <button type="button" className="text-sm text-blue-700 hover:underline" onClick={() => setShowForm(false)}>
+            <button type="button" className="text-sm text-brand-700 hover:underline" onClick={() => setShowForm(false)}>
               Close
             </button>
           </div>
@@ -98,7 +98,7 @@ export default function LeaveRequestsTab() {
       )}
 
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}

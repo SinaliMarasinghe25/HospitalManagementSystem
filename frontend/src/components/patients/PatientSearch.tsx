@@ -44,13 +44,13 @@ export function PatientSearch({ onChoose, error }: { onChoose: (p: ChosenPatient
       </div>
       {error && <p className="text-sm text-red-700">{error}</p>}
       {results && (
-        <ul className="divide-y divide-slate-100 rounded-md ring-1 ring-slate-200">
+        <ul className="divide-y divide-slate-100 rounded-lg ring-1 ring-slate-200">
           {results.map((p) => (
             <li key={p.id}>
               <button
                 type="button"
                 onClick={() => onChoose({ id: p.id, name: `${p.firstName} ${p.lastName}`, patientNumber: p.patientNumber })}
-                className="w-full px-3 py-2 text-left text-sm hover:bg-blue-50"
+                className="w-full px-3 py-2 text-left text-sm hover:bg-brand-50"
               >
                 <strong>
                   {p.firstName} {p.lastName}

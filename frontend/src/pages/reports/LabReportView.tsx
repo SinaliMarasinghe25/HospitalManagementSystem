@@ -129,7 +129,7 @@ export default function LabReportView() {
                 header: 'Request no.',
                 value: (r) => r.requestNumber,
                 show: (r) => (
-                  <Link to={`/laboratory/requests/${r.id}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/laboratory/requests/${r.id}`} className="font-medium text-brand-700 hover:underline">
                     {r.requestNumber}
                   </Link>
                 ),

@@ -53,13 +53,13 @@ export default function WardsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       <div>
-        <Link to="/admissions" className="text-sm text-blue-700 hover:underline">
+        <Link to="/admissions" className="text-sm text-brand-700 hover:underline">
           &larr; Admissions
         </Link>
-        <h1 className="mt-1 text-xl font-semibold text-slate-900">Wards and beds</h1>
+        <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">Wards and beds</h1>
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={handleSubmit} noValidate className="space-y-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         <h2 className="font-semibold text-slate-900">{editingId ? 'Edit ward' : 'Add ward'}</h2>
         <div className="grid gap-3 sm:grid-cols-3">
           <FormField id="wardName" label="Name" required error={errors.name}>
@@ -114,7 +114,7 @@ export default function WardsPage() {
       </form>
 
       {message && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
           {message}
         </p>
       )}
@@ -151,24 +151,24 @@ function WardCard({
   const [count, setCount] = useState('4')
 
   return (
-    <section className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-label={ward.name}>
+    <section className="rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/70" aria-label={ward.name}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-semibold text-slate-900">
           {ward.name} <span className="text-sm font-normal text-slate-500">({ward.wardType}, {formatMoney(ward.dailyCharge)} per day)</span>
         </h2>
-        <button type="button" onClick={onEdit} className="text-sm text-blue-700 hover:underline">
+        <button type="button" onClick={onEdit} className="text-sm text-brand-700 hover:underline">
           Edit<span className="sr-only"> {ward.name}</span>
         </button>
       </div>
 
       <ul className="mt-3 flex flex-wrap gap-2">
         {ward.beds.map((b) => (
-          <li key={b.id} className={`rounded-md border px-2 py-1 text-sm ${b.isActive ? 'border-slate-300' : 'border-dashed border-slate-300 text-slate-400'}`}>
+          <li key={b.id} className={`rounded-lg border px-2 py-1 text-sm ${b.isActive ? 'border-slate-300' : 'border-dashed border-slate-300 text-slate-400'}`}>
             {b.bedNumber}
             {b.admissionId ? (
               <span className="ml-2 text-xs text-amber-800">occupied</span>
             ) : (
-              <button type="button" onClick={() => onToggleBed(b.id, !b.isActive)} className="ml-2 text-xs text-blue-700 hover:underline">
+              <button type="button" onClick={() => onToggleBed(b.id, !b.isActive)} className="ml-2 text-xs text-brand-700 hover:underline">
                 {b.isActive ? 'Take out of use' : 'Put back in use'}
                 <span className="sr-only"> bed {b.bedNumber}</span>
               </button>

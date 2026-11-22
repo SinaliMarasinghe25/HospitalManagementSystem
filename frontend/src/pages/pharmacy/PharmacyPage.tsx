@@ -36,7 +36,7 @@ export default function PharmacyPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Pharmacy</h1>
+        <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Pharmacy</h1>
         {hasAnyRole(user?.roles, Permissions.managePharmacyStock) && (
           <Link to="/pharmacy/medicines/new" className={primaryButtonClass}>
             Add medicine
@@ -55,13 +55,13 @@ export default function PharmacyPage() {
 
 function ErrorText({ error }: { error: string | null }) {
   return error ? (
-    <p className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+    <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
       {error}
     </p>
   ) : null
 }
 
-const card = 'overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200'
+const card = 'overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70'
 const th = 'px-4 py-3 font-medium'
 
 function PrescriptionList({ dispensed }: { dispensed: boolean }) {
@@ -86,7 +86,7 @@ function PrescriptionList({ dispensed }: { dispensed: boolean }) {
       <ErrorText error={error} />
       <div className={card}>
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className={th}>Prescription</th>
               <th scope="col" className={th}>Patient</th>
@@ -97,9 +97,9 @@ function PrescriptionList({ dispensed }: { dispensed: boolean }) {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {rows?.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50">
+              <tr key={p.id} className="hover:bg-brand-50/40">
                 <td className="px-4 py-3">
-                  <Link to={`/pharmacy/prescriptions/${p.id}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/pharmacy/prescriptions/${p.id}`} className="font-medium text-brand-700 hover:underline">
                     #{p.id}
                   </Link>
                 </td>
@@ -199,7 +199,7 @@ function StockList() {
       <ErrorText error={error} />
       <div className={card}>
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
             <tr>
               <th scope="col" className={th}>Medicine</th>
               <th scope="col" className={th}>In stock</th>
@@ -211,9 +211,9 @@ function StockList() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {rows?.map((m) => (
-              <tr key={m.id} className={m.isActive ? 'hover:bg-slate-50' : 'text-slate-400'}>
+              <tr key={m.id} className={m.isActive ? 'hover:bg-brand-50/40' : 'text-slate-400'}>
                 <td className="px-4 py-3">
-                  <Link to={`/pharmacy/medicines/${m.id}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/pharmacy/medicines/${m.id}`} className="font-medium text-brand-700 hover:underline">
                     {m.name} {m.strength}
                   </Link>
                   <span className="block text-xs text-slate-500">
@@ -261,7 +261,7 @@ function AlertsView() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <section className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-labelledby="low-heading">
+      <section className="rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/70" aria-labelledby="low-heading">
         <h2 id="low-heading" className="font-semibold text-slate-900">
           Low stock <span className="text-slate-500">({alerts.lowStock.length})</span>
         </h2>
@@ -269,7 +269,7 @@ function AlertsView() {
         <ul className="mt-2 divide-y divide-slate-100 text-sm">
           {alerts.lowStock.map((m) => (
             <li key={m.id} className="flex justify-between gap-2 py-2">
-              <Link to={`/pharmacy/medicines/${m.id}`} className="text-blue-700 hover:underline">
+              <Link to={`/pharmacy/medicines/${m.id}`} className="text-brand-700 hover:underline">
                 {m.name} {m.strength}
               </Link>
               <span className="text-slate-700">
@@ -311,7 +311,7 @@ function BatchAlerts({
   danger?: boolean
 }) {
   return (
-    <section className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200" aria-labelledby={id}>
+    <section className="rounded-2xl bg-white p-4 shadow-card ring-1 ring-slate-200/70" aria-labelledby={id}>
       <h2 id={id} className="font-semibold text-slate-900">
         {title} <span className="text-slate-500">({batches.length})</span>
       </h2>
@@ -319,7 +319,7 @@ function BatchAlerts({
       <ul className="mt-2 divide-y divide-slate-100 text-sm">
         {batches.map((b) => (
           <li key={b.batchId} className="py-2">
-            <Link to={`/pharmacy/medicines/${b.medicineId}`} className="text-blue-700 hover:underline">
+            <Link to={`/pharmacy/medicines/${b.medicineId}`} className="text-brand-700 hover:underline">
               {b.medicineName} {b.strength}
             </Link>
             <span className="block text-xs text-slate-600">

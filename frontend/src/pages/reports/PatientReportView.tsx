@@ -45,7 +45,7 @@ export default function PatientReportView() {
                 header: 'Name',
                 value: (p) => p.fullName,
                 show: (p) => (
-                  <Link to={`/patients/${p.id}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/patients/${p.id}`} className="font-medium text-brand-700 hover:underline">
                     {p.fullName}
                   </Link>
                 ),

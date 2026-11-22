@@ -20,9 +20,9 @@ export function LeaveTable({
 }) {
   const columns = showEmployee ? 6 : 5
   return (
-    <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+    <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
       <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+        <thead className="border-b border-slate-200 bg-slate-50/60 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
           <tr>
             {showEmployee && <th scope="col" className="px-4 py-3 font-medium">Employee</th>}
             <th scope="col" className="px-4 py-3 font-medium">Leave</th>
@@ -37,7 +37,7 @@ export function LeaveTable({
             <tr key={l.id} className="align-top">
               {showEmployee && (
                 <td className="px-4 py-3">
-                  <Link to={`/staff/employees/${l.employeeId}`} className="font-medium text-blue-700 hover:underline">
+                  <Link to={`/staff/employees/${l.employeeId}`} className="font-medium text-brand-700 hover:underline">
                     {l.employeeName}
                   </Link>
                   <span className="block text-xs text-slate-500">{l.departmentName}</span>
