@@ -4,7 +4,7 @@ A web-based Hospital Management System for one hospital. It keeps patients, doct
 
 > This is an academic demonstration project. It uses fictitious data only and must never store real patient information.
 
-**Status:** all modules are built and covered by automated tests. Still to come: deployment to a live server (with backup and recovery) and a visual redesign.
+**Status:** all modules are built, redesigned and covered by automated tests, which GitHub runs on every pull request. The app ships as one Docker image and runs as a public demo on Render with a Neon database (see the [deployment guide](docs/guides/deployment-guide.md)).
 
 ## Features
 
@@ -57,11 +57,22 @@ npm run dev
 
 Open http://localhost:5173 and log in as `admin` with the password from step 1.
 
+## Run it with Docker (production version)
+
+With Docker Desktop installed, this runs the same image as the live demo, plus a PostgreSQL database:
+
+```powershell
+Copy-Item .env.example .env    # then choose your own passwords in .env
+docker compose up -d --build
+```
+
+Open http://localhost:8080 and log in as `admin` with `ADMIN_PASSWORD` from `.env`. Details, the public deployment and backups are in the [deployment guide](docs/guides/deployment-guide.md).
+
 ## Running the tests
 
 ```powershell
 cd backend
-dotnet test        # 361 backend tests; needs PostgreSQL and a login that may create databases
+dotnet test        # 366 backend tests; needs PostgreSQL and a login that may create databases
 
 cd ..\frontend
 npm test           # 61 frontend tests
@@ -74,6 +85,7 @@ See the [testing guide](docs/testing/testing-guide.md) for what is tested and ho
 | Document | For |
 | --- | --- |
 | [Setup guide](docs/guides/setup-guide.md) | Installing the tools, the database, secrets, running the app, troubleshooting |
+| [Deployment guide](docs/guides/deployment-guide.md) | Docker, the live demo on Render + Neon, CI, backup and restore, disaster recovery |
 | [User manual](docs/guides/user-manual.md) | How each of the seven roles uses the system |
 | [Architecture](docs/architecture/architecture.md) | Layers, folders, how a request flows, security design |
 | [Roles and permissions](docs/architecture/roles-and-permissions.md) | Exactly what each role may see and do |
@@ -90,6 +102,9 @@ See the [testing guide](docs/testing/testing-guide.md) for what is tested and ho
 | `frontend/` | React application |
 | `tests/Hms.Api.Tests/` | Backend unit and integration tests |
 | `docs/` | Plan, guides, architecture, API reference |
+| `scripts/` | Database backup and restore (PowerShell) |
+| `.github/workflows/` | CI: tests and Docker build on every pull request |
+| `Dockerfile`, `docker-compose.yml`, `render.yaml` | Production image, local Docker setup, Render hosting |
 
 ## Roles
 

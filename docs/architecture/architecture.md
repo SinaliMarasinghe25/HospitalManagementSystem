@@ -19,7 +19,7 @@ The HMS is a **single-page web application** with a separate API, as the PDF's f
  PostgreSQL  database "hms"
 ```
 
-Because the browser only ever talks to one address, the login cookie works as a normal same-site cookie and CORS stays closed. Production hosting is part of the deployment step.
+Because the browser only ever talks to one address, the login cookie works as a normal same-site cookie and CORS stays closed. In production there is no Vite server: the API serves the built React app itself from one Docker image, so the same holds. See the [deployment guide](../guides/deployment-guide.md).
 
 ## The four layers
 

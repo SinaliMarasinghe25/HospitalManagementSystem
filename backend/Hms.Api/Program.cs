@@ -4,8 +4,10 @@ using Hms.Api.Authorization;
 using Hms.Api.Controllers;
 using Hms.Api.Data;
 using Hms.Api.Entities;
+using Hms.Api.Hosting;
 using Hms.Api.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,8 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 // ---------- Database ----------
 // The connection string comes from User Secrets (development) or an environment variable (production).
 // It is never written in appsettings.json, so the password never reaches GitHub.
-var connectionString = builder.Configuration.GetConnectionString("HmsDatabase")
-    ?? throw new InvalidOperationException("Connection string 'HmsDatabase' is not configured.");
+// A hosting company's postgresql://... URL works too (see Hosting/DatabaseUrl.cs).
+var connectionString = DatabaseUrl.ToNpgsqlConnectionString(
+    builder.Configuration.GetConnectionString("HmsDatabase")
+    ?? throw new InvalidOperationException("Connection string 'HmsDatabase' is not configured."));
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
@@ -80,6 +84,20 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
+// ---------- Data protection keys (they encrypt the sign-in cookie) ----------
+// In a container the keys would vanish on every restart and log everybody out.
+// DataProtection:KeysPath (set in docker-compose.yml) keeps them in a folder that survives restarts.
+var keysPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrWhiteSpace(keysPath))
+{
+    builder.Services.AddDataProtection()
+        .SetApplicationName("Hms")
+        .PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+}
+
+// ---------- Health check: GET /health answers "Healthy" when the API can reach the database ----------
+builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database");
+
 // Re-check every minute that the user's security stamp is unchanged,
 // so a deactivated user or changed roles take effect quickly.
 builder.Services.Configure<SecurityStampValidatorOptions>(options =>
@@ -142,10 +160,20 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// ---------- Create roles, the first admin and the starter data ----------
+// ---------- Create the tables (production), roles, the first admin and the starter data ----------
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    // On a server there is no "dotnet ef database update", so the API applies any new migrations itself
+    // when Database:MigrateOnStartup is true (set in docker-compose.yml and render.yaml).
+    // Locally it stays off: you run migrations by hand, as before.
+    if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+    {
+        logger.LogInformation("Applying database migrations...");
+        await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+    }
+
     await IdentitySeeder.SeedAsync(scope.ServiceProvider, app.Configuration, logger);
     await MedicineSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
     await LabTestSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
@@ -164,6 +192,17 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseSecurityHeaders();
+
+// The built React app (only inside the Docker image, in wwwroot). The API and the web pages then come
+// from ONE address, so the sign-in cookie works without CORS, exactly like the Vite proxy in development.
+var serveFrontend = app.Environment.WebRootPath is not null
+    && File.Exists(Path.Combine(app.Environment.WebRootPath, "index.html"));
+if (serveFrontend)
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
 
 app.UseRateLimiter();      // 0. Too many "forgot password" requests are refused here.
 app.UseAuthentication();   // 1. Who are you? (reads the cookie)
@@ -171,5 +210,15 @@ app.UseMustChangePassword(); // 1b. A temporary password must be replaced before
 app.UseAuthorization();    // 2. Are you allowed? (checks roles and policies)
 
 app.MapControllers();
+app.MapHealthChecks("/health").AllowAnonymous();
+
+if (serveFrontend)
+{
+    // An unknown /api address is a real 404, never the web page.
+    app.Map("/api/{**rest}", () => Results.NotFound()).AllowAnonymous();
+    // Any other address (for example /patients/5 after a page refresh) gets the React app,
+    // and React Router shows the right screen. Logging in is still checked by every API call.
+    app.MapFallbackToFile("index.html").AllowAnonymous();
+}
 
 app.Run();

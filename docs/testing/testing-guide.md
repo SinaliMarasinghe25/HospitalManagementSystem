@@ -4,13 +4,13 @@ The HMS has two sets of automated tests. Run both before every pull request; bot
 
 | Set | Tool | Where | Command | Count (step 27) |
 | --- | --- | --- | --- | --- |
-| Backend | xUnit v3 | `tests/Hms.Api.Tests` | `dotnet test` in `backend` | 361 |
+| Backend | xUnit v3 | `tests/Hms.Api.Tests` | `dotnet test` in `backend` | 366 |
 | Frontend | Vitest + React Testing Library | next to the code in `frontend/src` (`*.test.ts(x)`) | `npm test` in `frontend` | 61 |
 
 ```powershell
 cd C:\dev\HospitalManagementSystem\backend
 dotnet test
-# Passed!  - Failed: 0, Passed: 361, ...
+# Passed!  - Failed: 0, Passed: 366, ...
 
 cd ..\frontend
 npm test
@@ -45,9 +45,11 @@ The **unit** tests need nothing else.
 | --- | --- | --- |
 | `Unit/RolePermissionTests.cs` | FR-UM-05 | All 36 permissions for all 7 roles match the plan's role table exactly. A new policy that is not in the table fails. |
 | `Unit/SearchTextTests.cs` | NFR-SEC (SQL) | Search text escaping: `50%` finds "50%", not everything. |
+| `Unit/DatabaseUrlTests.cs` | Deployment | A hosted `postgresql://...` database URL (with encoded password, port, `sslmode`) becomes a correct connection string; a normal one is unchanged. |
 | `Unit/HospitalTimeTests.cs` | A11 | UTC ↔ Asia/Colombo conversions and day ranges. |
 | `Unit/PagingMapTests.cs` | NFR-PERF-03 | Paging helpers keep page numbers and totals. |
 | `Integration/AuthTests.cs` | FR-UM-01–03, NFR-SEC-01, 05 | Login, same message for unknown user and wrong password, lockout after 5, deactivated users, 401 without login, logout ends the session, cookie is HttpOnly + Secure + SameSite=Strict, temporary password must be changed, weak passwords refused, forgot-password rate limit. |
+| `Integration/HostingTests.cs` | NFR-REL-02, NFR-SEC | `/health` is public and answers `Healthy`; responses carry the security headers (nosniff, no framing, Content-Security-Policy). |
 | `Integration/RoleAccessTests.cs` | FR-UM-05, NFR-SEC-03 | Seven real logins open patients, billing, unbilled charges, audit log, users, lab, pharmacy and the revenue report: allowed roles get 200, others 403. Only reception and admin can register a patient. |
 | `Integration/BillingTests.cs` | FR-BL-01, 05, 06 | Totals = lines − discount; exact decimals; discount ≤ subtotal; no double billing; part then full payment; no overpayment; card needs a reference; reprinted receipt keeps its old balance; cancelling releases charges; paid invoices cannot be cancelled; reception sees balances only; "total still due" covers all pages. |
 | `Integration/AppointmentTests.cs` | FR-AP-01, 04, FR-BL-01 | Free slot booking; no double booking; outside schedule, between slots and past times refused; cancelled slot bookable again; no jump from Scheduled to Completed; completing adds the fee; another doctor cannot complete. |
@@ -88,3 +90,7 @@ Some things are checked by hand before a release: printing (invoice, receipt, la
 | `permission denied to create database` | Give the login `CREATEDB` (setup guide, step 3), or use `HMS_TEST_DATABASE` with the `postgres` user. |
 | `Failed to connect to ...:5432` | Start PostgreSQL (Windows Services, `postgresql-x64-...`). |
 | A left-over `hms_test_...` database | A run was stopped half-way (Ctrl+C). It is safe to delete in pgAdmin. |
+
+## Tests on GitHub (CI)
+
+The workflow `.github/workflows/ci.yml` runs both test suites, the linter and the production builds on every pull request, with a throw-away PostgreSQL. See the [deployment guide](../guides/deployment-guide.md#4-automatic-tests-on-github-ci).
