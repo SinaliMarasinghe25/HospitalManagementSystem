@@ -1,0 +1,21 @@
+# Render "Blueprint": tells Render how to run the HMS (https://render.com/docs/blueprint-spec).
+# Render builds the Dockerfile in this repository and gives the app an https://....onrender.com address.
+# The database is NOT here: it lives on Neon (see docs/guides/deployment-guide.md).
+# Secrets (sync: false) are typed into Render's dashboard once and never stored in this file.
+services:
+  - type: web
+    name: hms
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8080"
+      # The Neon connection URL, exactly as Neon shows it (postgresql://...?sslmode=require...).
+      - key: ConnectionStrings__HmsDatabase
+        sync: false
+      # Password for the first "admin" login.
+      - key: Seed__AdminPassword
+        sync: false

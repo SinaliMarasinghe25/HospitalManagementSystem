@@ -495,3 +495,6 @@ coverage/
 uploads/
 # Uploaded patient documents (backend/Hms.Api/App_Data). Never commit them.
 **/App_Data/
+
+# Database backups made by scripts/backup-db.ps1. They contain all the data: never commit them.
+backups/

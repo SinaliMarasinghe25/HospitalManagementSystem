@@ -1,0 +1,43 @@
+# Runs the whole HMS on your computer with one command:
+#   docker compose up --build
+# then open http://localhost:8080
+# Passwords come from the file .env (copy .env.example to .env first). .env is never committed.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hms
+      POSTGRES_USER: hms_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the .env file}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hms_app -d hms"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # No "ports:" on purpose: only the app can reach the database, not the outside world.
+
+  app:
+    build: .
+    image: hms:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__HmsDatabase: "Host=db;Port=5432;Database=hms;Username=hms_app;Password=${DB_PASSWORD}"
+      Seed__AdminPassword: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in the .env file}
+      DataProtection__KeysPath: /app/keys
+    ports:
+      - "8080:8080"
+    volumes:
+      - documents:/app/App_Data
+      - keys:/app/keys
+
+volumes:
+  db-data:     # the database files
+  documents:   # uploaded patient documents
+  keys:        # keys that encrypt the sign-in cookie
