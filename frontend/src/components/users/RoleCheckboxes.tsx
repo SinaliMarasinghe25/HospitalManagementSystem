@@ -45,7 +45,7 @@ export function RoleCheckboxes({
       </div>
       <p id={`${idPrefix}-hint`} className="mt-1 text-xs text-slate-500">
         {isDoctor
-          ? 'Doctor is ticked because this person has a doctor profile. Add other roles only if they also do that work.'
+          ? 'Assigned automatically from the doctor profile.'
           : 'Doctor is given automatically to staff with a doctor profile (Staff → edit the employee → This person is a doctor).'}
       </p>
       {error && (

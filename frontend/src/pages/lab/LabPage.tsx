@@ -139,7 +139,7 @@ export default function LabPage() {
             {rows && rows.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
-                  Nothing here.
+                  No lab requests.
                 </td>
               </tr>
             )}

@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
       ) : (
         <>
           <p className="mt-1 text-sm text-slate-600">
-            Enter your username. An administrator will be asked to reset your password.
+            Enter your username. An administrator will reset your password.
           </p>
           {error && <AuthAlert>{error}</AuthAlert>}
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">

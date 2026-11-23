@@ -57,9 +57,8 @@ export default function LoginsTab() {
       )}
 
       <p className="text-sm text-slate-600">
-        To give someone a new login, open them on the{' '}
-        <Link to="/staff" className="text-brand-700 hover:underline">Employees</Link> tab and use &ldquo;Login account&rdquo;.
-        A login marked &ldquo;Not linked&rdquo; was made before this; link it from the person&apos;s page. There must always be at least one active administrator, and you cannot remove your own Administrator role.
+        New logins are created from the employee profile on the{' '}
+        <Link to="/staff" className="text-brand-700 hover:underline">Employees</Link> tab. At least one active administrator is required.
       </p>
 
       <div className="overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">
@@ -232,7 +231,7 @@ function UserRow({
               <button type="submit" className={primaryButtonClass}>
                 Reset password
               </button>
-              <p className="w-full text-xs text-slate-500">This also unlocks a locked account. The user must change it at their next login.</p>
+              <p className="w-full text-xs text-slate-500">Also unlocks the account. The user must change it at next sign-in.</p>
             </form>
           </td>
         </tr>

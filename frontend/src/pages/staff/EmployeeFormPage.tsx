@@ -150,11 +150,6 @@ export default function EmployeeFormPage() {
   return (
     <div className="max-w-3xl space-y-4">
       <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">{title}</h1>
-      {!isEdit && (
-        <p className="text-sm text-slate-600">
-          Use this form for everyone who works at the hospital: doctors, nurses, receptionists, accountants and others.
-        </p>
-      )}
 
       {error && (
         <p className="border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800" role="alert">
@@ -196,9 +191,7 @@ export default function EmployeeFormPage() {
             Clinical staff
           </label>
           <p id="isClinical-hint" className="text-xs text-slate-500 sm:col-span-2">
-            Tick for doctors, nurses, laboratory staff, pharmacists and others who care for patients: they choose a
-            clinical department. Leave it empty for office staff such as accountants and receptionists: they are placed in
-            Administration automatically.
+            Non-clinical staff are assigned to Administration.
           </p>
           {showDepartment && (
             <FormField id="departmentId" label="Clinical department" required error={fieldErrors.departmentId}>
@@ -221,7 +214,7 @@ export default function EmployeeFormPage() {
           </FormField>
           <label className="flex items-center gap-2 self-end pb-2 text-sm text-slate-700">
             <input type="checkbox" name="isActive" checked={form.isActive} onChange={handleChange} />
-            Active (still working here)
+            Active
           </label>
         </fieldset>
 
@@ -240,8 +233,8 @@ export default function EmployeeFormPage() {
           </label>
           <p id="isDoctor-hint" className="text-xs text-slate-500">
             {wasDoctor
-              ? 'A doctor profile cannot be removed, because appointments and medical records use it. Untick Active instead.'
-              : 'Doctors can be booked for appointments. Their login gets the Doctor role automatically.'}
+              ? 'A doctor profile cannot be removed. Mark the employee inactive instead.'
+              : 'Available for appointments. The login is given the Doctor role.'}
           </p>
           {fieldErrors.doctor && <p className="text-sm text-red-700">{fieldErrors.doctor}</p>}
           {form.isDoctor && (
@@ -274,7 +267,7 @@ export default function EmployeeFormPage() {
                 <input {...field('slotMinutes')} type="number" min={5} max={120} step={5} required />
               </FormField>
               <p className="text-xs text-slate-500 sm:col-span-2">
-                Set the weekly working hours afterwards, from the employee&apos;s page (Weekly schedule).
+                Working hours are set on the employee profile after saving.
               </p>
             </div>
           )}
@@ -292,7 +285,7 @@ export default function EmployeeFormPage() {
             )}
             {!withLogin && (
               <p className="text-sm text-slate-600">
-                Leave this off for staff who do not use the system. You can add a login later from the employee&apos;s page.
+                A login can also be created later from the employee profile.
               </p>
             )}
           </fieldset>

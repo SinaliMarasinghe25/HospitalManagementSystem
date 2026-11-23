@@ -98,7 +98,7 @@ export default function DispensePage() {
       )}
       {saved && (
         <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800" role="status">
-          Dispensed. Stock and the patient&apos;s bill have been updated.
+          Dispensed. Stock and billing updated.
         </p>
       )}
 
@@ -170,7 +170,7 @@ export default function DispensePage() {
               {saving ? 'Saving...' : 'Dispense'}
             </button>
             <p className="text-sm text-slate-600">
-              Stock is taken from the batch that expires first. Expired batches are never used.
+              Issued from the earliest-expiring batch. Expired batches are excluded.
             </p>
           </div>
         )}

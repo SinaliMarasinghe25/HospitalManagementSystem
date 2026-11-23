@@ -25,8 +25,8 @@ export default function RevenueReportView() {
         <>
           <ReportHeader title="Revenue" covers={periodText(data.period.from, data.period.to)}>
             <p className="mt-1 max-w-2xl text-sm text-slate-600">
-              <strong>Billed</strong> counts invoices issued in this period (cancelled invoices are left out).{' '}
-              <strong>Collected</strong> counts the payments received in this period, whenever the invoice was issued.
+              <strong>Billed:</strong> invoices issued in this period, excluding cancelled invoices.{' '}
+              <strong>Collected:</strong> payments received in this period.
             </p>
           </ReportHeader>
           <StatGrid>

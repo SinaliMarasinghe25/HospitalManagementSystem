@@ -87,7 +87,7 @@ export default function InvoicePage() {
       <section className="space-y-4 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70">
         {invoice.status === 'Cancelled' ? (
           <p className="text-sm text-slate-600">
-            This invoice was cancelled. Its charges went back to &quot;Ready to bill&quot;; the audit log keeps what was on it.
+            This invoice was cancelled. Its charges have been returned to Ready to bill.
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -279,7 +279,7 @@ function PaymentForm({
           </FormField>
         )}
       </div>
-      <p className="text-xs text-slate-500">A part payment is allowed. More than the balance due is refused.</p>
+      <p className="text-xs text-slate-500">Partial payments are accepted, up to the balance due.</p>
       <button type="submit" disabled={saving} className={primaryButtonClass}>
         {saving ? 'Saving...' : 'Record payment'}
       </button>

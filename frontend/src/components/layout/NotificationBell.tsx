@@ -92,7 +92,7 @@ export function NotificationBell() {
         aria-expanded={open}
         aria-controls="notification-panel"
         aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
-        className="relative rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+        className="relative rounded-full p-2.5 text-slate-500 hover:bg-white/80 hover:text-slate-900"
       >
         <BellIcon />
         {unread > 0 && (
@@ -106,7 +106,7 @@ export function NotificationBell() {
         <div
           id="notification-panel"
           // Phones: full width under the header. Larger screens: a dropdown below the bell.
-          className="fade-in fixed inset-x-2 top-16 z-40 overflow-hidden rounded-lg bg-white shadow-pop sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-96"
+          className="fade-in fixed inset-x-2 top-16 z-40 overflow-hidden rounded-xl bg-white/90 shadow-pop backdrop-blur-xl sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-96"
         >
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <h2 className="text-sm font-semibold text-slate-900">Notifications</h2>

@@ -143,7 +143,7 @@ export const ArrowRightIcon = (p: P) => (
 export function LogoMark({ className = '' }: { className?: string }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center rounded-md bg-brand-700 text-white ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-md bg-linear-to-br from-brand-700 to-brand-500 text-white ${className}`}
       aria-hidden="true"
     >
       <svg viewBox="0 0 24 24" className="h-1/2 w-1/2" fill="currentColor">
