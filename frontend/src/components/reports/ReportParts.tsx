@@ -64,8 +64,7 @@ export function ReportHeader({ title, covers, children }: { title: string; cover
         <p className="text-sm text-slate-600">{covers}</p>
         {children}
         <p className="hidden text-xs text-slate-500 print:block">
-          Printed {formatDateTime(printedAt)} by {user?.userName} &middot; Hospital Management System &middot; Demonstration
-          system with fictitious data
+          Printed {formatDateTime(printedAt)} by {user?.userName} &middot; Hospital Management System &middot; Confidential
         </p>
       </div>
       <button
@@ -108,8 +107,8 @@ export function ReportMessage({ error, loading }: { error: string | null; loadin
 export function TruncatedNote({ shown, total }: { shown: number; total: number }) {
   return (
     <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
-      The list below shows the first {shown.toLocaleString()} of {total.toLocaleString()} rows. The totals above count
-      all of them. Choose a shorter period to see every row.
+      Showing the first {shown.toLocaleString()} of {total.toLocaleString()} rows. Totals include all rows. Select a
+      shorter period to view every row.
     </p>
   )
 }

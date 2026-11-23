@@ -149,7 +149,7 @@ export default function MedicinePage() {
 
       <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70" aria-labelledby="moves-heading">
         <h2 id="moves-heading" className="font-semibold text-slate-900">Stock history</h2>
-        <p className="text-xs text-slate-500">The latest 50 changes. Every change to stock is recorded here.</p>
+        <p className="text-xs text-slate-500">Latest 50 stock movements.</p>
         <div className="mt-2 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="text-slate-500">

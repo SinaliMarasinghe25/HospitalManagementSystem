@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { ApiError } from '../../api/client'
 import { getDoctor, saveSchedule } from '../../api/doctors'
+import { DoctorPhoto } from '../../components/doctors/DoctorPhoto'
 import { Permissions } from '../../auth/permissions'
 import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
@@ -48,9 +49,17 @@ export default function DoctorDetailPage() {
           <Link to="/doctors" className="text-sm text-brand-700 hover:underline">
             &larr; All doctors
           </Link>
-          <h1 className="mt-1 text-[1.75rem] leading-tight font-medium text-slate-900">
-            Dr {doctor.firstName} {doctor.lastName}
-          </h1>
+          <div className="mt-2 flex items-center gap-4">
+            <DoctorPhoto
+              doctorId={doctor.id}
+              name={`${doctor.firstName} ${doctor.lastName}`}
+              size="h-16 w-16"
+              textSize="text-base"
+            />
+            <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">
+              Dr {doctor.firstName} {doctor.lastName}
+            </h1>
+          </div>
         </div>
         {canManage && (
           // Doctors are edited with every other member of staff, on the Staff page.

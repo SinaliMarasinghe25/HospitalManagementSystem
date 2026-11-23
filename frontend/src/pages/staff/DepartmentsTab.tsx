@@ -44,10 +44,6 @@ export default function DepartmentsTab() {
 
   return (
     <div className="max-w-3xl space-y-4">
-      <p className="text-sm text-slate-600">
-        Clinical staff (doctors, nurses, laboratory staff, pharmacists) choose a clinical department when they are added.
-        Everyone else, such as accountants and receptionists, goes to <strong>Administration</strong> automatically.
-      </p>
 
       <form onSubmit={handleSubmit} className="grid gap-3 rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-200/70 sm:grid-cols-2">
         <h2 className="font-medium text-slate-900 sm:col-span-2">{draft.id === null ? 'Add department' : 'Edit department'}</h2>
@@ -63,7 +59,7 @@ export default function DepartmentsTab() {
         <label className="flex items-center gap-2 text-sm text-slate-700">
           <input type="checkbox" checked={draft.isClinical} disabled={draft.isDefault}
             onChange={(e) => setDraft({ ...draft, isClinical: e.target.checked })} />
-          Clinical (offered when adding clinical staff)
+          Clinical department
         </label>
         <label className="flex items-center gap-2 text-sm text-slate-700">
           <input type="checkbox" checked={draft.isActive} disabled={draft.isDefault}
@@ -117,7 +113,7 @@ export default function DepartmentsTab() {
             {departments.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
-                  No departments yet. Restart the API to add the starter list.
+                  No departments found.
                 </td>
               </tr>
             )}

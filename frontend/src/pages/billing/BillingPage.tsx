@@ -66,8 +66,7 @@ function UnbilledList() {
   return (
     <>
       <p className="text-sm text-slate-600">
-        Charges are added automatically when a visit is completed, a lab result is entered, medicine is dispensed or a
-        patient is discharged.
+        Charges from completed visits, lab results, dispensed medicines and discharges.
       </p>
       <ErrorText error={error} />
       <div className={card}>

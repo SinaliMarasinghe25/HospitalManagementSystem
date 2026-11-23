@@ -3,64 +3,82 @@
 @import '@fontsource/ibm-plex-sans/600.css';
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/500.css';
-@import '@fontsource-variable/newsreader/opsz.css';
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------
-   HMS design system (step 30: "clinical editorial")
+   HMS design system (step 32: clinical blue with an aquamarine accent)
    Every colour, font, corner and shadow of the app is set here once.
    Pages use them through normal Tailwind classes:
      bg-brand-700, text-slate-500, font-display, rounded-lg ...
    ------------------------------------------------------------------ */
 @theme {
   /* Fonts: IBM Plex Sans for the interface, IBM Plex Mono for numbers and codes,
-     Newsreader (a serif) for page titles and big figures. All bundled, no internet needed. */
+     page titles and big figures use Plex Sans too, bold and tightly spaced. All bundled, no internet needed. */
   --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  --font-display: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
+  --font-display: 'IBM Plex Sans', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
 
-  /* Paper: the page background. */
-  --color-paper: #fcfbf8;
+  /* Paper: the page background, a very light cool white. */
+  --color-paper: #f2f5fa;
+  /* The colour around notched panels; the same as the page so the cut-outs blend in. */
+  --color-frame: #f2f5fa;
 
-  /* Neutrals: a warm grey, like printed paper and ink, instead of the usual cool blue-grey.
-     (Named "slate" so every page picks it up without changes.) */
-  --color-slate-50: #f7f6f2;
-  --color-slate-100: #efede7;
-  --color-slate-200: #e3e0d7;
-  --color-slate-300: #cfcbbf;
-  --color-slate-400: #a19d90;
-  --color-slate-500: #757167;
-  --color-slate-600: #5a574e;
-  --color-slate-700: #45433c;
-  --color-slate-800: #2e2d28;
-  --color-slate-900: #1c1b18;
-  --color-slate-950: #121210;
+  /* Neutrals: a cool blue-grey that sits well with the blue brand colour. */
+  --color-slate-50: #f6f8fb;
+  --color-slate-100: #eef2f7;
+  --color-slate-200: #e1e7ef;
+  --color-slate-300: #cbd4e1;
+  --color-slate-400: #94a1b5;
+  --color-slate-500: #66738a;
+  --color-slate-600: #4b576c;
+  --color-slate-700: #374255;
+  --color-slate-800: #222b3b;
+  --color-slate-900: #131a28;
+  --color-slate-950: #0a0f1a;
 
-  /* Brand: a deep surgical green. 600 and darker pass WCAG AA on white. */
-  --color-brand-50: #eef5f1;
-  --color-brand-100: #d7e9de;
-  --color-brand-200: #b0d3bf;
-  --color-brand-300: #80b69b;
-  --color-brand-400: #4f9476;
-  --color-brand-500: #2f775b;
-  --color-brand-600: #22654d;
-  --color-brand-700: #1a523f;
-  --color-brand-800: #154233;
-  --color-brand-900: #113429;
-  --color-brand-950: #0a1f18;
+  /* Brand: a deep clinical blue. 600 and darker pass WCAG AA on white. */
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #dbe7fe;
+  --color-brand-200: #bdd3fc;
+  --color-brand-300: #8fb4f8;
+  --color-brand-400: #5b8ef1;
+  --color-brand-500: #386ce6;
+  --color-brand-600: #2453cf;
+  --color-brand-700: #1d43a8;
+  --color-brand-800: #1b3986;
+  --color-brand-900: #18306a;
+  --color-brand-950: #0d1b40;
 
-  /* Corners: tight and precise, not bubbly. */
-  --radius-md: 0.25rem;
-  --radius-lg: 0.3125rem;
-  --radius-xl: 0.375rem;
-  --radius-2xl: 0.375rem;
+  /* Accent: aquamarine, used sparingly (highlights, active marks, glows). Not for body text on white. */
+  --color-accent-50: #ebfdf8;
+  --color-accent-100: #cefaee;
+  --color-accent-200: #a0f2dd;
+  --color-accent-300: #67e4c7;
+  --color-accent-400: #34cdae;
+  --color-accent-500: #16b195;
+  --color-accent-600: #0d8f7a;
+  --color-accent-700: #0f7264;
 
-  /* No floating cards: a hairline border does the work. Only pop-ups get a shadow. */
-  --shadow-card: 0 0 #0000;
-  --shadow-xs: 0 0 #0000;
-  --shadow-sm: 0 1px 0 0 rgb(28 27 24 / 0.05);
-  --shadow-md: 0 1px 0 0 rgb(28 27 24 / 0.05);
-  --shadow-pop: 0 10px 28px -8px rgb(28 27 24 / 0.2), 0 0 0 1px rgb(28 27 24 / 0.06);
+  /* Supporting colours for icons and charts only (never for buttons or body text). */
+  --color-coral-400: #fb8a7a;
+  --color-coral-600: #e0533f;
+  --color-violet-400: #9b8cf5;
+  --color-violet-600: #6d55e0;
+  --color-amber-300: #fcd36b;
+  --color-amber-500: #f0a52a;
+
+  /* Corners: soft and generous, with pill-shaped buttons. */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  /* Soft, blue-tinted shadows. Cards float slightly; pop-ups more. */
+  --shadow-card: 0 1px 2px 0 rgb(19 26 40 / 0.04), 0 8px 24px -12px rgb(29 67 168 / 0.12);
+  --shadow-xs: 0 1px 2px 0 rgb(19 26 40 / 0.04);
+  --shadow-sm: 0 1px 2px 0 rgb(19 26 40 / 0.06);
+  --shadow-md: 0 4px 12px -4px rgb(19 26 40 / 0.1);
+  --shadow-pop: 0 16px 40px -12px rgb(13 27 64 / 0.28), 0 0 0 1px rgb(19 26 40 / 0.06);
 }
 
 @layer base {
@@ -74,11 +92,11 @@
     @apply bg-paper text-slate-800;
   }
 
-  /* Page titles (h1) use the serif. */
+  /* Page titles (h1): bold sans, tightly spaced. */
   h1 {
     font-family: var(--font-display);
-    font-optical-sizing: auto;
-    letter-spacing: -0.01em;
+    font-weight: 600;
+    letter-spacing: -0.025em;
   }
 
   ::selection {
@@ -131,6 +149,27 @@
   .badge::before {
     content: '';
     @apply h-1.5 w-1.5 shrink-0 rounded-full bg-current;
+  }
+
+  /* Frosted glass on a light background: sidebar, top bar, dashboard strip, pop-ups. */
+  .glass {
+    @apply bg-white/65 ring-1 ring-white/70 backdrop-blur-xl backdrop-saturate-150;
+  }
+
+  /* Frosted glass on the dark blue login panel. */
+  .glass-dark {
+    @apply bg-brand-950/30 ring-1 ring-white/20 backdrop-blur-xl;
+  }
+
+  /* Soft 3D icon badge: a coloured gradient, a light top edge and a layered shadow.
+     Set the colours with Tailwind gradient classes, e.g. "icon-3d from-brand-400 to-brand-700". */
+  .icon-3d {
+    @apply inline-flex shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-white;
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.45),
+      inset 0 -2px 4px 0 rgb(0 0 0 / 0.12),
+      0 6px 14px -6px rgb(19 26 40 / 0.35),
+      0 2px 4px -2px rgb(19 26 40 / 0.2);
   }
 
   /* Small upper-case label, e.g. above a number. */
@@ -197,5 +236,16 @@
 @media print {
   body {
     background: white;
+    background-image: none;
+  }
+}
+
+/* Browsers without backdrop blur get a solid panel instead, so text stays readable. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background-color: rgb(255 255 255 / 0.96);
+  }
+  .glass-dark {
+    background-color: rgb(13 27 64 / 0.85);
   }
 }

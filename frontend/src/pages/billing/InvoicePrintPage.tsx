@@ -24,7 +24,6 @@ function PrintFrame({ title, children }: { title: string; children: ReactNode })
         <header className="flex items-end justify-between border-b-2 border-slate-800 pb-3">
           <div>
             <h1 className="text-xl font-bold">Hospital Management System</h1>
-            <p className="text-xs text-slate-600">Demonstration system with fictitious data</p>
           </div>
           <p className="text-lg font-semibold uppercase">{title}</p>
         </header>

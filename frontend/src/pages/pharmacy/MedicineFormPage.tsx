@@ -123,7 +123,7 @@ export default function MedicineFormPage() {
         <p className="text-xs text-slate-500">A low-stock alert shows when usable stock falls below the reorder level.</p>
         <label className="flex items-center gap-2 text-sm text-slate-700">
           <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
-          Active (doctors can prescribe it)
+          Active (available for prescribing)
         </label>
         <div className="flex gap-2">
           <button type="submit" disabled={saving} className={primaryButtonClass}>

@@ -90,7 +90,7 @@ export default function AdmissionsPage() {
         <div className="space-y-4">
           {wards && wards.length === 0 && (
             <p className="text-sm text-slate-600">
-              No wards yet.{canManageWards && ' Use "Manage wards" to add wards and beds.'}
+              No wards yet.{canManageWards && ' Add wards and beds under Manage wards.'}
             </p>
           )}
           {wards?.map((w) => (

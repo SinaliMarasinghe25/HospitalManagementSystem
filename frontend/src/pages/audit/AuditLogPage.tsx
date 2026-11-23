@@ -44,8 +44,7 @@ export default function AuditLogPage() {
       <div>
         <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Audit log</h1>
         <p className="text-sm text-slate-600">
-          Every login, failed login and logout, every change to patient, clinical, financial and staff records, and
-          every time someone opened a medical record. Newest first. Entries cannot be changed or deleted.
+          Sign-ins, record changes and medical record access. Entries are read-only.
         </p>
       </div>
 

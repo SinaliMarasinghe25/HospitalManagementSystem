@@ -408,7 +408,7 @@ function DischargeSection({ admissionId, onDone }: { admissionId: number; onDone
             onChange={(e) => setSummary(e.target.value)}
             className={inputClass}
           />
-          <p className="text-sm text-slate-600">Discharging frees the bed. The bed charge is added to the bill in the Billing step.</p>
+          <p className="text-sm text-slate-600">Discharge releases the bed and adds the bed charge to the bill.</p>
           <div className="flex gap-2">
             <button type="submit" className={primaryButtonClass}>
               Confirm discharge

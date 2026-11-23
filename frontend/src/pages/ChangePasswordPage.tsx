@@ -89,7 +89,7 @@ export default function ChangePasswordPage() {
           />
         </FormField>
         <p className="text-xs text-slate-500">
-          At least 8 characters, with an upper-case letter, a lower-case letter, a number and a symbol.
+          Minimum 8 characters, with upper- and lower-case letters, a number and a symbol.
         </p>
         <button type="submit" disabled={saving} className={`${primaryButtonClass} w-full`}>
           {saving ? 'Saving...' : 'Change password'}

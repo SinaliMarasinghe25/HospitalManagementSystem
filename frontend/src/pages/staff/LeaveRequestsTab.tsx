@@ -89,10 +89,10 @@ export default function LeaveRequestsTab() {
             </button>
           </div>
           <p className="text-sm text-slate-600">
-            For staff without a login. The request is added as pending, so approve it below.
+            For employees without a login.
           </p>
           <LeaveRequestForm employees={employees} onSubmit={recordLeave} submitLabel="Add request"
-            sentMessage="Added as pending. Approve it in the list below."
+            sentMessage="Leave request added as pending."
           />
         </section>
       )}

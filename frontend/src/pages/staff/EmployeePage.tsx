@@ -95,7 +95,7 @@ export default function EmployeePage() {
       <section aria-labelledby="leave-heading" className="space-y-2">
         <h2 id="leave-heading" className="font-semibold text-slate-900">Leave</h2>
         <p className="text-sm text-slate-600">
-          Review pending requests on the{' '}
+          Pending requests are reviewed on the{' '}
           <Link to="/staff?tab=leave" className="text-brand-700 hover:underline">Leave requests</Link> tab.
         </p>
         <LeaveTable rows={employee.leave} />
@@ -152,7 +152,7 @@ function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved
     }
     void run(
       () => createEmployeeLogin(employee.id, login),
-      `Login ${login.userName.trim()} was created. Give the temporary password to the person privately.`,
+      `Login ${login.userName.trim()} created. Share the temporary password with the employee securely.`,
     )
   }
 
@@ -179,8 +179,8 @@ function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved
       {employee.userName ? (
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
           <p>
-            Linked to <strong>{employee.userName}</strong>. They can request their own leave. Reset the password or change
-            roles on the <Link to="/staff?tab=logins" className="text-brand-700 hover:underline">Logins</Link> tab.
+            Linked to <strong>{employee.userName}</strong>. Passwords and roles are managed on the{' '}
+            <Link to="/staff?tab=logins" className="text-brand-700 hover:underline">Logins</Link> tab.
           </p>
           <button
             type="button"
@@ -190,8 +190,8 @@ function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved
               void run(
                 () => setEmployeeLogin(employee.id, null),
                 isDoctor
-                  ? 'The login was unlinked. It lost the Doctor role, and it was deactivated if it had no other role.'
-                  : 'The login was unlinked. It still exists.',
+                  ? 'Login unlinked. The Doctor role was removed.'
+                  : 'Login unlinked.',
               )
             }
           >
@@ -200,7 +200,7 @@ function LoginSection({ employee, onSaved }: { employee: EmployeeDetail; onSaved
         </div>
       ) : (
         <div className="mt-2 space-y-3 text-sm">
-          <p className="text-slate-600">Not linked yet. With a login, this person can sign in and request leave.</p>
+          <p className="text-slate-600">No login linked.</p>
           <fieldset className="flex flex-wrap gap-x-6 gap-y-1">
             <legend className="sr-only">How to add a login</legend>
             {tab('new', 'Create a new login')}

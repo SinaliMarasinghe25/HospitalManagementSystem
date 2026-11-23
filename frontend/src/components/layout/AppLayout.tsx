@@ -6,7 +6,7 @@ import { ChevronDownIcon, CloseIcon, KeyIcon, LogoMark, LogoutIcon, MenuIcon } f
 import { NotificationBell } from './NotificationBell'
 import { Sidebar } from './Sidebar'
 
-// The frame around every page after login: dark sidebar, top bar, and the page itself (<Outlet />).
+// The frame around every page after login: frosted-glass sidebar, top bar, and the page itself (<Outlet />).
 export function AppLayout() {
   const { pathname } = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -30,6 +30,7 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-paper print:bg-white">
       {/* Desktop: the sidebar is always visible */}
+      {/* Desktop: the sidebar with the name and icon of each page, always visible */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-slate-50 lg:flex print:hidden">
         <SidebarBody />
       </aside>
@@ -42,7 +43,7 @@ export function AppLayout() {
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
-          <aside id="mobile-menu" className="slide-in absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-slate-200 bg-slate-50 shadow-pop">
+          <aside id="mobile-menu" className="slide-in absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col border-r border-slate-200 bg-white/95 shadow-pop backdrop-blur-xl">
             <button
               type="button"
               className="absolute top-4 right-3 rounded-md p-2 text-slate-500 hover:bg-slate-200/60 hover:text-slate-900"
@@ -56,11 +57,23 @@ export function AppLayout() {
         </div>
       )}
 
-      <div className="lg:pl-64 print:pl-0">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200 bg-paper/95 px-4 backdrop-blur-sm sm:px-6 lg:px-8 print:hidden">
+      <div className="relative isolate lg:pl-64 print:pl-0">
+        {/* Every page except the dashboard (which has its own banner) gets a soft photo backdrop behind its
+            title. It fades into the page, so tables and forms below stay on a plain background. */}
+        {pathname !== '/' && (
+          <div
+            className="pointer-events-none absolute inset-x-3 top-3 -z-10 h-72 overflow-hidden rounded-[2rem] lg:left-[calc(16rem+0.75rem)] print:hidden"
+            style={{ maskImage: 'linear-gradient(to bottom, black 35%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 35%, transparent 100%)' }}
+            aria-hidden="true"
+          >
+            <img src="/images/dashboard-hero.jpg" alt="" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-linear-to-b from-paper/55 via-paper/70 to-paper" />
+          </div>
+        )}
+        <header className="sticky top-0 z-20 flex h-20 items-center gap-3 px-4 sm:px-6 lg:px-8 print:hidden">
           <button
             type="button"
-            className="-ml-1 rounded-md p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden"
+            className="glass rounded-full p-2.5 text-slate-600 shadow-sm hover:text-slate-900 lg:hidden"
             aria-label="Open menu"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
@@ -73,7 +86,7 @@ export function AppLayout() {
           </Link>
 
           <div className="min-w-0 flex-1">
-            <p className="hidden truncate font-mono text-xs tracking-wide text-slate-500 uppercase sm:block">
+            <p className="glass hidden w-fit max-w-full truncate rounded-full px-5 py-2.5 font-mono text-xs tracking-wide text-slate-500 uppercase shadow-sm sm:block">
               <span className="text-slate-400">HMS</span>
               {section && (
                 <>
@@ -86,14 +99,17 @@ export function AppLayout() {
             </p>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
-            <NotificationBell />
-            <span className="mx-1 hidden h-6 w-px bg-slate-200 sm:block" aria-hidden="true" />
-            <UserMenu />
+          <div className="flex items-center gap-2">
+            <span className="glass rounded-full p-0.5 shadow-sm">
+              <NotificationBell />
+            </span>
+            <span className="glass rounded-full p-1 shadow-sm">
+              <UserMenu />
+            </span>
           </div>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8 print:p-0">
+        <main className="px-4 pt-2 pb-8 sm:px-6 lg:px-8 print:p-0">
           <div key={pathname} className="page-enter mx-auto max-w-7xl">
             <Outlet />
           </div>
@@ -107,7 +123,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   const { user } = useAuth()
   return (
     <>
-      <Link to="/" onClick={onNavigate} className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200 px-5">
+      <Link to="/" onClick={onNavigate} className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200/70 px-5">
         <LogoMark className="h-8 w-8" />
         <span className="leading-tight">
           <span className="block font-display text-lg font-medium text-slate-900">HMS</span>
@@ -118,7 +134,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
         <Sidebar onNavigate={onNavigate} />
       </div>
       {user && (
-        <div className="flex items-center gap-3 border-t border-slate-200 px-5 py-4">
+        <div className="flex items-center gap-3 border-t border-slate-200/70 px-5 py-4">
           <Avatar name={user.userName} />
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-slate-900">{user.userName}</p>
@@ -139,7 +155,7 @@ function Avatar({ name, size = 'h-9 w-9' }: { name: string; size?: string }) {
     .join('')
   return (
     <span
-      className={`${size} inline-flex shrink-0 items-center justify-center rounded-full bg-brand-100 font-mono text-[11px] font-medium text-brand-800 ring-1 ring-brand-200`}
+      className={`${size} inline-flex shrink-0 items-center justify-center rounded-full bg-linear-to-br from-brand-600 to-accent-500 font-mono text-[11px] font-medium text-white ring-2 ring-white`}
       aria-hidden="true"
     >
       {initials || '?'}
@@ -176,7 +192,7 @@ function UserMenu() {
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-controls="user-menu"
-        className="flex items-center gap-2 rounded-md p-1 pr-2 text-left hover:bg-slate-100"
+        className="flex items-center gap-2 rounded-full p-0.5 pr-3 text-left hover:bg-white/70"
       >
         <Avatar name={user.userName} size="h-8 w-8" />
         <span className="hidden leading-tight md:block">
@@ -190,7 +206,7 @@ function UserMenu() {
       {open && (
         <div
           id="user-menu"
-          className="fade-in absolute right-0 z-40 mt-2 w-60 overflow-hidden rounded-lg bg-white shadow-pop"
+          className="fade-in absolute right-0 z-40 mt-2 w-60 overflow-hidden rounded-xl bg-white/90 shadow-pop backdrop-blur-xl"
         >
           <div className="border-b border-slate-100 px-4 py-3">
             <p className="truncate text-sm font-medium text-slate-900">{user.userName}</p>

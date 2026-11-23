@@ -42,7 +42,7 @@ export const inputClass = `${inputBase} w-full`
 export const compactInputClass = inputBase
 
 export const primaryButtonClass =
-  'inline-flex items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-800 active:bg-brand-900 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-600/30 disabled:cursor-not-allowed disabled:opacity-60'
+  'inline-flex items-center justify-center gap-2 rounded-full bg-brand-700 px-5 py-2 text-sm font-medium text-white shadow-sm shadow-brand-900/20 transition-colors hover:bg-brand-800 active:bg-brand-900 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-600/30 disabled:cursor-not-allowed disabled:opacity-60'
 
 export const secondaryButtonClass =
-  'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition-colors hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-600/25 disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-medium text-slate-800 transition-colors hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-600/25 disabled:cursor-not-allowed disabled:opacity-50'

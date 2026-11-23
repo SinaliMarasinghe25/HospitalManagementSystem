@@ -45,8 +45,8 @@ export function NewLoginFields({
         </FormField>
       </div>
       <p className="text-xs text-slate-500">
-        At least 8 characters, with an upper-case letter, a lower-case letter, a number and a symbol. Give it to the
-        person privately. They must choose their own password at their first login.
+        Minimum 8 characters, with upper- and lower-case letters, a number and a symbol. The user must change it at
+        first sign-in.
       </p>
       <RoleCheckboxes
         idPrefix="login-role"

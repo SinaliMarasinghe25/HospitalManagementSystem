@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { ApiError } from '../../api/client'
 import { listDepartments, listDoctors } from '../../api/doctors'
+import { DoctorPhoto } from '../../components/doctors/DoctorPhoto'
 import { Permissions } from '../../auth/permissions'
 import { hasAnyRole } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
-import { inputClass, secondaryButtonClass } from '../../components/ui/FormField'
+import { inputClass, primaryButtonClass, secondaryButtonClass } from '../../components/ui/FormField'
 import type { Department, DoctorSummary } from '../../types/doctor'
 import { formatMoney } from '../../utils/format'
 
@@ -48,14 +49,10 @@ export default function DoctorListPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[1.75rem] leading-tight font-medium text-slate-900">Doctors</h1>
         {canManage && (
-          // People are added in one place only: Staff → Add employee, with "This person is a doctor" ticked.
-          <p className="text-sm text-slate-600">
-            To add a doctor, use{' '}
-            <Link to="/staff" className="text-brand-700 hover:underline">
-              Staff &rarr; Add employee
-            </Link>{' '}
-            and tick &ldquo;This person is a doctor&rdquo;.
-          </p>
+          // Doctors are added through the employee form, opened with "This person is a doctor" already ticked.
+          <Link to="/staff/employees/new?doctor=1" className={primaryButtonClass}>
+            Add doctor
+          </Link>
         )}
       </div>
 
@@ -122,9 +119,12 @@ export default function DoctorListPage() {
             {doctors?.map((d) => (
               <tr key={d.id} className="hover:bg-brand-50/40">
                 <td className="px-4 py-3">
-                  <Link to={`/doctors/${d.id}`} className="font-medium text-brand-700 hover:underline">
-                    Dr {d.fullName}
-                  </Link>
+                  <span className="flex items-center gap-3">
+                    <DoctorPhoto doctorId={d.id} name={d.fullName} />
+                    <Link to={`/doctors/${d.id}`} className="font-medium text-brand-700 hover:underline">
+                      Dr {d.fullName}
+                    </Link>
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-slate-700">{d.specialization}</td>
                 <td className="px-4 py-3 text-slate-700">{d.departmentName}</td>

@@ -49,8 +49,7 @@ export default function MyLeavePanel() {
   if (!data.linked) {
     return (
       <p className="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
-        Your login is not linked to an employee record yet, so you cannot request leave here. Ask an administrator to
-        link it on the Staff page.
+        Your login is not linked to an employee record. Contact an administrator.
       </p>
     )
   }
@@ -66,7 +65,7 @@ export default function MyLeavePanel() {
           Request leave
         </h2>
         <p className="text-sm text-slate-600">
-          For {data.employeeName}. Days are calendar days, both ends included.
+          {data.employeeName}
         </p>
         <LeaveRequestForm onSubmit={submit} submitLabel="Send request" />
       </section>

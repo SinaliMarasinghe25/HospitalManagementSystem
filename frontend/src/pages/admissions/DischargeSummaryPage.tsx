@@ -34,7 +34,7 @@ export default function DischargeSummaryPage() {
       <article className="mx-auto max-w-[210mm] bg-white p-[15mm] text-sm text-black shadow print:max-w-none print:p-0 print:shadow-none">
         <header className="border-b-2 border-slate-800 pb-3">
           <h1 className="text-xl font-bold">Hospital Management System</h1>
-          <p className="text-xs text-slate-600">Discharge summary &middot; Demonstration system with fictitious data</p>
+          <p className="text-xs text-slate-600">Discharge summary &middot; Confidential</p>
         </header>
         <section className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1">
           <Row label="Patient">{admission.patientName}</Row>

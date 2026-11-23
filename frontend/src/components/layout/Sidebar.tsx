@@ -70,16 +70,16 @@ function MenuLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void
       onClick={onNavigate}
       // NavLink adds aria-current="page" to the active link automatically.
       className={({ isActive }) =>
-        `group relative flex items-center gap-3 rounded-md px-3 py-[7px] text-sm transition-colors ${
+        `group relative flex items-center gap-3 rounded-lg px-3 py-[7px] text-sm transition-colors ${
           isActive
-            ? 'bg-white font-medium text-slate-900 ring-1 ring-slate-200'
+            ? 'bg-white font-medium text-slate-900 shadow-xs ring-1 ring-slate-200'
             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
         }`
       }
     >
       {({ isActive }) => (
         <>
-          {isActive && <span className="absolute inset-y-2 -left-3 w-[3px] bg-brand-700" aria-hidden="true" />}
+          {isActive && <span className="absolute inset-y-2 -left-3 w-[3px] rounded-full bg-accent-400" aria-hidden="true" />}
           {Icon && (
             <Icon width={18} height={18} className={isActive ? 'text-brand-700' : 'text-slate-400 transition-colors group-hover:text-slate-600'} />
           )}

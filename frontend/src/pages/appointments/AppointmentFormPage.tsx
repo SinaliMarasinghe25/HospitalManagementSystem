@@ -122,8 +122,7 @@ export default function AppointmentFormPage() {
 
       {original && (
         <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700 ring-1 ring-slate-200">
-          Current time: <strong>{formatDateTime(original.startTime)}</strong> with Dr {original.doctorName}. The old
-          appointment is kept in the history with the status Rescheduled.
+          Currently booked for <strong>{formatDateTime(original.startTime)}</strong> with Dr {original.doctorName}.
         </p>
       )}
 
@@ -190,7 +189,7 @@ export default function AppointmentFormPage() {
           {!doctorId && <p className="text-sm text-slate-500">Choose a doctor to see the free times.</p>}
           {doctorId && visibleSlots === null && <p className="text-sm text-slate-500">Loading times...</p>}
           {visibleSlots && visibleSlots.length === 0 && (
-            <p className="text-sm text-slate-600">The doctor does not work on this day. Try another date.</p>
+            <p className="text-sm text-slate-600">The doctor is not available on this date.</p>
           )}
           {visibleSlots && visibleSlots.length > 0 && (
             <div role="radiogroup" aria-label="Free time slots" aria-describedby={errors.startTime ? 'slot-error' : undefined}>
