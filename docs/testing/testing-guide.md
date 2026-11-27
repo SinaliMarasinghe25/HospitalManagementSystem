@@ -4,13 +4,13 @@ The HMS has two sets of automated tests. Run both before every pull request; bot
 
 | Set | Tool | Where | Command | Count (step 31) |
 | --- | --- | --- | --- | --- |
-| Backend | xUnit v3 | `tests/Hms.Api.Tests` | `dotnet test` in `backend` | 366 |
+| Backend | xUnit v3 | `tests/Hms.Api.Tests` | `dotnet test` in `backend` | 370 |
 | Frontend | Vitest + React Testing Library | next to the code in `frontend/src` (`*.test.ts(x)`) | `npm test` in `frontend` | 56 |
 
 ```powershell
 cd C:\dev\HospitalManagementSystem\backend
 dotnet test
-# Passed!  - Failed: 0, Passed: 366, ...
+# Passed!  - Failed: 0, Passed: 370, ...
 
 cd ..\frontend
 npm test

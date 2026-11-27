@@ -178,6 +178,9 @@ using (var scope = app.Services.CreateScope())
     await MedicineSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
     await LabTestSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
     await DepartmentSeeder.SeedAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
+
+    // Demo data for a presentation: only when Seed:DemoData is true, and only once (see Data/DemoDataSeeder.cs).
+    await DemoDataSeeder.SeedAsync(scope.ServiceProvider, app.Configuration, logger);
 }
 
 // ---------- HTTP request pipeline (order matters) ----------
