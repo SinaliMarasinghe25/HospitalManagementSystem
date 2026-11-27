@@ -31,6 +31,9 @@ services:
       ConnectionStrings__HmsDatabase: "Host=db;Port=5432;Database=hms;Username=hms_app;Password=${DB_PASSWORD}"
       Seed__AdminPassword: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in the .env file}
       DataProtection__KeysPath: /app/keys
+      # Demo data (step 33): DEMO_DATA=true in .env adds made-up patients, staff and visits once.
+      Seed__DemoData: ${DEMO_DATA:-false}
+      Seed__DemoPassword: ${DEMO_PASSWORD:-}
     ports:
       - "8080:8080"
     volumes:

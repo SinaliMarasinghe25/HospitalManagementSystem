@@ -80,7 +80,7 @@ Backups (they go to the `backups` folder, which Git ignores):
 
 ```powershell
 cd backend
-dotnet test        # 366 backend tests; needs PostgreSQL and a login that may create databases
+dotnet test        # 370 backend tests; needs PostgreSQL and a login that may create databases
 
 cd ..\frontend
 npm test           # 56 frontend tests
@@ -94,6 +94,7 @@ See the [testing guide](docs/testing/testing-guide.md) for what is tested and ho
 | --- | --- |
 | [Setup guide](docs/guides/setup-guide.md) | Installing the tools, the database, secrets, running the app, troubleshooting |
 | [User manual](docs/guides/user-manual.md) | How each of the seven roles uses the system |
+| [Demo data](docs/guides/demo-data.md) | Fill the app with made-up demo data, and the demo logins |
 | [Architecture](docs/architecture/architecture.md) | Layers, folders, how a request flows, security design |
 | [Roles and permissions](docs/architecture/roles-and-permissions.md) | Exactly what each role may see and do |
 | [Database](docs/architecture/database.md) | Tables, relationships (ER diagram), rules enforced by the database, migrations |
